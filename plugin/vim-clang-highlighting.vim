@@ -1,3 +1,7 @@
+if exists('g:loaded_vim_clang_highlight')
+      finish
+endif
+
 if !exists('g:enable_clang_highlighting')
 	let g:enable_clang_highlighting=1
 endif
@@ -49,17 +53,17 @@ def try_highlighting():
     for t in gTu.cursor.get_tokens():
         if t.kind.value == 2 and (top <=t.location.line <= bottom):
             if t.cursor.kind == clang.cindex.CursorKind.MACRO_INSTANTIATION:
-                vim_highlight(t, 'Macro')
+                vim_highlight(t, 'MacroInstantiation')
             elif t.cursor.kind == clang.cindex.CursorKind.STRUCT_DECL:
-                vim_highlight(t, 'Type')
+                vim_highlight(t, 'StructDecl')
             elif t.cursor.kind == clang.cindex.CursorKind.CLASS_DECL:
-                vim_highlight(t, 'Type')
+                vim_highlight(t, 'ClassDecl')
             elif t.cursor.kind == clang.cindex.CursorKind.ENUM_DECL:
-                vim_highlight(t, 'Type')
+                vim_highlight(t, 'EnumDecl')
             elif t.cursor.kind == clang.cindex.CursorKind.ENUM_CONSTANT_DECL:
-                vim_highlight(t, 'Identifier')
+                vim_highlight(t, 'EnumConstantDecl')
             elif t.cursor.kind == clang.cindex.CursorKind.TYPE_REF:
-                vim_highlight(t, 'Type')
+                vim_highlight(t, 'TypeRef')
 endpython
 
 fun! s:clear_match()
@@ -112,6 +116,13 @@ endf
 
 execute "nmap <silent> ".g:key_toggle_srchhl. " :call ToggleAutoHighlight()<CR>"
 
+hi link MacroInstantiation Macro
+hi link TypeRef Type
+hi link StructDecl Type
+hi link ClassDecl Type
+hi link EnumDecl Type
+hi link EnumConstantDecl Identifier
+
 augroup ClangHighlight
     au CursorHold *.[ch],*.[ch]pp,*.objc call s:start_parsing_if_mod()
     au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
@@ -119,3 +130,5 @@ augroup ClangHighlight
 augroup END
 
 endif
+
+let g:loaded_vim_clang_highlight = 1
