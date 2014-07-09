@@ -1,17 +1,53 @@
+if !exists('g:enable_clang_highlighting')
+	let g:enable_clang_highlighting=1
+endif
+
+if g:enable_clang_highlighting == 1  
+
+if !exists ('g:key_toggle_srchhl')
+    let g:key_toggle_srchhl = '<F3>'   
+endif
+
+if !exists('g:clang_options')
+    let g:clang_options=[]
+endif
+
+let s:matched_list=[]
+
 python << endpython
 import vim
 import sys
 import clang.cindex
+from threading import Thread
 
-def vim_highlight(t, group):
-#    vim.command("call matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1)".format( group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1))
-    vim.command("call add(s:matched_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format( group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
+gTu=None # global translation unit
 
-def find_typerefs(node):
-    vim.command('call s:clear_match()');
+def start_parsing():
+    t = Thread(target=do_parsing, args=(vim.current.buffer,))
+    t.start()
+
+def do_parsing(buffer, options):
+    global gTu
+    if int(vim.eval('exists(\'g:libclang_path\')')) == 1:
+        clang.cindex.Config.set_library_file(vim.eval("g:libclang_path"))
+
+    clang.cindex.Config
+    idx = clang.cindex.Index.create()
+    gTu = idx.parse(buffer.name, options, [(buffer.name, "\n".join(buffer))], options=clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 	
-    for t in node.get_tokens():
-        if t.kind.value == 2:
+def vim_highlight(t, group):
+	vim.command("call add(s:matched_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format( group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
+
+def do_highlighting():
+    global gTu
+    if gTu == None:
+        return
+		
+    vim.command('call s:clear_match()')
+    top = int(vim.eval("line('w0')"))
+    bottom = int(vim.eval("line('w$')"))
+    for t in gTu.cursor.get_tokens():
+        if t.kind.value == 2 and (top <=t.location.line <= bottom):
             if t.cursor.kind == clang.cindex.CursorKind.MACRO_INSTANTIATION:
                 vim_highlight(t, 'Macro')
             elif t.cursor.kind == clang.cindex.CursorKind.STRUCT_DECL:
@@ -24,7 +60,6 @@ def find_typerefs(node):
                 vim_highlight(t, 'Identifier')
             elif t.cursor.kind == clang.cindex.CursorKind.TYPE_REF:
                 vim_highlight(t, 'Type')
-    vim.command('let s:expired=0');
 endpython
 
 fun! s:clear_match()
@@ -34,20 +69,47 @@ fun! s:clear_match()
 	let s:matched_list=[]
 endf
 
-fun! s:clang_highlight()
-	if s:expired == 0	
-		return
-	endif
+fun! s:start_parsing()
 python << endpython
-buffer = vim.current.buffer
-index = clang.cindex.Index.create()
-tu = index.parse(buffer.name, None, [(buffer.name, "\n".join(vim.current.buffer))], options=clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-find_typerefs(tu.cursor)
+t = Thread(target=do_parsing, args=(vim.current.buffer, vim.eval('g:clang_options')))
+t.start()
 endpython
 endf
 
-let s:expired=1
-let s:matched_list=[]
-au CursorHold *.[ch],*.[ch]pp call s:clang_highlight()
-au FileType c,cpp,objc call s:clang_highlight()
-au InsertLeave *.[ch],*.[ch]pp let s:expired=1
+fun! s:parsing_and_highlighting()
+python << endpython
+do_parsing(vim.current.buffer, vim.eval('g:clang_options'))
+do_highlighting()
+endpython
+endf
+
+fun! s:highlighting()
+python << endpython
+do_highlighting()
+endpython
+endf
+
+fun! ToggleAutoHighlight()
+    if exists('s:auto_highlight_on') && s:auto_highlight_on==1
+        match none
+        au! AutoHighlight
+        let s:auto_highlight_on=0
+    else
+        augroup AutoHighlight
+            au CursorHold * exe printf('match IncSearch /\V\<%s\>/', escape(expand('<cword>'), '/\'))
+            au CursorMoved * match none
+            "au CursorHold * let @/ = '\V\<'.escape(expand('<cword>'), '\').'\>'
+        augroup END
+        let s:auto_highlight_on=1
+    endif
+endf
+
+execute "nmap <silent> ".g:key_toggle_srchhl. " :call ToggleAutoHighlight()<CR>"
+
+augroup ClangHighlight
+    au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
+    au FileType c,cpp,objc call s:parsing_and_highlighting()
+    au InsertLeave *.[ch],*.[ch]pp,*.objc call s:start_parsing()
+augroup END
+
+endif
