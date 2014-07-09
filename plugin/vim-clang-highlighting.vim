@@ -2,10 +2,10 @@ if !exists('g:enable_clang_highlighting')
 	let g:enable_clang_highlighting=1
 endif
 
-if g:enable_clang_highlighting == 1  
+if g:enable_clang_highlighting == 1
 
 if !exists ('g:key_toggle_srchhl')
-    let g:key_toggle_srchhl = '<F3>'   
+    let g:key_toggle_srchhl = '<F3>'
 endif
 
 if !exists('g:clang_options')
@@ -34,7 +34,7 @@ def do_parsing(buffer, options):
     clang.cindex.Config
     idx = clang.cindex.Index.create()
     gTu = idx.parse(buffer.name, options, [(buffer.name, "\n".join(buffer))], options=clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-	
+
 def vim_highlight(t, group):
 	vim.command("call add(s:matched_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format( group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
 
@@ -42,7 +42,7 @@ def try_highlighting():
     global gTu
     if gTu == None:
         return
-		
+
     vim.command('call s:clear_match()')
     top = int(vim.eval("line('w0')"))
     bottom = int(vim.eval("line('w$')"))
