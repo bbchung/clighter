@@ -23,7 +23,7 @@ from threading import Thread
 gTu=None # global translation unit
 
 def start_parsing():
-    t = Thread(target=do_parsing, args=(vim.current.buffer,))
+    t = Thread(target=do_parsing, args=(vim.current.buffer, vim.eval('g:clang_options')))
     t.start()
 
 def do_parsing(buffer, options):
@@ -38,7 +38,7 @@ def do_parsing(buffer, options):
 def vim_highlight(t, group):
 	vim.command("call add(s:matched_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format( group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
 
-def do_highlighting():
+def try_highlighting():
     global gTu
     if gTu == None:
         return
@@ -69,23 +69,29 @@ fun! s:clear_match()
 	let s:matched_list=[]
 endf
 
+fun! s:start_parsing_if_mod()
+python << endpython
+if vim.eval('&mod') == '1':
+    start_parsing()
+endpython
+endf
+
 fun! s:start_parsing()
 python << endpython
-t = Thread(target=do_parsing, args=(vim.current.buffer, vim.eval('g:clang_options')))
-t.start()
+start_parsing()
 endpython
 endf
 
 fun! s:parsing_and_highlighting()
 python << endpython
-do_parsing(vim.current.buffer, vim.eval('g:clang_options'))
-do_highlighting()
+start_parsing()
+try_highlighting()
 endpython
 endf
 
 fun! s:highlighting()
 python << endpython
-do_highlighting()
+try_highlighting()
 endpython
 endf
 
@@ -107,9 +113,9 @@ endf
 execute "nmap <silent> ".g:key_toggle_srchhl. " :call ToggleAutoHighlight()<CR>"
 
 augroup ClangHighlight
+    au CursorHold *.[ch],*.[ch]pp,*.objc call s:start_parsing_if_mod()
     au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
     au FileType c,cpp,objc call s:parsing_and_highlighting()
-    au InsertLeave *.[ch],*.[ch]pp,*.objc call s:start_parsing()
 augroup END
 
 endif
