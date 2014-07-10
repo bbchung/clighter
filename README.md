@@ -1,22 +1,7 @@
-*clighter.txt*	Plugin for c-family semantic source code highlighting
-*clighter*
+#Clighter
+Plugin for c-family semantic source code highlighting
 
-Author: bbchung (afafaf4@gmail.com)
-For Vim version 7.3 and above
-Last change: 2014 July 10
-
-==============================================================================
-CONTENTS                                                  *clighter-contents*
-1. Intro 			|clighter-intro|
-2. Clighter on the internet	|clighter-internet|
-3. Requirements			|clighter-requirements|
-4. Options 			|clighter-options|
-5. Customize Colors 		|clighter-colors|
-6. FAQ				|clighter-faq|
-
-==============================================================================
-						*clighter-intro*
-1. Intro~
+##Intro
 Clighter(Clang Highlighter) is a c-family semantic highlighting plugin for
 Vim based on Clang. This plugin use libclang to enhance c-family source code
 highlighting from Vim builtin syntax highlighting to semantic highlighting.
