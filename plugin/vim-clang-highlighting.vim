@@ -85,14 +85,10 @@ start_parsing()
 endpython
 endf
 
-fun! s:parsing_and_highlighting()
-python << endpython
-start_parsing()
-try_highlighting()
-endpython
-endf
-
 fun! s:highlighting()
+if !exists('w:matched_list')
+    let w:matched_list = []
+endif
 python << endpython
 try_highlighting()
 endpython
@@ -123,10 +119,9 @@ hi link EnumDecl Type
 hi link EnumConstantDecl Identifier
 
 augroup ClangHighlight
-    au WinEnter *.[ch],*.[ch]pp,*.objc if !exists('w:matched_list') | let w:matched_list=[] | endif
+    au WinEnter *.[ch],*.[ch]pp,*.objc call s:start_parsing()
     au CursorHold *.[ch],*.[ch]pp,*.objc call s:start_parsing()
     au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
-    au FileType c,cpp,objc call s:parsing_and_highlighting()
 augroup END
 
 endif
