@@ -37,29 +37,34 @@ Default: `1`
 
 
 ### g:clighter_cursor_toggle_key
-Default: `'<F3>'`
 The hotkey to toggle cursor highlighting function.
-```vim
+
+Default: `'<F3>'`
+
+
 	let g:clighter_cursor_toggle_key = '<F3>'
-```
+
 
 ### g:clighter_clang_options
-Default: `[]`
 The compiler options for libclang. Sometimes Clighter doesn't do corret
 highlighting cause Clang can't parse the source code, then you need tell Clang
 how to parse it. You can set the compiler options to the list in
-g:clighter_clang_options
-```vim
+g:clighter_clang_options.
+
+Default: `[]`
+
 	let g:clighter_clang_options = ['-std=c++', '-DLinux']
-```
+
 
 ### g:clighter_libclang_path
-Default: `undefine`
 Clighter use default path to find libclang, if your libclang is not in
-default path, tell Clighter by this option
-```vim
+default path, tell Clighter by this option.
+
+Default: `undefine`
+
+
 	let g:clighter_libclang_path = '/usr/lib/libclang.so'
-```
+
 
 ## Customize Colors~
 
