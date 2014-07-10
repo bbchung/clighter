@@ -87,6 +87,9 @@ Default: `hi link EnumDecl Type`
 ###EnumConstantDecl
 Default: `hi link EnumConstantDecl Identifier`
 
+###DeclRefExpr
+Default: `hi link DeclRefExpr Identifier`
+
 eg:
 ```vim
 	hi TypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE

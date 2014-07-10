@@ -70,6 +70,8 @@ def try_highlighting():
                 vim_highlight(t, 'EnumConstantDecl')
             elif t.cursor.kind == clang.cindex.CursorKind.TYPE_REF:
                 vim_highlight(t, 'TypeRef')
+            elif t.cursor.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
+                vim_highlight(t, 'DeclRefExpr')
 endpython
 
 fun! s:clear_match()
@@ -117,6 +119,7 @@ hi link StructDecl Type
 hi link ClassDecl Type
 hi link EnumDecl Type
 hi link EnumConstantDecl Identifier
+hi link DeclRefExpr Identifier
 
 augroup ClangHighlight
     au WinEnter *.[ch],*.[ch]pp,*.objc call s:start_parsing()
