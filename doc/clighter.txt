@@ -59,35 +59,39 @@ Clighter currently works only at linux platform, others have not been test.
 
 						*'enable_clighter'*
 g:enable_clighter~
-Default: 1
 If enabled, Clighter will start with Vim, you can disable Clighter by set
-g:enable_clighter to 0
+g:enable_clighter to 0.
+
+Default: 1
 >
 	let g:enable_clighter = 0
 <
 
 						*'clighter_cursor_toggle_key'*
 g:clighter_cursor_toggle_key~
-Default: '<F3>'
 The hotkey to toggle cursor highlighting function.
+
+Default: '<F3>'
 >
 	let g:clighter_cursor_toggle_key = '<F3>'
 <
 						*'clighter_clang_options'*
 g:clighter_clang_options~
-Default: []
 The compiler options for libclang. Sometimes Clighter doesn't do corret
 highlighting cause Clang can't parse the source code, then you need tell Clang
 how to parse it. You can set the compiler options to the list in
-g:clighter_clang_options
+g:clighter_clang_options.
+
+Default: []
 >
 	let g:clighter_clang_options = ['-std=c++', '-DLinux']
 <
 						*'clighter_libclang_path'*
 g:clighter_libclang_path~
-Default: undefine
 Clighter use default path to find libclang, if your libclang is not in
-default path, tell Clighter by this option
+default path, tell Clighter by this option.
+
+Default: undefine
 >
 	let g:clighter_libclang_path = '/usr/lib/libclang.so'
 <
@@ -96,24 +100,25 @@ default path, tell Clighter by this option
 5. Customize Colors~
 
 Clighter defines the following syntax group corresponding to CursorKing of
+libclang
 
 MacroInstantiation~
-Default: link to Macro
+Default: hi link MacroInstantiation Macro
 
 TypeRef~
-Default: link to Type
+Default: hi link TypeRef Type
 
 StructDecl~
-Default: link to Type
+Default: hi link StructDecl Type
 
 ClassDecl~
-Default: link to Type
+Default: hi link ClassDecl Type
 
 EnumDecl~
-Default: link to Type
+Default: hi link EnumDecl Type
 
 EnumConstantDecl~
-Default: link to Identifier
+Default: hi link EnumConstantDecl Identifier
 
 eg:
 >
