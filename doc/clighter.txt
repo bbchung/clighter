@@ -1,0 +1,102 @@
+*clighter.txt*	Plugin for c-family semantic code highlighting
+
+Author: bbchung
+For Vim version 7.3 and above
+Last change: 2014 July 10
+
+1. Overview 			|clighter-intro|
+2. clighter on the internet	|clighter-internet|
+3. Requirements			|clighter-requirements|
+4. Options 			|clighter-options|
+5. FAQ				|clighter-faq|
+6. Todo				|clighter-todo|
+
+==============================================================================
+						*clighter-intro*
+1. Overview~
+The "Clang Highlighter"(clighter) plugin is a c-family semantic highlighting
+plugin for Vim. This plugin use libclang to allows you to enhance c, cpp,
+object-c source code highlighting from Vim builtin syntax highlighting to
+semantic highlighting.  The "clighter" plugin provides the
+following features:
+
+    * Autumatically do semantic highlighting for c-family source code.
+    * Automatically highlight all words under the cursor
+    * Options to customize the colors
+
+==============================================================================
+						*clighter-internet*
+2. clighter on the internet~
+
+The Github repository is at:
+>
+	https://github.com/bbchung/clighter
+<
+==============================================================================
+						*clighter-requirements*
+3. Requirements~
+
+The clighter plugin requires the following:
+
+    * Vim version 7.3 and above
+    * libclang
+
+clighter currently works at linux platform, others doesn't have
+been test.
+
+==============================================================================
+						*clighter-options*
+4. Options~
+
+A number of Vim variables control the behavior of the clighter plugin.
+
+|'g:enable_clighter'|			Enable the clighter plugin
+|'g:clighter_cursor_toggle_key'|	Keymap for toggling search highlighting
+|'g:clighter_clang_options'|		Compile options for libclang
+|'g:clighter_libclang_path'|		The path of the libclang
+
+						*'g:enable_clighter'*
+g:enable_clighter~
+You can set g:enable_clighter to 0 to disable clighter plugin at Vim starting.
+>
+	let g:enable_clighter = 0
+<
+
+						*'g:clighter_cursor_toggle_key'*
+g:clighter_cursor_toggle_key~
+Set the hotkey to toggle cursor highlighting function on/off.
+>
+	let g:clighter_cursor_toggle_key = '<F3>'
+<
+						*'g:clighter_clang_options'*
+g:clighter_clang_options~
+Sometimes you have to give Clang specific compiler options to let Clang parse
+the source code corretly. You can set the options to the list in
+g:clighter_clang_options.
+>
+	let g:clighter_clang_options = ['-std=c++', '-DDebug']
+<
+						*'g:clighter_libclang_path'*
+g:clighter_libclang_path~
+clighter use default path to find libclang, if you want to
+change the path of libclang, you can set g:clighter_libclang_path.
+>
+	let g:clighter_libclang_path = '/usr/lib/libclang.so'
+<
+==============================================================================
+						*clighter-faq*
+5. Frequently Asked Questions~
+
+Q. The clighter plugin doesn't work.
+A. Make sure the Vim version is 7.3 or above and make sure your system have
+installed the libclang or you have set the g:clighter_libclang_path corretly
+
+==============================================================================
+						*clighter-todo*
+6. Todo~
+
+1. Provide more options to customize colors
+
+==============================================================================
+
+vim:tw=78:ts=8:noet:ft=help:

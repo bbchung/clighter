@@ -2,18 +2,18 @@ if exists('g:loaded_vim_clang_highlight')
       finish
 endif
 
-if !exists('g:enable_clang_highlighting')
-	let g:enable_clang_highlighting=1
+if !exists('g:enable_clighter')
+	let g:enable_clighter=1
 endif
 
-if g:enable_clang_highlighting == 1
+if g:enable_clighter == 1
 
-if !exists ('g:key_toggle_srchhl')
-    let g:key_toggle_srchhl = '<F3>'
+if !exists ('g:clighter_cursor_toggle_key')
+    let g:clighter_cursor_toggle_key = '<F3>'
 endif
 
-if !exists('g:clang_options')
-    let g:clang_options=[]
+if !exists('g:clighter_clang_options')
+    let g:clighter_clang_options=[]
 endif
 
 python << endpython
@@ -25,13 +25,13 @@ from threading import Thread
 gTu=None # global translation unit
 
 def start_parsing():
-    t = Thread(target=do_parsing, args=(vim.eval('g:clang_options'),))
+    t = Thread(target=do_parsing, args=(vim.eval('g:clighter_clang_options'),))
     t.start()
 
 def do_parsing(options):
     global gTu
-    if int(vim.eval('exists(\'g:libclang_path\')')) == 1:
-        clang.cindex.Config.set_library_file(vim.eval("g:libclang_path"))
+    if int(vim.eval('exists(\'g:clighter_libclang_path\')')) == 1:
+        clang.cindex.Config.set_library_file(vim.eval("g:clighter_libclang_path"))
 
     clang.cindex.Config
     idx = clang.cindex.Index.create()
@@ -109,7 +109,7 @@ fun! ToggleAutoHighlight()
     endif
 endf
 
-execute "nmap <silent> ".g:key_toggle_srchhl. " :call ToggleAutoHighlight()<CR>"
+execute "nmap <silent> ".g:clighter_cursor_toggle_key. " :call ToggleAutoHighlight()<CR>"
 
 hi link MacroInstantiation Macro
 hi link TypeRef Type
