@@ -24,52 +24,43 @@ The clighter plugin requires the following:
 
 Clighter currently works only at linux platform, others have not been test.
 
-==============================================================================
-						*clighter-options*
-4. Options~
 
-|'g:enable_clighter'|			Enable the Clighter
-|'g:clighter_cursor_toggle_key'|	Keymap for toggling search highlighting
-|'g:clighter_clang_options'|		The Compile options for Clang
-|'g:clighter_libclang_path'|		The path of the libclang
+## Options
 
-						*'enable_clighter'*
-g:enable_clighter~
+### g:enable_clighter
 Default: 1
 If enabled, Clighter will start with Vim, you can disable Clighter by set
 g:enable_clighter to 0
->
+```vim
 	let g:enable_clighter = 0
-<
+```
 
-						*'clighter_cursor_toggle_key'*
-g:clighter_cursor_toggle_key~
+### g:clighter_cursor_toggle_key
 Default: '<F3>'
 The hotkey to toggle cursor highlighting function.
->
+```vim
 	let g:clighter_cursor_toggle_key = '<F3>'
-<
-						*'clighter_clang_options'*
-g:clighter_clang_options~
+```
+
+### g:clighter_clang_options
 Default: []
 The compiler options for libclang. Sometimes Clighter doesn't do corret
 highlighting cause Clang can't parse the source code, then you need tell Clang
 how to parse it. You can set the compiler options to the list in
 g:clighter_clang_options
->
+```vim
 	let g:clighter_clang_options = ['-std=c++', '-DLinux']
-<
-						*'clighter_libclang_path'*
-g:clighter_libclang_path~
+```
+
+### g:clighter_libclang_path~
 Default: undefine
 Clighter use default path to find libclang, if your libclang is not in
 default path, tell Clighter by this option
->
+```vim
 	let g:clighter_libclang_path = '/usr/lib/libclang.so'
-<
-==============================================================================
-						*clighter-colors*
-5. Customize Colors~
+```
+
+## Customize Colors~
 
 Clighter defines the following syntax group corresponding to CursorKing of
 
