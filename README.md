@@ -95,7 +95,7 @@ eg:
 ```
 
 
-## Frequently Asked Questions~
+## Frequently Asked Questions
 
 ### The clighter plugin doesn't work.
 Vim version 7.3 or above is need, and make sure libclang is installed
