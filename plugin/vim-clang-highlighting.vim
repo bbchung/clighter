@@ -16,8 +16,6 @@ if !exists('g:clang_options')
     let g:clang_options=[]
 endif
 
-let s:matched_list=[]
-
 python << endpython
 import vim
 import sys
@@ -27,31 +25,39 @@ from threading import Thread
 gTu=None # global translation unit
 
 def start_parsing():
-    t = Thread(target=do_parsing, args=(vim.current.buffer, vim.eval('g:clang_options')))
+    t = Thread(target=do_parsing, args=(vim.eval('g:clang_options'),))
     t.start()
 
-def do_parsing(buffer, options):
+def do_parsing(options):
     global gTu
     if int(vim.eval('exists(\'g:libclang_path\')')) == 1:
         clang.cindex.Config.set_library_file(vim.eval("g:libclang_path"))
 
     clang.cindex.Config
     idx = clang.cindex.Index.create()
-    gTu = idx.parse(buffer.name, options, [(buffer.name, "\n".join(buffer))], options=clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    gTu = idx.parse(vim.current.buffer.name, options, [(vim.current.buffer.name, "\n".join(vim.current.buffer))], options=clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
 def vim_highlight(t, group):
-	vim.command("call add(s:matched_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format( group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
+	vim.command("call add(w:matched_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format( group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
 
 def try_highlighting():
     global gTu
     if gTu == None:
         return
 
+    #for t in gTu.cursor.get_tokens(extent=clang.cindex.SourceRange(start=clang.cindex.SourceLocation(line=top), end=clang.cindex.SourceLocation(line=bottom))):
+    file = clang.cindex.File.from_name(gTu, vim.current.buffer.name)
+    top = clang.cindex.SourceLocation.from_position(gTu, file, int(vim.eval("line('w0')")), 1)
+    bottom = clang.cindex.SourceLocation.from_position(gTu, file, int(vim.eval("line('w$')")), 1)
+    range = clang.cindex.SourceRange.from_locations(top, bottom)
+
+    tokens = gTu.get_tokens(extent=range)
+    if len(list(tokens)) == 0:
+        return
+
     vim.command('call s:clear_match()')
-    top = int(vim.eval("line('w0')"))
-    bottom = int(vim.eval("line('w$')"))
-    for t in gTu.cursor.get_tokens():
-        if t.kind.value == 2 and (top <=t.location.line <= bottom):
+    for t in gTu.get_tokens(extent=range):
+        if t.kind.value == 2:
             if t.cursor.kind == clang.cindex.CursorKind.MACRO_INSTANTIATION:
                 vim_highlight(t, 'MacroInstantiation')
             elif t.cursor.kind == clang.cindex.CursorKind.STRUCT_DECL:
@@ -67,17 +73,10 @@ def try_highlighting():
 endpython
 
 fun! s:clear_match()
-	for i in s:matched_list
+	for i in w:matched_list
 		call matchdelete(i)
 	endfor
-	let s:matched_list=[]
-endf
-
-fun! s:start_parsing_if_mod()
-python << endpython
-if vim.eval('&mod') == '1':
-    start_parsing()
-endpython
+	let w:matched_list=[]
 endf
 
 fun! s:start_parsing()
@@ -124,7 +123,8 @@ hi link EnumDecl Type
 hi link EnumConstantDecl Identifier
 
 augroup ClangHighlight
-    au CursorHold *.[ch],*.[ch]pp,*.objc call s:start_parsing_if_mod()
+    au WinEnter *.[ch],*.[ch]pp,*.objc if !exists('w:matched_list') | let w:matched_list=[] | endif
+    au CursorHold *.[ch],*.[ch]pp,*.objc call s:start_parsing()
     au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
     au FileType c,cpp,objc call s:parsing_and_highlighting()
 augroup END
