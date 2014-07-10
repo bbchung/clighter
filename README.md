@@ -1,22 +1,6 @@
-*clighter.txt*	Plugin for c-family semantic source code highlighting
-*clighter*
+# Clighter: plugin for c-family semantic source code highlighting
 
-Author: bbchung (afafaf4@gmail.com)
-For Vim version 7.3 and above
-Last change: 2014 July 10
-
-==============================================================================
-CONTENTS                                                  *clighter-contents*
-1. Intro 			|clighter-intro|
-2. Clighter on the internet	|clighter-internet|
-3. Requirements			|clighter-requirements|
-4. Options 			|clighter-options|
-5. Customize Colors 		|clighter-colors|
-6. FAQ				|clighter-faq|
-
-==============================================================================
-						*clighter-intro*
-1. Intro~
+## Intro
 Clighter(Clang Highlighter) is a c-family semantic highlighting plugin for
 Vim based on Clang. This plugin use libclang to enhance c-family source code
 highlighting from Vim builtin syntax highlighting to semantic highlighting.
@@ -25,118 +9,101 @@ the semantic highlighting into the word.
 
 Clighter provides the following features:
 
-    * Autumatically do semantic highlighting for c-family source code.
-    * Automatically mark all words that are same as the word under cursor
-    * Options to customize the colors
+* Autumatically do semantic highlighting for c-family source code.
+* Automatically mark all words that are same as the word under cursor
+* Options to customize the colors
 
-==============================================================================
-						*clighter-internet*
-2. Clighter on the internet~
 
-The Github repository is at:
->
-	https://github.com/bbchung/clighter
-<
-==============================================================================
-						*clighter-requirements*
-3. Requirements~
+## Requirements
 
 The clighter plugin requires the following:
 
-    * Vim version 7.3 and above
-    * libclang
+* Vim version 7.3 and above
+* libclang
 
 Clighter currently works only at linux platform, others have not been test.
 
-==============================================================================
-						*clighter-options*
-4. Options~
 
-|'g:enable_clighter'|			Enable the Clighter
-|'g:clighter_cursor_toggle_key'|	Keymap for toggling search highlighting
-|'g:clighter_clang_options'|		The Compile options for Clang
-|'g:clighter_libclang_path'|		The path of the libclang
+## Options
 
-						*'enable_clighter'*
-g:enable_clighter~
-Default: 1
+### g:enable_clighter
 If enabled, Clighter will start with Vim, you can disable Clighter by set
 g:enable_clighter to 0
->
-	let g:enable_clighter = 0
-<
 
-						*'clighter_cursor_toggle_key'*
-g:clighter_cursor_toggle_key~
-Default: '<F3>'
+Default: `1`
+
+	let g:enable_clighter = 0
+
+
+### g:clighter_cursor_toggle_key
 The hotkey to toggle cursor highlighting function.
->
+
+Default: `'<F3>'`
+
+
 	let g:clighter_cursor_toggle_key = '<F3>'
-<
-						*'clighter_clang_options'*
-g:clighter_clang_options~
-Default: []
+
+
+### g:clighter_clang_options
 The compiler options for libclang. Sometimes Clighter doesn't do corret
 highlighting cause Clang can't parse the source code, then you need tell Clang
 how to parse it. You can set the compiler options to the list in
-g:clighter_clang_options
->
+g:clighter_clang_options.
+
+Default: `[]`
+
 	let g:clighter_clang_options = ['-std=c++', '-DLinux']
-<
-						*'clighter_libclang_path'*
-g:clighter_libclang_path~
-Default: undefine
+
+
+### g:clighter_libclang_path
 Clighter use default path to find libclang, if your libclang is not in
-default path, tell Clighter by this option
->
+default path, tell Clighter by this option.
+
+Default: `undefine`
+
+
 	let g:clighter_libclang_path = '/usr/lib/libclang.so'
-<
-==============================================================================
-						*clighter-colors*
-5. Customize Colors~
 
-Clighter defines the following syntax group corresponding to CursorKing of
 
-MacroInstantiation~
-Default: link to Macro
+## Customize Colors
 
-TypeRef~
-Default: link to Type
+Clighter defines the following syntax group corresponding to CursorKing of libclang
 
-StructDecl~
-Default: link to Type
+###MacroInstantiation
+Default: `hi link MacroInstantiation Macro`
 
-ClassDecl~
-Default: link to Type
+###TypeRef
+Default: `hi link TypeRef Type`
 
-EnumDecl~
-Default: link to Type
+###StructDecl
+Default: `hi link StructDecl Type`
 
-EnumConstantDecl~
-Default: link to Identifier
+###ClassDecl
+Default: `hi link ClassDecl Type`
+
+###EnumDecl
+Default: `hi link EnumDecl Type`
+
+###EnumConstantDecl
+Default: `hi link EnumConstantDecl Identifier`
 
 eg:
->
+```vim
 	hi TypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
 	hi ClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
-<
+```
 
-==============================================================================
-						*clighter-faq*
-6. Frequently Asked Questions~
 
-Q. The clighter plugin doesn't work.
-A. Vim version 7.3 or above is need, and make sure libclang is installed
+## Frequently Asked Questions
+
+### The clighter plugin doesn't work.
+Vim version 7.3 or above is need, and make sure libclang is installed
 correctly and set g:clighter_libclang_path if need.
 
-Q. Highlighing is not quick-response
-A. Clighter use CursorHold event to update the current window highlighting,
+### Highlighing is not quick-response
+Clighter use CursorHold event to update the current window highlighting,
 you can set updatetime smaller. Remember that other plugins may chagne the
 updatetime
->
+```vim
 	set updatetime=1200
-<
-
-==============================================================================
-
-vim:tw=78:ts=8:noet:ft=help:
+```
