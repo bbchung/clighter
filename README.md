@@ -13,8 +13,8 @@ Clighter provides the following features:
 * Automatically mark all words that are same as the word under cursor
 * Options to customize the colors
 
-![clighter][1]
-![clighter][2]
+![clighter demo](http://goo.gl/ncGLYC)
+![clighter demo](http://goo.gl/4QCv6O)
 
 ## Requirements
 
