@@ -66,27 +66,27 @@ Default: `undefine`
 	let g:clighter_libclang_path = '/usr/lib/libclang.so'
 
 
-## Customize Colors~
+## Customize Colors
 
-Clighter defines the following syntax group corresponding to CursorKing of
+Clighter defines the following syntax group corresponding to CursorKing of libclang
 
-MacroInstantiation~
-Default: link to Macro
+###MacroInstantiation
+Default: `hi link MacroInstantiation Macro`
 
-TypeRef~
-Default: link to Type
+###TypeRef
+Default: hi link TypeRef Type
 
-StructDecl~
-Default: link to Type
+###StructDecl
+Default: hi link StructDecl Type
 
-ClassDecl~
-Default: link to Type
+###ClassDecl
+Default: hi link ClassDecl Type
 
-EnumDecl~
-Default: link to Type
+###EnumDecl
+Default: hi link EnumDecl Type
 
-EnumConstantDecl~
-Default: link to Identifier
+###EnumConstantDecl
+Default: hi link EnumConstantDecl Identifier
 
 eg:
 >
