@@ -74,42 +74,37 @@ Clighter defines the following syntax group corresponding to CursorKing of libcl
 Default: `hi link MacroInstantiation Macro`
 
 ###TypeRef
-Default: hi link TypeRef Type
+Default: `hi link TypeRef Type`
 
 ###StructDecl
-Default: hi link StructDecl Type
+Default: `hi link StructDecl Type`
 
 ###ClassDecl
-Default: hi link ClassDecl Type
+Default: `hi link ClassDecl Type`
 
 ###EnumDecl
-Default: hi link EnumDecl Type
+Default: `hi link EnumDecl Type`
 
 ###EnumConstantDecl
-Default: hi link EnumConstantDecl Identifier
+Default: `hi link EnumConstantDecl Identifier`
 
 eg:
->
+```vim
 	hi TypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
 	hi ClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
-<
+```
 
-==============================================================================
-						*clighter-faq*
-6. Frequently Asked Questions~
 
-Q. The clighter plugin doesn't work.
-A. Vim version 7.3 or above is need, and make sure libclang is installed
+## Frequently Asked Questions~
+
+### The clighter plugin doesn't work.
+Vim version 7.3 or above is need, and make sure libclang is installed
 correctly and set g:clighter_libclang_path if need.
 
-Q. Highlighing is not quick-response
-A. Clighter use CursorHold event to update the current window highlighting,
+### Highlighing is not quick-response
+Clighter use CursorHold event to update the current window highlighting,
 you can set updatetime smaller. Remember that other plugins may chagne the
 updatetime
->
+```vim
 	set updatetime=1200
-<
-
-==============================================================================
-
-vim:tw=78:ts=8:noet:ft=help:
+```
