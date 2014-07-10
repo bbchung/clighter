@@ -28,22 +28,23 @@ Clighter currently works only at linux platform, others have not been test.
 ## Options
 
 ### g:enable_clighter
-Default: 1
 If enabled, Clighter will start with Vim, you can disable Clighter by set
 g:enable_clighter to 0
-```vim
+
+Default: `1`
+
 	let g:enable_clighter = 0
-```
+
 
 ### g:clighter_cursor_toggle_key
-Default: '<F3>'
+Default: `'<F3>'`
 The hotkey to toggle cursor highlighting function.
 ```vim
 	let g:clighter_cursor_toggle_key = '<F3>'
 ```
 
 ### g:clighter_clang_options
-Default: []
+Default: `[]`
 The compiler options for libclang. Sometimes Clighter doesn't do corret
 highlighting cause Clang can't parse the source code, then you need tell Clang
 how to parse it. You can set the compiler options to the list in
@@ -52,8 +53,8 @@ g:clighter_clang_options
 	let g:clighter_clang_options = ['-std=c++', '-DLinux']
 ```
 
-### g:clighter_libclang_path~
-Default: undefine
+### g:clighter_libclang_path
+Default: `undefine`
 Clighter use default path to find libclang, if your libclang is not in
 default path, tell Clighter by this option
 ```vim
