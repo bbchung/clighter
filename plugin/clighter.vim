@@ -1,3 +1,17 @@
+if v:version < 703
+    echohl WarningMsg |
+                \ echomsg "Clighter unavailable: requires Vim 7.3+" |
+                \ echohl None
+    finish
+endif
+
+if !has('python')
+    echohl WarningMsg |
+                \ echomsg "Clighter unavailable: required python2 support" |
+                \ echohl None
+    finish
+endif
+
 if exists('g:loaded_vim_clang_highlight')
       finish
 endif
@@ -33,8 +47,12 @@ def do_parsing(options):
     if int(vim.eval('exists(\'g:clighter_libclang_path\')')) == 1:
         clang.cindex.Config.set_library_file(vim.eval("g:clighter_libclang_path"))
 
-    clang.cindex.Config
-    idx = clang.cindex.Index.create()
+    try:
+        idx = clang.cindex.Index.create()
+    except:
+        vim.command('echohl WarningMsg | echomsg "Clighter runtime error: libclang error" | echohl None')
+        return
+
     gTu = idx.parse(vim.current.buffer.name, options, [(vim.current.buffer.name, "\n".join(vim.current.buffer))], options=clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
 def vim_highlight(t, group):
