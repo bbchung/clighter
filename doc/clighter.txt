@@ -56,7 +56,7 @@ Clighter currently works only at linux platform, others have not been tested.
 |'g:enable_clighter'|			Enable the Clighter
 |'g:clighter_cursor_toggle_key'|	Keymap for toggling search highlighting
 |'g:clighter_clang_options'|		The Compile options for Clang
-|'g:clighter_libclang_path'|		The path of the libclang
+|'g:clighter_libclang_file'|		The path of the libclang
 
 						*'enable_clighter'*
 g:enable_clighter~
@@ -87,14 +87,14 @@ Default: []
 >
 	let g:clighter_clang_options = ['-std=c++', '-DLinux']
 <
-						*'clighter_libclang_path'*
-g:clighter_libclang_path~
+						*'clighter_libclang_file'*
+g:clighter_libclang_file~
 If your libclang is not in default path of system, tell Clighter by this
 option.
 
 Default: undefined
 >
-	let g:clighter_libclang_path = '/usr/lib/libclang.so'
+	let g:clighter_libclang_file = '/usr/lib/libclang.so'
 <
 ==============================================================================
 						*clighter-colors*
@@ -150,7 +150,7 @@ You can customize these colors in your colorscheme, for example:
 
 Q. The clighter plugin doesn't work.
 A. Vim version 7.3(or above) is required, and make sure libclang is installed
-correctly and set g:clighter_libclang_path if need.
+correctly and set g:clighter_libclang_file if need.
 
 Q. Highlighting is not quick-response
 A. Clighter use CursorHold event to update the current window highlighting,

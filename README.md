@@ -59,14 +59,14 @@ Default: `[]`
 let g:clighter_clang_options = ['-std=c++', '-DLinux']
 ```
 
-### g:clighter_libclang_path
+### g:clighter_libclang_file
 
 If your libclang is not in default path of system, tell Clighter by this
 option.
 
 Default: `undefined`
 ```vim
-let g:clighter_libclang_path = '/usr/lib/libclang.so'
+let g:clighter_libclang_file = '/usr/lib/libclang.so'
 ```
 
 ## Customize Colors
@@ -119,7 +119,7 @@ You can customize these colors in your colorscheme, for example:
 
 ### The clighter plugin doesn't work.
 Vim version 7.3(or above) with python2.x is required, and make sure libclang is installed
-correctly and set g:clighter_libclang_path if need.
+correctly and set g:clighter_libclang_file if need.
 
 ### Highlighting is not quick-response
 Clighter use CursorHold event to update the current window highlighting,

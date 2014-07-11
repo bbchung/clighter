@@ -37,6 +37,8 @@ import clang.cindex
 from threading import Thread
 
 gTu=None # global translation unit
+if int(vim.eval('exists(\'g:clighter_libclang_file\')')) == 1:
+    clang.cindex.Config.set_library_file(vim.eval("g:clighter_libclang_file"))
 
 def start_parsing():
     t = Thread(target=do_parsing, args=(vim.eval('g:clighter_clang_options'),))
@@ -44,8 +46,6 @@ def start_parsing():
 
 def do_parsing(options):
     global gTu
-    if int(vim.eval('exists(\'g:clighter_libclang_path\')')) == 1:
-        clang.cindex.Config.set_library_file(vim.eval("g:clighter_libclang_path"))
 
     try:
         idx = clang.cindex.Index.create()
