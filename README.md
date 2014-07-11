@@ -123,7 +123,7 @@ correctly and set g:clighter_libclang_path if need.
 
 ### Highlighing is not quick-response
 Clighter use CursorHold event to update the current window highlighting,
-you can set updatetime smaller. Remember that other plugins may chagne the
+you can set updatetime smaller. Remember that other plugins may change the
 updatetime
 ```vim
 	set updatetime=1200
