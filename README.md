@@ -40,7 +40,7 @@ let g:enable_clighter = 0
 
 ### g:clighter_cursor_toggle_key
 
-The hotkey to toggle cursor highlighting function.
+Define the hotkey to toggle cursor highlighting function.
 
 Default: `'<F3>'`
 ```vim
