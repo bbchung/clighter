@@ -140,9 +140,10 @@ hi link EnumConstantDecl Identifier
 hi link DeclRefExpr Identifier
 
 augroup ClangHighlight
-    au WinEnter *.[ch],*.[ch]pp,*.objc call s:start_parsing()
-    au CursorHold *.[ch],*.[ch]pp,*.objc call s:start_parsing()
+    au BufEnter *.[ch],*.[ch]pp,*.objc call s:start_parsing()
     au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
+    au TextChanged *.[ch],*.[ch]pp,*.objc call s:start_parsing()
+    au InsertLeave *.[ch],*.[ch]pp,*.objc call s:start_parsing()
 augroup END
 
 endif
