@@ -24,7 +24,7 @@ The clighter plugin requires the following:
 * Vim version 7.3 and above with python2.x enabled
 * libclang
 
-Clighter currently works only at linux platform, others have not been test.
+Clighter currently works only at linux platform, others have not been tested.
 
 
 ## Options
@@ -118,7 +118,7 @@ You can customize these colors in your colorscheme, for example:
 ## FAQ
 
 ### The clighter plugin doesn't work.
-Vim version 7.3 or above is need, and make sure libclang is installed
+Vim version 7.3(or above) with python2.x is required, and make sure libclang is installed
 correctly and set g:clighter_libclang_path if need.
 
 ### Highlighing is not quick-response
