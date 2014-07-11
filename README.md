@@ -1,4 +1,4 @@
-# Clighter: plugin for c-family semantic source code highlighting
+# Clighter: plugin for c-family semantic source code highlighting, based on Clang
 
 ## Intro
 

@@ -1,4 +1,5 @@
-*clighter.txt*	Plugin for c-family semantic source code highlighting
+*clighter.txt*	Plugin for c-family semantic source code highlighting, based
+on Clang
 *clighter*
 
 Author: bbchung (afafaf4@gmail.com)
