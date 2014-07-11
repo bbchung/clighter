@@ -123,8 +123,9 @@ correctly and set g:clighter_libclang_path if need.
 
 ### Highlighting is not quick-response
 Clighter use CursorHold event to update the current window highlighting,
-you can set updatetime smaller. Remember that other plugins may change the
-updatetime.
+and only highlight the code when parsing is done. To get the better response
+time, you can change updatetime smaller and pray your Clang run faster.
+Notice that many other plugins will change updatetime.
 ```vim
 	set updatetime=1200
 ```
