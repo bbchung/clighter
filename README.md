@@ -46,6 +46,7 @@ can only highlight a given region instead of whole buffer each time to get
 the good performance even when the file is very large. 
 	
 clighter_window_size < 0: highlight whole buffer.
+
 clighter_window_size >= 0: highlight from top line number reduce 30 *
 clighter_window_size to bottom line number plug 30 * clighter_window_size of
 screen.
@@ -81,14 +82,19 @@ let g:clighter_libclang_file = '/usr/lib/libclang.so'
 
 Clighter provides command to control it
 
-* ClighterEnable
-Enable the Clighter
+* Enable Clighter
 
-* ClighterDisable
-Disable the Clighter. Notice that is will not disable the cursor highlighting.
+`ClighterEnable`
 
-* ClighterToggleCursorHL
-Toggling if cursor highlighting is enabled.
+* Disable the Clighter
+
+Notice that is will not disable the cursor highlighting.
+
+`ClighterDisable`
+
+* Toggle cursor highlighting
+
+`ClighterToggleCursorHL`
 
 ## Customize Colors
 
