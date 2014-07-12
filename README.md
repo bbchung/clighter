@@ -86,7 +86,7 @@ Clighter provides command to control it
 
 	`ClighterEnable`
 
-* Disable the Clighter
+* Disable Clighter
 
 	Notice that is will not disable the cursor highlighting.
 

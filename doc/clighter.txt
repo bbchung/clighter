@@ -110,14 +110,21 @@ Default: ''
 						*clighter-commands*
 Clighter provides command to control it
 
-ClighterEnable~
-Enable the Clighter
+Enable Clighter~
+>
+	ClighterEnable
+<
 
-ClighterDisable~
-Disable the Clighter. Notice that is will not disable the cursor highlighting.
+Disable Clighter~
+Notice that is will not disable the cursor highlighting.
+>
+	ClighterDisable
+<
 
-ClighterToggleCursorHL~
-Toggling if cursor highlighting is enabled.
+Toggle cursor highlighting~
+>
+	ClighterToggleCursorHL
+<
 
 ==============================================================================
 						*clighter-colors*
