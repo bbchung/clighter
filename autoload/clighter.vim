@@ -111,8 +111,8 @@ fun! clighter#Enable()
     augroup ClighterEnable
         au!
         au BufEnter *.[ch],*.[ch]pp,*.objc call s:start_parsing()
-        au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
         au CursorHold *.[ch],*.[ch]pp,*.objc call s:start_parsing()
+        au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
     augroup END
 endf
 

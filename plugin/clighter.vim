@@ -33,9 +33,9 @@ hi link EnumDecl Type
 hi link EnumConstantDecl Identifier
 hi link DeclRefExpr Identifier
 
-augroup ClighterStart
-  au!
-  au VimEnter *.[ch],*.[ch]pp,*.objc if g:clighter_autostart == 1 | call clighter#Enable() | endif
-augroup END
-
 let g:loaded_clighter = 1
+
+if g:clighter_autostart == 1
+    call clighter#Enable()
+endif
+
