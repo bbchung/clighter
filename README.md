@@ -84,17 +84,17 @@ Clighter provides command to control it
 
 * Enable Clighter
 
-`ClighterEnable`
+	`ClighterEnable`
 
 * Disable the Clighter
 
-Notice that is will not disable the cursor highlighting.
+	Notice that is will not disable the cursor highlighting.
 
-`ClighterDisable`
+	`ClighterDisable`
 
 * Toggle cursor highlighting
 
-`ClighterToggleCursorHL`
+	`ClighterToggleCursorHL`
 
 ## Customize Colors
 
