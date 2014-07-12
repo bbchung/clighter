@@ -29,22 +29,31 @@ Clighter currently works only at linux platform, others have not been tested.
 
 ## Options
 
-### g:enable_clighter
-If enabled, Clighter will start with Vim, you can disable Clighter by set
-g:enable_clighter to 0
+### g:clighter_autostart
+Clighter will automatically start with Vim if set g:clighter_autostart to 1,
+otherwise, you have to manually start Clighter by ClighterEnable command.
 
 Default: `1`
 ```vim
-let g:enable_clighter = 0
+let g:clighter_autostart = 0
 ```
 
-### g:clighter_cursor_toggle_key
+### g:clighter_window_size
 
-Define the hotkey to toggle cursor highlighting function.
+Clighter uses vim regular expression engine to do syntax highlighting,
+but vim's RE engine performs very bad when there are too many rules. Clighter
+can only highlight a given region instead of whole buffer each time to get
+the good performance even when the file is very large. 
+	
+clighter_window_size < 0: highlight whole buffer.
+clighter_window_size >= 0: highlight from top line number reduce 30 *
+clighter_window_size to bottom line number plug 30 * clighter_window_size of
+screen.
 
-Default: `'<F3>'`
+Default: `0`
 ```vim
-let g:clighter_cursor_toggle_key = '<F3>'
+let g:clighter_window_size = -1 " whole buffer
+let g:clighter_window_size = 0 " highlight current screen of window
 ```
 
 ### g:clighter_clang_options
@@ -64,10 +73,22 @@ let g:clighter_clang_options = ['-std=c++', '-DLinux']
 If your libclang is not in default path of system, tell Clighter by this
 option.
 
-Default: `undefined`
+Default: `''`
 ```vim
 let g:clighter_libclang_file = '/usr/lib/libclang.so'
 ```
+## Commands
+
+Clighter provides command to control it
+
+* ClighterEnable
+Enable the Clighter
+
+* ClighterDisable
+Disable the Clighter. Notice that is will not disable the cursor highlighting.
+
+* ClighterToggleCursorHL
+Toggling if cursor highlighting is enabled.
 
 ## Customize Colors
 

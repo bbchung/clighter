@@ -5,7 +5,7 @@ import clang.cindex
 from threading import Thread
 
 gTu=None # global translation unit
-if int(vim.eval('exists(\'g:clighter_libclang_file\')')) == 1:
+if vim.eval("g:clighter_libclang_file") != "":
     clang.cindex.Config.set_library_file(vim.eval("g:clighter_libclang_file"))
 
 def start_parsing():
