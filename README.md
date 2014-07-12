@@ -101,39 +101,39 @@ Clighter provides command to control it
 Clighter defines the following syntax group corresponding to CursorKing of Clang.
 
 * MacroInstantiation
-```vim
-hi link MacroInstantiation Macro
-```
+	```vim
+	hi link MacroInstantiation Macro
+	```
 
 * TypeRef
-```vim
-hi link TypeRef Type
-```
+	```vim
+	hi link TypeRef Type
+	```
 
 * StructDecl
-```vim
-hi link StructDecl Type
-```
+	```vim
+	hi link StructDecl Type
+	```
 
 * ClassDecl
-```vim
-hi link ClassDecl Type
-```
+	```vim
+	hi link ClassDecl Type
+	```
 
 * EnumDecl
-```vim
-hi link EnumDecl Type
-```
+	```vim
+	hi link EnumDecl Type
+	```
 
 * EnumConstantDecl
-```vim
-hi link EnumConstantDecl Identifier
-```
+	```vim
+	hi link EnumConstantDecl Identifier
+	```
 
 * DeclRefExpr
-```vim
-hi link DeclRefExpr Identifier
-```
+	```vim
+	hi link DeclRefExpr Identifier
+	```
 
 You can customize these colors in your colorscheme, for example:
 ```vim
