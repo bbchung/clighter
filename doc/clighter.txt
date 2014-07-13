@@ -4,7 +4,6 @@ on Clang
 
 Author: bbchung (afafaf4@gmail.com)
 For Vim version 7.3 or above
-Last change: 2014 July 10
 
 ==============================================================================
 CONTENTS                                                  *clighter-contents*
