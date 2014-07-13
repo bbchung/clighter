@@ -24,7 +24,8 @@ def do_parsing(options):
     gTu = idx.parse(vim.current.buffer.name, options, [(vim.current.buffer.name, "\n".join(vim.current.buffer))], options=clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
 def vim_matchadd(t, group):
-	vim.command("call add(w:matched_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format(group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
+	vim.command("call add(w:matched_list, matchaddpos('{0}', [[{1}, {2}, {3}], -1]))".format(group, t.location.line, t.location.column, len(t.spelling)));
+    #vim.command("call add(w:matched_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format(group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
 
 def try_highlighting():
     global gTu
