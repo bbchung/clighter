@@ -57,6 +57,7 @@ Clighter currently works only at linux platform, others have not been tested.
 |'g:clighter_window_size'|		Window size for highlighting
 |'g:clighter_clang_options'|		The Compile options for Clang
 |'g:clighter_libclang_file'|		The file path of the libclang
+|'g:clighter_realtime'|			Update highlighting in realtime	
 
 						*'clighter_autostart'*
 g:clighter_autostart~
@@ -104,6 +105,15 @@ Default: ''
 >
 	let g:clighter_libclang_file = '/usr/lib/libclang.so'
 <
+						*'clighter_realtime'*
+g:clighter_realtime~
+Highlight the code in realtime(simulating), rather than when cursor is idle.
+
+Default: 0
+>
+	let g:clighter_realtime = 1
+<
+
 ==============================================================================
 						*clighter-commands*
 Clighter provides command to control it

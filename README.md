@@ -75,6 +75,15 @@ Default: `''`
 ```vim
 let g:clighter_libclang_file = '/usr/lib/libclang.so'
 ```
+### g:clighter_realtime
+
+Highlight the code in realtime(simulating), rather than when cursor is idle.
+
+Default: `0`
+```vim
+let g:clighter_realtime = 1
+```
+
 ## Commands
 
 Clighter provides command to control it

@@ -130,7 +130,11 @@ fun! clighter#Enable()
         au!
         au BufEnter *.[ch],*.[ch]pp,*.objc call s:start_parsing()
         au CursorHold *.[ch],*.[ch]pp,*.objc call s:start_parsing()
-        au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
+        if g:clighter_realtime == 1
+            au CursorMoved *.[ch],*.[ch]pp,*.objc call s:highlighting()
+        else
+            au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
+        endif
     augroup END
 
     call s:start_parsing()
