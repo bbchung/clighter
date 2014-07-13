@@ -30,7 +30,7 @@ Clighter currently works only at linux platform, others have not been tested.
 ## Options
 
 ### g:clighter_autostart
-Clighter will automatically start with Vim if set g:clighter_autostart to 1,
+Clighter will automatically start with Vim if set g:clighter_autostart to `1`,
 otherwise, you have to manually start Clighter by ClighterEnable command.
 
 Default: `1`
@@ -45,11 +45,8 @@ but vim's RE engine performs very bad when there are too many rules. Clighter
 can only highlight a given region instead of whole buffer each time to get
 the good performance even when the file is very large. 
 	
-clighter_window_size < 0: highlight whole buffer.
-
-clighter_window_size >= 0: highlight from top line number reduce 30 *
-clighter_window_size to bottom line number plug 30 * clighter_window_size of
-screen.
+* `< 0`: highlight whole buffer.
+* `>= 0`: highlight from top line number reduce 30 * clighter_window_size to bottom line number plug 30 * clighter_window_size of screen.
 
 Default: `0`
 ```vim
