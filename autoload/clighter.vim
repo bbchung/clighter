@@ -114,6 +114,8 @@ fun! clighter#Enable()
         au CursorHold *.[ch],*.[ch]pp,*.objc call s:start_parsing()
         au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
     augroup END
+
+    call s:start_parsing()
 endf
 
 fun! clighter#Disable()
