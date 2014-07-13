@@ -39,9 +39,9 @@ def try_highlighting():
         top = clang.cindex.SourceLocation.from_position(gTu, file, max(int(vim.eval("line('w0')")) - 30 * window_size, 1), 1)
         bottom = clang.cindex.SourceLocation.from_position(gTu, file, min(int(vim.eval("line('w$')")) + 30 * window_size, int(vim.eval("line('$')"))), 1)
         range = clang.cindex.SourceRange.from_locations(top, bottom)
-        vim_by_tokens(gTu.get_tokens(extent=range))
+        vim_hl_tokens(gTu.get_tokens(extent=range))
 
-def vim_by_tokens(tokens):
+def vim_hl_tokens(tokens):
     first = 0
     for t in tokens:
         if first == 0:

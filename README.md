@@ -48,7 +48,7 @@ the good performance even when the file is very large.
 * `< 0`: highlight whole buffer.
 * `>= 0`: highlight from top line number reduce 30 * clighter_window_size to bottom line number plug 30 * clighter_window_size of screen.
 
-Default: `0`
+Default: `1`
 ```vim
 let g:clighter_window_size = -1 " whole buffer
 let g:clighter_window_size = 0 " highlight current screen of window
