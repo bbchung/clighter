@@ -76,8 +76,8 @@ can only highlight a given region instead of whole buffer each time to get
 the good performance even when the file is very large. 
 	
 < 0: highlight whole buffer.
->= 0: highlight from top line number reduce 30 * clighter_window_size to bottom 
-line number plug 30 * clighter_window_size of screen.
+>= 0: highlight from top line number reduce 100 * clighter_window_size to bottom 
+line number plug 100 * clighter_window_size of screen.
 
 Default: 1
 >

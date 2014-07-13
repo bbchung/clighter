@@ -4,7 +4,9 @@ import sys
 import clang.cindex
 from threading import Thread
 
-gTu=None # global translation unit
+gTranslationUnit = [None, 0]
+
+gWindow=[]
 if vim.eval("g:clighter_libclang_file") != "":
     clang.cindex.Config.set_library_file(vim.eval("g:clighter_libclang_file"))
 
@@ -13,7 +15,7 @@ def start_parsing():
     t.start()
 
 def do_parsing(options):
-    global gTu
+    global gTranslationUnit
 
     try:
         idx = clang.cindex.Index.create()
@@ -21,26 +23,41 @@ def do_parsing(options):
         vim.command('echohl WarningMsg | echomsg "Clighter runtime error: libclang error" | echohl None')
         return
 
-    gTu = idx.parse(vim.current.buffer.name, options, [(vim.current.buffer.name, "\n".join(vim.current.buffer))], options=clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    gTranslationUnit[0] = idx.parse(vim.current.buffer.name, options, [(vim.current.buffer.name, "\n".join(vim.current.buffer))], options=clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    gTranslationUnit[1] = 1
 
-def vim_matchadd(t, group):
+def vim_matchpos(t, group):
 	vim.command("call add(w:matched_list, matchaddpos('{0}', [[{1}, {2}, {3}], -1]))".format(group, t.location.line, t.location.column, len(t.spelling)));
     #vim.command("call add(w:matched_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format(group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
 
+
 def try_highlighting():
-    global gTu
-    if gTu is None:
+    global gWindow
+    global gTranslationUnit
+    if gTranslationUnit[0] is None:
         return
 
-    window_size =  int(vim.eval('g:clighter_window_size'))
+    w_top = int(vim.eval("line('w0')"))
+    w_bottom = int(vim.eval("line('w$')"))
+    
+    if gWindow != [] and w_top >= gWindow[0] and w_bottom <= gWindow[1] and gTranslationUnit[1] == 0:
+        return
+
+    b_bottom = int(vim.eval("line('$')"))
+    window_size = int(vim.eval('g:clighter_window_size'))
+
     if (window_size < 0):
-        vim_hl_tokens(gTu.cursor.get_tokens())
+        gWindow = [1, b_bottom]
+        vim_hl_tokens(gTranslationUnit[0].cursor.get_tokens())
     else:
-        file = clang.cindex.File.from_name(gTu, vim.current.buffer.name)
-        top = clang.cindex.SourceLocation.from_position(gTu, file, max(int(vim.eval("line('w0')")) - 30 * window_size, 1), 1)
-        bottom = clang.cindex.SourceLocation.from_position(gTu, file, min(int(vim.eval("line('w$')")) + 30 * window_size, int(vim.eval("line('$')"))), 1)
+        gWindow = [max(w_top - 100 * window_size, 1), min(w_bottom + 100 * window_size, b_bottom)]
+        file = clang.cindex.File.from_name(gTranslationUnit[0], vim.current.buffer.name)
+        top = clang.cindex.SourceLocation.from_position(gTranslationUnit[0], file, gWindow[0], 1)
+        bottom = clang.cindex.SourceLocation.from_position(gTranslationUnit[0], file, gWindow[1], 1)
         range = clang.cindex.SourceRange.from_locations(top, bottom)
-        vim_hl_tokens(gTu.get_tokens(extent=range))
+        vim_hl_tokens(gTranslationUnit[0].get_tokens(extent=range))
+
+    gTranslationUnit[1] = 0
 
 def vim_hl_tokens(tokens):
     first = 0
@@ -51,19 +68,19 @@ def vim_hl_tokens(tokens):
 
         if t.kind.value == 2:
             if t.cursor.kind == clang.cindex.CursorKind.MACRO_INSTANTIATION:
-                vim_matchadd(t, 'MacroInstantiation')
+                vim_matchpos(t, 'MacroInstantiation')
             elif t.cursor.kind == clang.cindex.CursorKind.STRUCT_DECL:
-                vim_matchadd(t, 'StructDecl')
+                vim_matchpos(t, 'StructDecl')
             elif t.cursor.kind == clang.cindex.CursorKind.CLASS_DECL:
-                vim_matchadd(t, 'ClassDecl')
+                vim_matchpos(t, 'ClassDecl')
             elif t.cursor.kind == clang.cindex.CursorKind.ENUM_DECL:
-                vim_matchadd(t, 'EnumDecl')
+                vim_matchpos(t, 'EnumDecl')
             elif t.cursor.kind == clang.cindex.CursorKind.ENUM_CONSTANT_DECL:
-                vim_matchadd(t, 'EnumConstantDecl')
+                vim_matchpos(t, 'EnumConstantDecl')
             elif t.cursor.kind == clang.cindex.CursorKind.TYPE_REF:
-                vim_matchadd(t, 'TypeRef')
+                vim_matchpos(t, 'TypeRef')
             elif t.cursor.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
-                vim_matchadd(t, 'DeclRefExpr')
+                vim_matchpos(t, 'DeclRefExpr')
 endpython
 
 
