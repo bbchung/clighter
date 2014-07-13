@@ -28,7 +28,7 @@ def vim_matchadd(t, group):
 
 def try_highlighting():
     global gTu
-    if gTu == None:
+    if gTu is None:
         return
 
     window_size =  int(vim.eval('g:clighter_window_size'))
