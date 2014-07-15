@@ -13,7 +13,7 @@ if !has('python')
 endif
 
 if exists('g:loaded_clighter')
-      finish
+  finish
 endif
 
 let g:clighter_autostart = get(g:, 'clighter_autostart', 1)

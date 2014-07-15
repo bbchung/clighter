@@ -65,7 +65,7 @@ call is efficient.
 from ctypes import *
 import collections
 
-import clang.enumerations
+from clang import enumerations
 
 # ctypes doesn't implicitly convert c_void_p to the appropriate wrapper
 # object. This is a problem, because it means that from_parameter will see an
@@ -272,7 +272,7 @@ class SourceRange(Structure):
             return False
         if other.file is None and self.start.file is None:
             pass
-        elif ( self.start.file.name != other.file.name or 
+        elif ( self.start.file.name != other.file.name or
                other.file.name != self.end.file.name):
             # same file name
             return False
@@ -387,7 +387,7 @@ class Diagnostic(object):
             self.severity, self.location, self.spelling)
 
     def from_param(self):
-      return self.ptr
+        return self.ptr
 
 class FixIt(object):
     """
@@ -748,7 +748,7 @@ CursorKind.LABEL_REF = CursorKind(48)
 # that has not yet been resolved to a specific function or function template.
 CursorKind.OVERLOADED_DECL_REF = CursorKind(49)
 
-# A reference to a variable that occurs in some non-expression 
+# A reference to a variable that occurs in some non-expression
 # context, e.g., a C++ lambda capture list.
 CursorKind.VARIABLE_REF = CursorKind(50)
 
@@ -937,7 +937,7 @@ CursorKind.SIZE_OF_PACK_EXPR = CursorKind(143)
 
 # Represents a C++ lambda expression that produces a local function
 # object.
-# 
+#
 #  \code
 #  void abssort(float *x, unsigned N) {
 #    std::sort(x, x + N,
@@ -947,7 +947,7 @@ CursorKind.SIZE_OF_PACK_EXPR = CursorKind(143)
 #  }
 #  \endcode
 CursorKind.LAMBDA_EXPR = CursorKind(144)
-  
+
 # Objective-c Boolean Literal.
 CursorKind.OBJ_BOOL_LITERAL_EXPR = CursorKind(145)
 
@@ -1331,7 +1331,7 @@ class Cursor(Structure):
     @property
     def referenced(self):
         """
-        For a cursor that is a reference, returns a cursor 
+        For a cursor that is a reference, returns a cursor
         representing the entity that it references.
         """
         if not hasattr(self, '_referenced'):
@@ -1343,7 +1343,7 @@ class Cursor(Structure):
     def brief_comment(self):
         """Returns the brief comment text associated with that Cursor"""
         return conf.lib.clang_Cursor_getBriefCommentText(self)
-    
+
     @property
     def raw_comment(self):
         """Returns the raw comment text associated with that Cursor"""
@@ -3398,7 +3398,7 @@ class Config:
         return True
 
 def register_enumerations():
-    for name, value in clang.enumerations.TokenKinds:
+    for name, value in enumerations.TokenKinds:
         TokenKind.register(value, name)
 
 conf = Config()
