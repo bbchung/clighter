@@ -1,6 +1,6 @@
-if v:version < 703
+if v:version < 704 || !exists("*matchaddpos")
     echohl WarningMsg |
-                \ echomsg "Clighter unavailable: requires Vim 7.3+" |
+                \ echomsg "Clighter unavailable: requires Vim 7.4p330+" |
                 \ echohl None
     finish
 endif
