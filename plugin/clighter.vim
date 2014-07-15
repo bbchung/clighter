@@ -37,6 +37,6 @@ hi link DeclRefExpr Identifier
 if g:clighter_autostart == 1
     augroup ClighterStart
         au!
-        au VimEnter *.[ch],*.[ch]pp call clighter#Enable()
+        au VimEnter *.[ch],*.[ch]pp,*.m call clighter#Enable()
     augroup END
 endif

@@ -43,6 +43,7 @@ def try_highlighting():
     if gWindow != [] and w_top >= gWindow[0] and w_bottom <= gWindow[1] and gTranslationUnit[1] == 0:
         return
 
+    gTranslationUnit[1] = 0
     b_bottom = int(vim.eval("line('$')"))
     window_size = int(vim.eval('g:clighter_window_size'))
 
@@ -57,7 +58,6 @@ def try_highlighting():
         range = clang.cindex.SourceRange.from_locations(top, bottom)
         vim_hl_tokens(gTranslationUnit[0].get_tokens(extent=range))
 
-    gTranslationUnit[1] = 0
 
 def vim_hl_tokens(tokens):
     first = 0
@@ -128,12 +128,12 @@ endf
 fun! clighter#Enable()
     augroup ClighterEnable
         au!
-        au BufEnter *.[ch],*.[ch]pp,*.objc call s:start_parsing()
-        au CursorHold *.[ch],*.[ch]pp,*.objc call s:start_parsing()
+        au BufEnter *.[ch],*.[ch]pp,*.m call s:start_parsing()
+        au CursorHold *.[ch],*.[ch]pp,*.m call s:start_parsing()
         if g:clighter_realtime == 1
-            au CursorMoved *.[ch],*.[ch]pp,*.objc call s:highlighting()
+            au CursorMoved *.[ch],*.[ch]pp,*.m call s:highlighting()
         else
-            au CursorHold *.[ch],*.[ch]pp,*.objc call s:highlighting()
+            au CursorHold *.[ch],*.[ch]pp,*.m call s:highlighting()
         endif
     augroup END
 
