@@ -65,7 +65,6 @@ call is efficient.
 from ctypes import *
 import collections
 
-# import enumerations
 from clang import enumerations
 
 # ctypes doesn't implicitly convert c_void_p to the appropriate wrapper
@@ -388,7 +387,7 @@ class Diagnostic(object):
             self.severity, self.location, self.spelling)
 
     def from_param(self):
-      return self.ptr
+        return self.ptr
 
 class FixIt(object):
     """
