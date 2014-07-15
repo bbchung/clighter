@@ -16,12 +16,6 @@ if exists('g:loaded_clighter')
   finish
 endif
 
-let s:plug = expand("<sfile>:p:h:h") . '/misc'
-let script = s:plug . '/clighter.py'
-execute 'python import sys'
-execute 'python sys.path.append("' . s:plug . '")'
-execute 'pyfile ' . script
-
 let g:clighter_autostart = get(g:, 'clighter_autostart', 1)
 let g:clighter_clang_options = get(g:, 'clighter_clang_options', [])
 let g:clighter_window_size = get(g:, 'clighter_window_size', 1)

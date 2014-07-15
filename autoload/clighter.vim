@@ -1,3 +1,9 @@
+let s:plug = expand("<sfile>:p:h:h") . '/misc'
+let s:script = s:plug . '/clighter.py'
+execute 'python import sys'
+execute 'python sys.path.append("' . s:plug . '")'
+execute 'pyfile ' . s:script
+
 fun! clighter#ToggleCursorHL()
     if exists('s:cursor_highlight_on') && s:cursor_highlight_on==1
         match none
@@ -37,7 +43,6 @@ fun! s:highlighting()
 endf
 
 fun! clighter#Enable()
-  echom "Enabling"
     augroup ClighterEnable
         au!
         au BufEnter *.[ch],*.[ch]pp,*.m call s:start_parsing()

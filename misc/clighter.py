@@ -10,7 +10,6 @@ if vim.eval("g:clighter_libclang_file") != "":
 
 
 def start_parsing():
-    print "Here"
     t = Thread(target=do_parsing, args=(vim.eval('g:clighter_clang_options'),))
     t.start()
 
