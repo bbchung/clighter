@@ -1,8 +1,7 @@
 let s:plug = expand("<sfile>:p:h:h") . '/misc'
-let s:script = s:plug . '/clighter.py'
 execute 'python import sys'
 execute 'python sys.path.append("' . s:plug . '")'
-execute 'pyfile ' . s:script
+execute 'python import clighter'
 
 let w:match_dict = {'semantic':[], 'def':[]}
 
@@ -22,11 +21,11 @@ fun! clighter#ToggleCursorHL()
 endf
 
 fun! s:start_parsing()
-  python start_parsing()
+  python clighter.start_parsing()
 endf
 
 fun! s:try_match_def()
-  python try_match_def(int(vim.eval('line(".")')), int(vim.eval('col(".")')))
+  python clighter.try_match_def(int(vim.eval('line(".")')), int(vim.eval('col(".")')))
 endf
 
 fun! s:clear_match(type)
@@ -38,7 +37,7 @@ fun! s:clear_match(type)
 endf
 
 fun! s:try_highlight_semantic()
-  python try_highlight_semantic()
+  python clighter.try_highlight_semantic()
 endf
 
 fun! clighter#Enable()
