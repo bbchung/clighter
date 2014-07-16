@@ -4,6 +4,8 @@ execute 'python import sys'
 execute 'python sys.path.append("' . s:plug . '")'
 execute 'pyfile ' . s:script
 
+let w:match_dict = {'semantic':[], 'def':[]}
+
 fun! clighter#ToggleCursorHL()
     if exists('s:cursor_highlight_on') && s:cursor_highlight_on==1
         match none
@@ -23,23 +25,20 @@ fun! s:start_parsing()
   python start_parsing()
 endf
 
-fun! s:clear_match()
-  if !exists('w:matched_list')
-    return
-  endif
-
-	for i in w:matched_list
-		call matchdelete(i)
-	endfor
-	let w:matched_list=[]
+fun! s:try_match_def()
+  python try_match_def(int(vim.eval('line(".")')), int(vim.eval('col(".")')))
 endf
 
-fun! s:highlighting()
-  if !exists('w:matched_list')
-    let w:matched_list = []
-  endif
+fun! s:clear_match(type)
+    for i in w:match_dict[a:type]
+        call matchdelete(i)
+    endfor
 
-  python try_highlighting()
+    let w:match_dict[a:type] = []
+endf
+
+fun! s:try_highlight_semantic()
+  python try_highlight_semantic()
 endf
 
 fun! clighter#Enable()
@@ -47,11 +46,14 @@ fun! clighter#Enable()
         au!
         au BufEnter *.[ch],*.[ch]pp,*.m call s:start_parsing()
         au CursorHold *.[ch],*.[ch]pp,*.m call s:start_parsing()
+        au CursorHold *.[ch],*.[ch]pp,*.m call s:try_match_def()
         if g:clighter_realtime == 1
-            au CursorMoved *.[ch],*.[ch]pp,*.m call s:highlighting()
+            au CursorMoved *.[ch],*.[ch]pp,*.m call s:try_highlight_semantic()
         else
-            au CursorHold *.[ch],*.[ch]pp,*.m call s:highlighting()
+            au CursorHold *.[ch],*.[ch]pp,*.m call s:try_highlight_semantic()
         endif
+        
+        au CursorMoved *.[ch],*.[ch]pp,*.m call s:clear_match('def')
     augroup END
 
     call s:start_parsing()
@@ -59,5 +61,6 @@ endf
 
 fun! clighter#Disable()
     au! ClighterEnable
-    call s:clear_match()
+    call s:clear_match('semantic')
+    call s:clear_match('def')
 endf
