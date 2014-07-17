@@ -80,7 +80,7 @@ def do_highlight(window_tokens, decl_ref_cursor):
             vim.command('call s:clear_match("semantic")')
             need_clear_semantic = 0
         if t.kind.value == 2:
-            if t.cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
+            if t.cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
                 vim_match_add('semantic', 'MacroInstantiation', t.location.line, t.location.column, len(t.spelling))
             elif t.cursor.kind == cindex.CursorKind.STRUCT_DECL:
                 vim_match_add('semantic', 'StructDecl', t.location.line, t.location.column, len(t.spelling))
@@ -112,7 +112,7 @@ def do_highlight(window_tokens, decl_ref_cursor):
     """
     if decl_ref_cursor is not None:
         def_cursor = decl_ref_cursor.get_definition()
-        if def_cursor is not None:
+        if def_cursor is not None and def_cursor.spelling is not None:
             vim_match_add('cursor_decl_ref', 'CursorDeclRef', def_cursor.location.line, def_cursor.location.column, len(def_cursor.spelling))
     
 
