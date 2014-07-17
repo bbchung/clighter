@@ -3,13 +3,13 @@ execute 'python import sys'
 execute 'python sys.path.append("' . s:plug . '")'
 execute 'python import clighter'
 
-let w:highlight_dict = {'semantic':[], 'cursor_decl_ref':[]}
+let w:highlight_dict = {'semantic':[], 'cursor_def_ref':[]}
 let s:cursor_decl_ref_hl_on = 1
 
 fun! clighter#ToggleCursorHL()
     if s:cursor_decl_ref_hl_on==1
         let s:cursor_decl_ref_hl_on=0
-        call s:clear_match('cursor_decl_ref')
+        call s:clear_match('cursor_def_ref')
     else
         let s:cursor_decl_ref_hl_on=1
         "augroup CursorHighlight
@@ -54,5 +54,5 @@ endf
 fun! clighter#Disable()
     au! ClighterEnable
     call s:clear_match('semantic')
-    call s:clear_match('cursor_decl_ref')
+    call s:clear_match('cursor_def_ref')
 endf
