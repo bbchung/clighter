@@ -67,7 +67,7 @@ def do_highlight(window_tokens, decl_ref_cursor):
     ref_spelling = None
     
     if decl_ref_cursor is not None:
-        if decl_ref_cursor.kind == cindex.CursorKind.DECL_REF_EXPR or decl_ref_cursor.kind == cindex.CursorKind.MEMBER_REF_EXPR:
+        if decl_ref_cursor.kind == cindex.CursorKind.DECL_REF_EXPR or decl_ref_cursor.kind == cindex.CursorKind.MEMBER_REF_EXPR or decl_ref_cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
             for t in decl_ref_cursor.get_tokens():
                 if t.kind.value == 2:
                     ref_spelling = t.spelling
@@ -105,16 +105,18 @@ def do_highlight(window_tokens, decl_ref_cursor):
 
             """ Do reference highlighting'
             """
-            if ref_spelling is not None and t.spelling == ref_spelling and (t.cursor.kind == cindex.CursorKind.DECL_REF_EXPR or t.cursor.kind == cindex.CursorKind.MEMBER_REF_EXPR):
+            if ref_spelling is not None and t.spelling == ref_spelling and (t.cursor.kind == cindex.CursorKind.DECL_REF_EXPR or t.cursor.kind == cindex.CursorKind.MEMBER_REF_EXPR or t.cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION):
                 vim_match_add('cursor_decl_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling))
 
     """ Do declaring highlighting'
     """
     if decl_ref_cursor is not None:
         def_cursor = decl_ref_cursor.get_definition()
-        if def_cursor is not None and def_cursor.spelling is not None:
-            vim_match_add('cursor_decl_ref', 'CursorDeclRef', def_cursor.location.line, def_cursor.location.column, len(def_cursor.spelling))
-    
+        if def_cursor is not None:
+            for t in def_cursor.get_tokens():
+                if t.kind.value == 2:
+                    vim_match_add('cursor_decl_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling))
+
 
 def vim_match_add(type, group, line, col, len):
     vim.command("call add(w:highlight_dict['{0}'], matchaddpos('{1}', [[{2}, {3}, {4}]], -1))".format(type, group, line, col, len))
