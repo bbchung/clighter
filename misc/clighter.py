@@ -65,6 +65,7 @@ def try_highlight(vim_cursor_line, vim_cursor_col):
 def do_highlight(window_tokens, decl_ref_cursor):
     vim.command('call s:clear_match("cursor_decl_ref")')
     ref_spelling = None
+    
     if decl_ref_cursor is not None:
         if decl_ref_cursor.kind == cindex.CursorKind.DECL_REF_EXPR:
             for t in decl_ref_cursor.get_tokens():
@@ -93,9 +94,8 @@ def do_highlight(window_tokens, decl_ref_cursor):
             elif t.cursor.kind == cindex.CursorKind.TYPE_REF:
                 vim_match_add('semantic', 'TypeRef', t.location.line, t.location.column, len(t.spelling))
             elif t.cursor.kind == cindex.CursorKind.DECL_REF_EXPR:
-                vim_match_add('semantic', 'DeclRefExpr', t.location.line, t.location.column, len(t.spelling))
-            elif t.cursor.kind.is_reference():
-                vim_match_add('semantic', 'DeclRefExpr', t.location.line, t.location.column, len(t.spelling))
+                if window_tokens.next().cursor.kind != cindex.CursorKind.CALL_EXPR:
+                    vim_match_add('semantic', 'DeclRefExpr', t.location.line, t.location.column, len(t.spelling))
 
             """ Do reference highlighting'
             """
