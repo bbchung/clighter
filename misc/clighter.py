@@ -67,11 +67,10 @@ def do_highlight(window_tokens, decl_ref_cursor):
     ref_spelling = None
     
     if decl_ref_cursor is not None:
-        if decl_ref_cursor.kind == cindex.CursorKind.DECL_REF_EXPR:
+        if decl_ref_cursor.kind == cindex.CursorKind.DECL_REF_EXPR or decl_ref_cursor.kind == cindex.CursorKind.MEMBER_REF_EXPR:
             for t in decl_ref_cursor.get_tokens():
                 if t.kind.value == 2:
                     ref_spelling = t.spelling
-                    break
 
     need_clear_semantic = 1
     for t in window_tokens:
@@ -99,7 +98,7 @@ def do_highlight(window_tokens, decl_ref_cursor):
 
             """ Do reference highlighting'
             """
-            if ref_spelling is not None and t.spelling == ref_spelling and t.cursor.kind == cindex.CursorKind.DECL_REF_EXPR:
+            if ref_spelling is not None and t.spelling == ref_spelling and (t.cursor.kind == cindex.CursorKind.DECL_REF_EXPR or t.cursor.kind == cindex.CursorKind.MEMBER_REF_EXPR):
                 vim_match_add('cursor_decl_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling))
 
     """ Do declaring highlighting'
