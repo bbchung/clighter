@@ -34,7 +34,7 @@ hi link EnumDecl Type
 hi link EnumConstantDecl Identifier
 hi link DeclRefExpr Identifier
 
-hi link CursorDefRef Search
+hi link CursorDeclRef Search
 
 if g:clighter_autostart == 1
     augroup ClighterStart

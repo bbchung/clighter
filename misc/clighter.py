@@ -28,7 +28,7 @@ def do_parsing(options):
     gTranslationUnit[1] = 1
 
 
-def try_highlight(mouse_line, mouse_col):
+def try_highlight(vim_cursor_line, vim_cursor_col):
     global gWindow
     global gTranslationUnit
     if gTranslationUnit[0] is None:
@@ -44,7 +44,6 @@ def try_highlight(mouse_line, mouse_col):
     b_bottom = int(vim.eval("line('$')"))
     window_size = int(vim.eval('g:clighter_window_size'))
     file = cindex.File.from_name(gTranslationUnit[0], vim.current.buffer.name)
-    mouse_cursor = cindex.Cursor.from_location(gTranslationUnit[0], cindex.SourceLocation.from_position(gTranslationUnit[0], file, mouse_line, mouse_col))
 
     if (window_size < 0):
         gWindow = []
@@ -56,17 +55,22 @@ def try_highlight(mouse_line, mouse_col):
         range = cindex.SourceRange.from_locations(top, bottom)
         window_tokens = gTranslationUnit[0].get_tokens(extent=range)
 
-    do_highlight(window_tokens, mouse_cursor)
+    decl_ref_cursor = None
+    if int(vim.eval("s:cursor_decl_ref_hl_on")) == 1:
+        decl_ref_cursor = cindex.Cursor.from_location(gTranslationUnit[0], cindex.SourceLocation.from_position(gTranslationUnit[0], file, vim_cursor_line, vim_cursor_col)) # cusor under vim-cursor
+
+    do_highlight(window_tokens, decl_ref_cursor)
 
 
-def do_highlight(window_tokens, mouse_cursor):
-    vim.command('call s:clear_match("def_ref")')
+def do_highlight(window_tokens, decl_ref_cursor):
+    vim.command('call s:clear_match("cursor_decl_ref")')
     ref_spelling = None
-    if mouse_cursor.kind == cindex.CursorKind.DECL_REF_EXPR:
-        for t in mouse_cursor.get_tokens():
-            if t.kind.value == 2:
-                ref_spelling = t.spelling
-                break
+    if decl_ref_cursor is not None:
+        if decl_ref_cursor.kind == cindex.CursorKind.DECL_REF_EXPR:
+            for t in decl_ref_cursor.get_tokens():
+                if t.kind.value == 2:
+                    ref_spelling = t.spelling
+                    break
 
     need_clear_semantic = 1
     for t in window_tokens:
@@ -96,13 +100,14 @@ def do_highlight(window_tokens, mouse_cursor):
             """ Do reference highlighting'
             """
             if ref_spelling is not None and t.spelling == ref_spelling and t.cursor.kind == cindex.CursorKind.DECL_REF_EXPR:
-                vim_match_add('def_ref', 'CursorDefRef', t.location.line, t.location.column, len(t.spelling))
+                vim_match_add('cursor_decl_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling))
 
     """ Do declaring highlighting'
     """
-    def_cursor = mouse_cursor.get_definition()
-    if def_cursor is not None:
-        vim_match_add('def_ref', 'CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(def_cursor.spelling))
+    if decl_ref_cursor is not None:
+        def_cursor = decl_ref_cursor.get_definition()
+        if def_cursor is not None:
+            vim_match_add('cursor_decl_ref', 'CursorDeclRef', def_cursor.location.line, def_cursor.location.column, len(def_cursor.spelling))
     
 
 def vim_match_add(type, group, line, col, len):

@@ -3,20 +3,20 @@ execute 'python import sys'
 execute 'python sys.path.append("' . s:plug . '")'
 execute 'python import clighter'
 
-let w:highlight_dict = {'semantic':[], 'def_ref':[]}
+let w:highlight_dict = {'semantic':[], 'cursor_decl_ref':[]}
+let s:cursor_decl_ref_hl_on = 1
 
 fun! clighter#ToggleCursorHL()
-    if exists('s:cursor_highlight_on') && s:cursor_highlight_on==1
-        match none
-        au! CursorHighlight
-        let s:cursor_highlight_on=0
+    if s:cursor_decl_ref_hl_on==1
+        let s:cursor_decl_ref_hl_on=0
+        call s:clear_match('cursor_decl_ref')
     else
-        augroup CursorHighlight
-            au CursorHold * exe printf('match IncSearch /\V\<%s\>/', escape(expand('<cword>'), '/\'))
-            au CursorMoved * match none
-            "au CursorHold * let @/ = '\V\<'.escape(expand('<cword>'), '\').'\>'
-        augroup END
-        let s:cursor_highlight_on=1
+        let s:cursor_decl_ref_hl_on=1
+        "augroup CursorHighlight
+            "au CursorHold * exe printf('match IncSearch /\V\<%s\>/', escape(expand('<cword>'), '/\'))
+            "au CursorMoved * match none
+            ""au CursorHold * let @/ = '\V\<'.escape(expand('<cword>'), '\').'\>'
+        "augroup END
     endif
 endf
 
@@ -54,5 +54,5 @@ endf
 fun! clighter#Disable()
     au! ClighterEnable
     call s:clear_match('semantic')
-    call s:clear_match('def_ref')
+    call s:clear_match('cursor_decl_ref')
 endf
