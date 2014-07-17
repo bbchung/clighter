@@ -93,7 +93,14 @@ def do_highlight(window_tokens, decl_ref_cursor):
             elif t.cursor.kind == cindex.CursorKind.TYPE_REF:
                 vim_match_add('semantic', 'TypeRef', t.location.line, t.location.column, len(t.spelling))
             elif t.cursor.kind == cindex.CursorKind.DECL_REF_EXPR:
-                if window_tokens.next().cursor.kind != cindex.CursorKind.CALL_EXPR:
+                is_call = 0
+                try:
+                    if window_tokens.next().cursor.kind == cindex.CursorKind.CALL_EXPR:
+                        is_call = 1
+                except:
+                    pass
+                    
+                if is_call == 0:
                     vim_match_add('semantic', 'DeclRefExpr', t.location.line, t.location.column, len(t.spelling))
 
             """ Do reference highlighting'
