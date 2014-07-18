@@ -3,10 +3,6 @@ execute 'python import sys'
 execute 'python sys.path.append("' . s:plug . '")'
 execute 'python import clighter'
 
-<<<<<<< HEAD
-=======
-let w:highlight_dict = {'semantic':[], 'cursor_def_ref':[]}
->>>>>>> 78d30ed73ae5766b6fcd2daabe00c2d15964d661
 let s:cursor_decl_ref_hl_on = 1
 
 fun! clighter#ToggleCursorHL()
@@ -36,7 +32,7 @@ fun! s:clear_match(type)
 endf
 
 fun! s:try_highlight()
-    let b:highlight_dict = get(b:, 'highlight_dict', {'semantic':[], 'cursor_decl_ref':[]})
+    let b:highlight_dict = get(b:, 'highlight_dict', {'semantic':[], 'cursor_def_ref':[]})
     python clighter.try_highlight(int(vim.eval('line(".")')), int(vim.eval('col(".")')))
 endf
 
