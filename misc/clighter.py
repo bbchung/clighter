@@ -76,7 +76,7 @@ def do_highlight(tu, window_tokens, decl_ref_cursor, file):
 
         """ Do declaring highlighting'
         """
-        if decl_ref_cursor_def is not None:
+        if decl_ref_cursor_def is not None and decl_ref_cursor_def.location.file.name == decl_ref_cursor.location.file.name:
             for t in decl_ref_cursor_def.get_tokens():
                 if t.kind.value == 2:
                     vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
