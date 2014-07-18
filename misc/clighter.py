@@ -57,27 +57,27 @@ def try_highlight(vim_cursor_line, vim_cursor_col):
         range = cindex.SourceRange.from_locations(top, bottom)
         window_tokens = tu.get_tokens(extent=range)
 
-    decl_ref_cursor = None
+    vim_cursor = None
     if int(vim.eval("s:cursor_decl_ref_hl_on")) == 1:
-        decl_ref_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, vim_cursor_line, vim_cursor_col)) # cusor under vim-cursor
+        vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, vim_cursor_line, vim_cursor_col)) # cusor under vim-cursor
 
-    do_highlight(tu, window_tokens, decl_ref_cursor, file)
+    do_highlight(tu, window_tokens, vim_cursor, file)
 
 
-def do_highlight(tu, window_tokens, decl_ref_cursor, file):
+def do_highlight(tu, window_tokens, vim_cursor, file):
     vim.command('call s:clear_match("cursor_def_ref")')
     ref_spelling = None
     
     #print decl_ref_cursor.kind
 
-    decl_ref_cursor_def = None
-    if decl_ref_cursor is not None and (decl_ref_cursor.kind == cindex.CursorKind.DECL_REF_EXPR or decl_ref_cursor.kind == cindex.CursorKind.MEMBER_REF_EXPR or decl_ref_cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION):
-        decl_ref_cursor_def =decl_ref_cursor.get_definition()
+    def_cursor = None
+    if vim_cursor is not None:
+        def_cursor =vim_cursor.get_definition()
 
         """ Do declaring highlighting'
         """
-        if decl_ref_cursor_def is not None and decl_ref_cursor_def.location.file.name == decl_ref_cursor.location.file.name:
-            for t in decl_ref_cursor_def.get_tokens():
+        if def_cursor is not None and def_cursor.location.file.name == vim_cursor.location.file.name:
+            for t in def_cursor.get_tokens():
                 if t.kind.value == 2:
                     vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
                     break
@@ -115,12 +115,11 @@ def do_highlight(tu, window_tokens, decl_ref_cursor, file):
 
             """ Do reference highlighting'
             """
-            if decl_ref_cursor_def is not None:
-                t_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, t.location.line, t.location.column)) # cusor under vim-cursor
-                if t_cursor is not None:
-                    t_cursor_def = t_cursor.get_definition()
-                    if t_cursor_def is not None and t_cursor_def == decl_ref_cursor_def and (t_cursor.kind.is_reference() or t_cursor.kind.is_expression()):
-                        vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
+            if def_cursor is not None:
+                t_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, t.location.line, t.location.column))
+                t_def_cursor = t_cursor.get_definition()
+                if t_def_cursor is not None and t_def_cursor == def_cursor:
+                    vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
 
 
 def vim_match_add(type, group, line, col, len, priority):
