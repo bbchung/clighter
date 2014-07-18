@@ -33,7 +33,7 @@ endf
 
 fun! s:try_highlight()
     let b:highlight_dict = get(b:, 'highlight_dict', {'semantic':[], 'cursor_def_ref':[]})
-    python clighter.try_highlight(int(vim.eval('line(".")')), int(vim.eval('col(".")')))
+    python clighter.try_highlight()
 endf
 
 fun! clighter#Enable()

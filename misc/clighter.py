@@ -28,7 +28,7 @@ def do_parsing(options):
     gTranslationUnit[1] = 1
 
 
-def try_highlight(vim_cursor_line, vim_cursor_col):
+def try_highlight():
     global gWindow
     global gTranslationUnit
     if gTranslationUnit[0] is None:
@@ -59,12 +59,13 @@ def try_highlight(vim_cursor_line, vim_cursor_col):
 
     vim_cursor = None
     if int(vim.eval("s:cursor_decl_ref_hl_on")) == 1:
-        vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, vim_cursor_line, vim_cursor_col)) # cusor under vim-cursor
+        (row, col) = vim.current.window.cursor
+        vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, row, col + 1)) # cusor under vim-cursor
 
     do_highlight(tu, window_tokens, vim_cursor, file)
 
 
-def do_highlight(tu, window_tokens, vim_cursor, file):
+def do_highlight(tu, window_tokens, vim_cursor, curr_file):
     vim.command('call s:clear_match("cursor_def_ref")')
     ref_spelling = None
     
@@ -116,7 +117,7 @@ def do_highlight(tu, window_tokens, vim_cursor, file):
             """ Do reference highlighting'
             """
             if def_cursor is not None:
-                t_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, t.location.line, t.location.column))
+                t_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, curr_file, t.location.line, t.location.column))
                 t_def_cursor = t_cursor.get_definition()
                 if t_def_cursor is not None and t_def_cursor == def_cursor:
                     vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
