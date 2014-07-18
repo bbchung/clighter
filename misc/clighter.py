@@ -117,5 +117,5 @@ def do_highlight(window_tokens, decl_ref_cursor):
     
 
 def vim_match_add(type, group, line, col, len):
-    vim.command("call add(w:highlight_dict['{0}'], matchaddpos('{1}', [[{2}, {3}, {4}]], -1))".format(type, group, line, col, len))
-    # vim.command("call add(w:semantic_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format(group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
+    vim.command("call add(b:highlight_dict['{0}'], matchaddpos('{1}', [[{2}, {3}, {4}]], -1))".format(type, group, line, col, len))
+    # vim.command("call add(b:semantic_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format(group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
