@@ -62,6 +62,7 @@ def try_highlight():
         (row, col) = vim.current.window.cursor
         vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, row, col + 1)) # cusor under vim-cursor
 
+    vim.command('call s:clear_match("cursor_def_ref")')
     def_cursor = None
     if vim_cursor is not None:
         def_cursor = vim_cursor.get_definition()
@@ -73,13 +74,13 @@ def try_highlight():
                 vim_match_add('cursor_def_ref', 'CursorDeclRef', def_cursor.location.line, def_cursor.location.column, len(def_cursor.spelling), -1)
             if def_cursor.kind.is_preprocessing():
                 t = def_cursor.get_tokens().next()
+                print t.spelling
                 vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
 
     highlight_window(tu, window_tokens, def_cursor, file)
 
 
 def highlight_window(tu, window_tokens, def_cursor, curr_file):
-    vim.command('call s:clear_match("cursor_def_ref")')
     ref_spelling = None
     
     #print decl_ref_cursor.kind
