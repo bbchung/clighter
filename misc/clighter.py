@@ -43,7 +43,7 @@ def try_highlight():
     tu = gTranslationUnit[0]
     gTranslationUnit[1] = 0
 
-    b_bottom = int(vim.eval("line('$')"))
+    print vim.current.window.row
     window_size = int(vim.eval('g:clighter_window_size'))
     file = cindex.File.from_name(tu, vim.current.buffer.name)
 
@@ -51,7 +51,7 @@ def try_highlight():
         gWindow = []
         window_tokens = tu.cursor.get_tokens()
     else:
-        gWindow = [max(w_top - 100 * window_size, 1), min(w_bottom + 100 * window_size, b_bottom)]
+        gWindow = [max(w_top - 100 * window_size, 1), min(w_bottom + 100 * window_size, len(vim.current.buffer))]
         top = cindex.SourceLocation.from_position(tu, file, gWindow[0], 1)
         bottom = cindex.SourceLocation.from_position(tu, file, gWindow[1], 1)
         range = cindex.SourceRange.from_locations(top, bottom)
@@ -122,5 +122,5 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file):
 
 
 def vim_match_add(type, group, line, col, len, priority):
-    vim.command("call add(b:highlight_dict['{0}'], matchaddpos('{1}', [[{2}, {3}, {4}]], {5}))".format(type, group, line, col, len, priority))
+    vim.command("call add(w:highlight_dict['{0}'], matchaddpos('{1}', [[{2}, {3}, {4}]], {5}))".format(type, group, line, col, len, priority))
     # vim.command("call add(w:semantic_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format(group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));

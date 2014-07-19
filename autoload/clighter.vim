@@ -25,15 +25,15 @@ fun! s:start_parsing()
 endf
 
 fun! s:clear_match(type)
-    for i in b:highlight_dict[a:type]
+    for i in w:highlight_dict[a:type]
         call matchdelete(i)
     endfor
 
-    let b:highlight_dict[a:type] = []
+    let w:highlight_dict[a:type] = []
 endf
 
 fun! s:try_highlight()
-    let b:highlight_dict = get(b:, 'highlight_dict', {'semantic':[], 'cursor_def_ref':[]})
+    let w:highlight_dict = get(w:, 'highlight_dict', {'semantic':[], 'cursor_def_ref':[]})
     py clighter.try_highlight()
 endf
 
