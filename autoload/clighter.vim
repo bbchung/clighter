@@ -1,8 +1,4 @@
 let s:plug = expand("<sfile>:p:h:h") . '/misc'
-execute 'python import sys'
-execute 'python sys.path.append("' . s:plug . '")'
-execute 'python import clighter'
-
 let s:cursor_decl_ref_hl_on = 1
 
 fun! clighter#ToggleCursorHL()
@@ -20,7 +16,7 @@ fun! clighter#ToggleCursorHL()
 endf
 
 fun! s:start_parsing()
-    python clighter.start_parsing()
+    py clighter.start_parsing()
 endf
 
 fun! s:clear_match(type)
@@ -33,10 +29,14 @@ endf
 
 fun! s:try_highlight()
     let b:highlight_dict = get(b:, 'highlight_dict', {'semantic':[], 'cursor_def_ref':[]})
-    python clighter.try_highlight()
+    py clighter.try_highlight()
 endf
 
 fun! clighter#Enable()
+    py  import sys
+    execute 'py sys.path.append("' . s:plug . '")'
+    execute 'py import clighter'
+
     augroup ClighterEnable
         au!
         au BufEnter *.[ch],*.[ch]pp,*.m call s:start_parsing()
