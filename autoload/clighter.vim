@@ -1,4 +1,9 @@
-let s:plug = expand("<sfile>:p:h:h") . '/misc'
+let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
+py import sys
+py import vim
+exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
+py import clighter
+
 let s:cursor_decl_ref_hl_on = 1
 
 fun! clighter#ToggleCursorHL()
@@ -33,10 +38,6 @@ fun! s:try_highlight()
 endf
 
 fun! clighter#Enable()
-    py  import sys
-    execute 'py sys.path.append("' . s:plug . '")'
-    execute 'py import clighter'
-
     augroup ClighterEnable
         au!
         au BufEnter *.[ch],*.[ch]pp,*.m call s:start_parsing()
