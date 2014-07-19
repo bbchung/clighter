@@ -136,9 +136,9 @@ Clighter defines the following syntax group corresponding to CursorKing of Clang
 	hi link EnumConstantDecl Identifier
 	```
 
-* DeclRefExpr
+* EnumDeclRefExpr
 	```vim
-	hi link DeclRefExpr Identifier
+	hi link EnumDeclRefExpr Identifier
 	```
 
 You can customize these colors in your colorscheme, for example:

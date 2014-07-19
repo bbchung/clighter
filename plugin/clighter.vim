@@ -32,8 +32,8 @@ hi link StructDecl Type
 hi link ClassDecl Type
 hi link EnumDecl Type
 hi link EnumConstantDecl Identifier
-hi link DeclRefExpr Identifier
 
+hi link EnumDeclRefExpr Identifier
 hi link CursorDeclRef Search
 
 if g:clighter_autostart == 1

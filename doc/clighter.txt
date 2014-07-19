@@ -171,9 +171,9 @@ EnumConstantDecl~
 	hi link EnumConstantDecl Identifier
 >
 
-DeclRefExpr~
+EnumDeclRefExpr~
 >
-	hi link DeclRefExpr Identifier
+	hi link EnumDeclRefExpr Identifier
 >
 
 You can customize these colors in your colorscheme, for example:

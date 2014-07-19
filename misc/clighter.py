@@ -111,7 +111,7 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file):
             elif t_tu_cursor.kind == cindex.CursorKind.TYPE_REF:
                 vim_match_add('semantic', 'TypeRef', t.location.line, t.location.column, len(t.spelling), -2)
             elif t_tu_cursor.kind == cindex.CursorKind.DECL_REF_EXPR and t_tu_cursor.type.kind == cindex.TypeKind.ENUM:
-                vim_match_add('semantic', 'DeclRefExpr', t.location.line, t.location.column, len(t.spelling), -2)
+                vim_match_add('semantic', 'EnumDeclRefExpr', t.location.line, t.location.column, len(t.spelling), -2)
 
             """ Do reference highlighting'
             """
