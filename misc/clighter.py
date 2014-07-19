@@ -62,26 +62,27 @@ def try_highlight():
         (row, col) = vim.current.window.cursor
         vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, row, col + 1)) # cusor under vim-cursor
 
-    do_highlight(tu, window_tokens, vim_cursor, file)
-
-
-def do_highlight(tu, window_tokens, vim_cursor, curr_file):
-    vim.command('call s:clear_match("cursor_def_ref")')
-    ref_spelling = None
-    
-    #print decl_ref_cursor.kind
-
     def_cursor = None
     if vim_cursor is not None:
-        def_cursor =vim_cursor.get_definition()
+        def_cursor = vim_cursor.get_definition()
 
         """ Do declaring highlighting'
         """
         if def_cursor is not None and def_cursor.location.file.name == vim_cursor.location.file.name:
-            for t in def_cursor.get_tokens():
-                if t.kind.value == 2:
-                    vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
-                    break
+            if def_cursor.kind.is_declaration():
+                vim_match_add('cursor_def_ref', 'CursorDeclRef', def_cursor.location.line, def_cursor.location.column, len(def_cursor.spelling), -1)
+            if def_cursor.kind.is_preprocessing():
+                t = def_cursor.get_tokens().next()
+                vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
+
+    highlight_window(tu, window_tokens, def_cursor, file)
+
+
+def highlight_window(tu, window_tokens, def_cursor, curr_file):
+    vim.command('call s:clear_match("cursor_def_ref")')
+    ref_spelling = None
+    
+    #print decl_ref_cursor.kind
 
     need_clear_semantic = 1
     for t in window_tokens:
@@ -91,34 +92,27 @@ def do_highlight(tu, window_tokens, vim_cursor, curr_file):
             vim.command('call s:clear_match("semantic")')
             need_clear_semantic = 0
         if t.kind.value == 2:
-            if t.cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
+            t_tu_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, curr_file, t.location.line, t.location.column))
+
+            if t_tu_cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
                 vim_match_add('semantic', 'MacroInstantiation', t.location.line, t.location.column, len(t.spelling), -2)
-            elif t.cursor.kind == cindex.CursorKind.STRUCT_DECL:
+            elif t_tu_cursor.kind == cindex.CursorKind.STRUCT_DECL:
                 vim_match_add('semantic', 'StructDecl', t.location.line, t.location.column, len(t.spelling), -2)
-            elif t.cursor.kind == cindex.CursorKind.CLASS_DECL:
+            elif t_tu_cursor.kind == cindex.CursorKind.CLASS_DECL:
                 vim_match_add('semantic', 'ClassDecl', t.location.line, t.location.column, len(t.spelling), -2)
-            elif t.cursor.kind == cindex.CursorKind.ENUM_DECL:
+            elif t_tu_cursor.kind == cindex.CursorKind.ENUM_DECL:
                 vim_match_add('semantic', 'EnumDecl', t.location.line, t.location.column, len(t.spelling), -2)
-            elif t.cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
+            elif t_tu_cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
                 vim_match_add('semantic', 'EnumConstantDecl', t.location.line, t.location.column, len(t.spelling), -2)
-            elif t.cursor.kind == cindex.CursorKind.TYPE_REF:
+            elif t_tu_cursor.kind == cindex.CursorKind.TYPE_REF:
                 vim_match_add('semantic', 'TypeRef', t.location.line, t.location.column, len(t.spelling), -2)
-            elif t.cursor.kind == cindex.CursorKind.DECL_REF_EXPR:
-                is_call = 0
-                try:
-                    if window_tokens.next().cursor.kind == cindex.CursorKind.CALL_EXPR:
-                        is_call = 1
-                except:
-                    pass
-                    
-                if is_call == 0:
-                    vim_match_add('semantic', 'DeclRefExpr', t.location.line, t.location.column, len(t.spelling), -2)
+            elif t_tu_cursor.kind == cindex.CursorKind.DECL_REF_EXPR and t_tu_cursor.type.kind == cindex.TypeKind.ENUM:
+                vim_match_add('semantic', 'DeclRefExpr', t.location.line, t.location.column, len(t.spelling), -2)
 
             """ Do reference highlighting'
             """
             if def_cursor is not None:
-                t_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, curr_file, t.location.line, t.location.column))
-                t_def_cursor = t_cursor.get_definition()
+                t_def_cursor = t_tu_cursor.get_definition()
                 if t_def_cursor is not None and t_def_cursor == def_cursor:
                     vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
 
