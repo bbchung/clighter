@@ -1,6 +1,6 @@
 import vim
 from clang import cindex
-from threading import Thread, Lock
+from threading import Thread
 
 gTu = [None, 0]
 
