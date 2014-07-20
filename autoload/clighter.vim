@@ -34,6 +34,7 @@ endf
 
 fun! s:try_highlight()
     let w:highlight_dict = get(w:, 'highlight_dict', {'semantic':[], 'cursor_def_ref':[]})
+    let w:window = get(w:, 'window', [])
     py clighter.try_highlight()
 endf
 
