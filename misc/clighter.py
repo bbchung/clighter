@@ -2,8 +2,7 @@ import vim
 from clang import cindex
 from threading import Thread, Lock
 
-gTu = None
-gTuMutex = Lock()
+gTu = [None, 0]
 
 
 if vim.eval("g:clighter_libclang_file") != "":
@@ -25,37 +24,33 @@ def do_parsing(options):
         vim.command('echohl WarningMsg | echomsg "Clighter runtime error: libclang error" | echohl None')
         return
 
-    gTuMutex.acquire()
-    gTu = idx.parse(vim.current.buffer.name, options, [(vim.current.buffer.name, "\n".join(vim.current.buffer))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-    gTuMutex.release()
+    gTu[0] = idx.parse(vim.current.buffer.name, options, [(vim.current.buffer.name, "\n".join(vim.current.buffer))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    gTu[1] = 1
 
 
 def try_highlight():
     global gTu
     global mutext
 
-    gTuMutex.acquire()
-    curr_tu = gTu
+    curr_tu = gTu[0]
     if curr_tu is None:
-        gTuMutex.release()
         return
 
     if curr_tu.get_file(vim.current.buffer.name) == None:
-        gTuMutex.release()
         return
-
-    gTu = None
-    gTuMutex.release()
-
-    vim.command('call s:clear_match("cursor_def_ref")')
-    vim.command('call s:clear_match("semantic")')
 
     w_top = int(vim.eval("line('w0')"))
     w_bottom = int(vim.eval("line('w$')"))
 
     window = vim.eval("w:window")
-    if window != [] and w_top >= window[0] and w_bottom <= window[1]:
+    if window != [] and w_top >= window[0] and w_bottom <= window[1] and gTu[1] == 0:
         return
+
+    gTu[1] = 0
+
+    vim.command('call s:clear_match("cursor_def_ref")')
+    vim.command('call s:clear_match("semantic")')
+
 
     window_size = int(vim.eval('g:clighter_window_size'))
     file = cindex.File.from_name(curr_tu, vim.current.buffer.name)
