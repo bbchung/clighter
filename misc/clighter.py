@@ -16,7 +16,6 @@ def start_parsing():
 
 def do_parsing(options):
     global gTu
-    global mutext
 
     try:
         idx = cindex.Index.create()
@@ -30,7 +29,6 @@ def do_parsing(options):
 
 def try_highlight():
     global gTu
-    global mutext
 
     curr_tu = gTu[0]
     if curr_tu is None:
