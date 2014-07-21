@@ -62,6 +62,8 @@ endf
 fun! clighter#Disable()
     au! ClighterEnable
     py clighter.stop_parsing_thread()
+    let a:winnr = winnr()
     windo call s:clear_match('semantic')
     windo call s:clear_match('cursor_def_ref')
+    exe a:winnr."wincmd w"
 endf
