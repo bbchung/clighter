@@ -152,7 +152,7 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic):
 
             """ Do reference highlighting'
             """
-            if def_cursor is not None and def_cursor.location.file == curr_file:
+            if def_cursor is not None and def_cursor.location.file.name == curr_file.name:
                 t_def_cursor = t_tu_cursor.get_definition()
                 if t_def_cursor is not None and t_def_cursor == def_cursor:
                     vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
