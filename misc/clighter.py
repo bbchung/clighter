@@ -133,7 +133,7 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic):
         if t.kind.value == 2:
             t_tu_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, curr_file, t.location.line, t.location.column))
 
-            if not only_hl_def_ref:
+            if resemantic:
                 if t_tu_cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
                     vim_match_add('semantic', 'MacroInstantiation', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.STRUCT_DECL:
