@@ -4,6 +4,7 @@ py import vim
 exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
 py import clighter
 
+augroup ClighterEnable
 let s:cursor_decl_ref_hl_on = 1
 
 fun! clighter#ToggleCursorHL()
@@ -39,6 +40,10 @@ fun! s:try_highlight()
     py clighter.try_highlight()
 endf
 
+fun! clighter#See()
+    let g:see = w:highlight_dict['cursor_def_ref']
+endf
+
 fun! clighter#Enable()
     py clighter.start_parsing_thread()
     augroup ClighterEnable
@@ -57,6 +62,6 @@ endf
 fun! clighter#Disable()
     au! ClighterEnable
     py clighter.stop_parsing_thread()
-    call s:clear_match('semantic')
-    call s:clear_match('cursor_def_ref')
+    windo call s:clear_match('semantic')
+    windo call s:clear_match('cursor_def_ref')
 endf
