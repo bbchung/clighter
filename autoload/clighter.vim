@@ -20,11 +20,11 @@ fun! clighter#ToggleCursorHL()
     endif
 endf
 
-fun! s:start_parsing()
-    py clighter.start_parsing()
-endf
-
 fun! s:clear_match(type)
+    if !exists('w:highlight_dict')
+        return
+    endif
+
     for i in w:highlight_dict[a:type]
         call matchdelete(i)
     endfor
@@ -34,27 +34,29 @@ endf
 
 fun! s:try_highlight()
     let w:highlight_dict = get(w:, 'highlight_dict', {'semantic':[], 'cursor_def_ref':[]})
-    let w:window = get(w:, 'window', [])
+    let w:window = get(w:, 'window', [0, 0])
+
     py clighter.try_highlight()
 endf
 
 fun! clighter#Enable()
+    py clighter.start_parsing_thread()
     augroup ClighterEnable
         au!
-        au BufEnter *.[ch],*.[ch]pp,*.m call s:start_parsing()
-        au CursorHold *.[ch],*.[ch]pp,*.m call s:start_parsing()
         if g:clighter_realtime == 1
             au CursorMoved *.[ch],*.[ch]pp,*.m call s:try_highlight()
         else
             au CursorHold *.[ch],*.[ch]pp,*.m call s:try_highlight()
         endif
+        au TextChanged *.[ch],*.[ch]pp,*.m py clighter.reset_timeup()
+        au BufEnter *.[ch],*.[ch]pp,*.m py clighter.reset_timeup()
+        au VimLeavePre * py clighter.stop_parsing_thread()
     augroup END
-
-    call s:start_parsing()
 endf
 
 fun! clighter#Disable()
     au! ClighterEnable
+    py clighter.stop_parsing_thread()
     call s:clear_match('semantic')
     call s:clear_match('cursor_def_ref')
 endf
