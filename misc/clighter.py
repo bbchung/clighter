@@ -117,7 +117,8 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic):
 
     """ Do declaring highlighting'
     """
-    if def_cursor is not None and tu.get_file(def_cursor.location.file.name) is not None:
+
+    if def_cursor is not None and def_cursor.location.file == curr_file:
         if def_cursor.kind.is_declaration():
             vim_match_add('cursor_def_ref', 'CursorDeclRef', def_cursor.location.line, def_cursor.location.column, len(def_cursor.spelling), -1)
         if def_cursor.kind.is_preprocessing():
@@ -151,7 +152,7 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic):
 
             """ Do reference highlighting'
             """
-            if def_cursor is not None:
+            if def_cursor is not None and def_cursor.location.file == curr_file:
                 t_def_cursor = t_tu_cursor.get_definition()
                 if t_def_cursor is not None and t_def_cursor == def_cursor:
                     vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
