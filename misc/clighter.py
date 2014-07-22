@@ -8,21 +8,27 @@ if vim.eval("g:clighter_libclang_file") != "":
 
 class Parsing:
     thread = None
-    timeup = None
     onoff= 0
-    def __init__(self):
-        tu=None
-        applied=1
+    dict={}
+    def __init__(self, bufnr, bufname):
+        self.tu=None
+        self.applied=1
+        self.timeup = time.time()*1000.0
+        self.bufnr = bufnr
+        self.bufname = bufname
 
-g_parsing = Parsing()
+
+def join_parsing_loop():
+    Parsing.dict[vim.current.buffer.number] = Parsing(vim.current.buffer.number, vim.current.buffer.name) 
+
+join_parsing_loop()
 
 def start_parsing_thread():
     if Parsing.thread is not None:
         return
 
-    Parsing.timeup = time.time()*1000.0
     Parsing.onoff = 1
-    Parsing.thread = Thread(target=parsing_worker)
+    Parsing.thread = Thread(target=parsing_worker, args=[vim.eval('g:clighter_clang_options')])
     Parsing.thread.start()
 
 def stop_parsing_thread():
@@ -32,35 +38,43 @@ def stop_parsing_thread():
     Parsing.onoff = 0
     Parsing.thread.join()
     Parsing.thread = None
-    Parsing.timeup = None
     
 
 def reset_timeup():
-    Parsing.timeup = time.time()*1000.0 + 500
+    pobj = Parsing.dict.get(vim.current.buffer.number)
+    if pobj is None:
+        return
+
+    pobj.timeup = time.time()*1000.0 + 500
 
 
-def parsing_worker():
+def parsing_worker(option):
     while Parsing.onoff == 1:
-        if Parsing.timeup != None and time.time() * 1000.0 > Parsing.timeup:
-            Parsing.timeup = None
-            do_parsing(vim.eval('g:clighter_clang_options'))
+        for d in Parsing.dict.values():
+            if d.timeup != None and time.time() * 1000.0 > d.timeup:
+                d.timeup = None
+                do_parsing(d.bufnr, option)
 
         time.sleep (500.0 / 1000.0);
 
 
-def do_parsing(options):
+def do_parsing(bufnr, options):
     try:
         idx = cindex.Index.create()
     except:
         vim.command('echohl WarningMsg | echomsg "Clighter runtime error: libclang error" | echohl None')
         return
 
-    g_parsing.tu = idx.parse(vim.current.buffer.name, options, [(vim.current.buffer.name, "\n".join(vim.current.buffer))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-    g_parsing.applied = 0
+    Parsing.dict[bufnr].tu = idx.parse(Parsing.dict[bufnr].bufname, options, [(Parsing.dict[bufnr].bufname, "\n".join(vim.buffers[bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    Parsing.dict[bufnr].applied = 0
 
 
 def try_highlight():
-    curr_tu = g_parsing.tu
+    parsing_desc = Parsing.dict.get(vim.current.buffer.number)
+    if parsing_desc is None:
+        return
+
+    curr_tu = parsing_desc.tu
     if curr_tu is None:
         return
 
@@ -71,7 +85,7 @@ def try_highlight():
     w_bottom = int(vim.eval("line('w$')"))
     window = [int(vim.eval("w:window[0]")), int(vim.eval("w:window[1]"))]
 
-    resemantic = w_top < window[0] or w_bottom > window[1] or g_parsing.applied == 0
+    resemantic = w_top < window[0] or w_bottom > window[1] or Parsing.dict[vim.current.buffer.number].applied == 0
 
     window_size = int(vim.eval('g:clighter_window_size'))
     file = cindex.File.from_name(curr_tu, vim.current.buffer.name)
@@ -108,7 +122,7 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic):
     vim.command("call s:clear_match(%s)" % ['CursorDefRef'])
     if resemantic:
         vim.command("call s:clear_match(%s)" % ['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr'])
-        g_parsing.applied = 1
+        Parsing.dict[vim.current.buffer.number].applied = 1
 
     """ Do declaring highlighting'
     """
