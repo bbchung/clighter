@@ -36,8 +36,8 @@ fun! s:try_highlight()
 endf
 
 fun! clighter#Enable()
-    py clighter.start_parsing_thread()
-    py clighter.join_parsing_loop()
+    py clighter.start_parsing_loop()
+    bufdo py clighter.join_parsing_loop()
     augroup ClighterEnable
         au!
         if g:clighter_realtime == 1
@@ -47,7 +47,7 @@ fun! clighter#Enable()
         endif
         au TextChanged *.[ch],*.[ch]pp,*.m py clighter.reset_timeup()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.join_parsing_loop()
-        au BufDelete *.[ch],*.[ch]pp,*.m py clighter.leave_parsing_loop()
+        au BufDelete *.[ch],*.[ch]pp,*.m py clighter.join_parsing_loop()
         au VimLeavePre * py clighter.stop_parsing_thread()
     augroup END
 endf

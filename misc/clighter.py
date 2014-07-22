@@ -6,7 +6,7 @@ import time
 if vim.eval("g:clighter_libclang_file") != "":
     cindex.Config.set_library_file(vim.eval("g:clighter_libclang_file"))
 
-class Parsing:
+class ParsingObject:
     thread = None
     run= 0
     dict={}
@@ -19,31 +19,31 @@ class Parsing:
 
 
 def join_parsing_loop():
-    Parsing.dict[vim.current.buffer.number] = Parsing(vim.current.buffer.number, vim.current.buffer.name) 
+    ParsingObject.dict[vim.current.buffer.number] = ParsingObject(vim.current.buffer.number, vim.current.buffer.name) 
 
 def leave_parsing_loop():
-    Parsing.dict.pop(vim.current.buffer.number, None)
+    ParsingObject.dict.pop(vim.current.buffer.number, None)
 
 
-def start_parsing_thread():
-    if Parsing.thread is not None:
+def start_parsing_loop():
+    if ParsingObject.thread is not None:
         return
 
-    Parsing.run = 1
-    Parsing.thread = Thread(target=parsing_worker, args=[vim.eval('g:clighter_clang_options')])
-    Parsing.thread.start()
+    ParsingObject.run = 1
+    ParsingObject.thread = Thread(target=parsing_worker, args=[vim.eval('g:clighter_clang_options')])
+    ParsingObject.thread.start()
 
 def stop_parsing_thread():
-    if Parsing.thread is None:
+    if ParsingObject.thread is None:
         return
 
-    Parsing.run = 0
-    Parsing.thread.join()
-    Parsing.thread = None
+    ParsingObject.run = 0
+    ParsingObject.thread.join()
+    ParsingObject.thread = None
     
 
 def reset_timeup():
-    pobj = Parsing.dict.get(vim.current.buffer.number)
+    pobj = ParsingObject.dict.get(vim.current.buffer.number)
     if pobj is None:
         return
 
@@ -51,11 +51,11 @@ def reset_timeup():
 
 
 def parsing_worker(option):
-    while Parsing.run == 1:
-        for d in Parsing.dict.values():
-            if d.timeup != None and time.time() * 1000.0 > d.timeup:
-                d.timeup = None
-                do_parsing(d.bufnr, option)
+    while ParsingObject.run == 1:
+        for pobj in ParsingObject.dict.values():
+            if pobj.timeup != None and time.time() * 1000.0 > pobj.timeup:
+                pobj.timeup = None
+                do_parsing(pobj.bufnr, option)
 
         time.sleep (500.0 / 1000.0);
 
@@ -67,12 +67,12 @@ def do_parsing(bufnr, options):
         vim.command('echohl WarningMsg | echomsg "Clighter runtime error: libclang error" | echohl None')
         return
 
-    Parsing.dict[bufnr].tu = idx.parse(Parsing.dict[bufnr].bufname, options, [(Parsing.dict[bufnr].bufname, "\n".join(vim.buffers[bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-    Parsing.dict[bufnr].applied = 0
+    ParsingObject.dict[bufnr].tu = idx.parse(ParsingObject.dict[bufnr].bufname, options, [(ParsingObject.dict[bufnr].bufname, "\n".join(vim.buffers[bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    ParsingObject.dict[bufnr].applied = 0
 
 
 def try_highlight():
-    pobj = Parsing.dict.get(vim.current.buffer.number)
+    pobj = ParsingObject.dict.get(vim.current.buffer.number)
     if pobj is None:
         return
 
@@ -88,7 +88,7 @@ def try_highlight():
     w_bottom = int(vim.eval("line('w$')"))
     window = [int(vim.eval("w:window[0]")), int(vim.eval("w:window[1]"))]
 
-    resemantic = w_top < window[0] or w_bottom > window[1] or Parsing.dict[vim.current.buffer.number].applied == 0
+    resemantic = w_top < window[0] or w_bottom > window[1] or ParsingObject.dict[vim.current.buffer.number].applied == 0
 
     window_size = int(vim.eval('g:clighter_window_size'))
 
@@ -124,7 +124,7 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic):
     vim.command("call s:clear_match(%s)" % ['CursorDefRef'])
     if resemantic:
         vim.command("call s:clear_match(%s)" % ['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr'])
-        Parsing.dict[vim.current.buffer.number].applied = 1
+        ParsingObject.dict[vim.current.buffer.number].applied = 1
 
     """ Do declaring highlighting'
     """
