@@ -3,9 +3,6 @@ from clang import cindex
 from threading import Thread
 import time
 
-if vim.eval("g:clighter_libclang_file") != "":
-    cindex.Config.set_library_file(vim.eval("g:clighter_libclang_file"))
-
 class ParsingObject:
     thread = None
     run= 0
@@ -18,8 +15,14 @@ class ParsingObject:
         self.bufname = bufname
 
 
+g_libclang_file = vim.eval("g:clighter_libclang_file")
+if g_libclang_file:
+    cindex.Config.set_library_file(g_libclang_file)
+
+
 def join_parsing_loop():
     ParsingObject.dict[vim.current.buffer.number] = ParsingObject(vim.current.buffer.number, vim.current.buffer.name) 
+
 
 def leave_parsing_loop():
     ParsingObject.dict.pop(vim.current.buffer.number, None)
@@ -32,6 +35,7 @@ def start_parsing_loop():
     ParsingObject.run = 1
     ParsingObject.thread = Thread(target=parsing_worker, args=[vim.eval('g:clighter_clang_options')])
     ParsingObject.thread.start()
+
 
 def stop_parsing_loop():
     if ParsingObject.thread is None:
@@ -53,7 +57,7 @@ def reset_timeup():
 def parsing_worker(option):
     while ParsingObject.run == 1:
         for pobj in ParsingObject.dict.values():
-            if pobj.timeup != None and time.time() * 1000.0 > pobj.timeup:
+            if pobj.timeup is not None and time.time() * 1000.0 > pobj.timeup:
                 pobj.timeup = None
                 do_parsing(pobj.bufnr, option)
 
@@ -73,41 +77,41 @@ def do_parsing(bufnr, options):
 
 def try_highlight():
     pobj = ParsingObject.dict.get(vim.current.buffer.number)
-    if pobj is None:
+
+    if pobj is None or pobj.tu is None:
         return
 
-    curr_tu = pobj.tu
-    if curr_tu is None:
-        return
+    tu = pobj.tu
 
-    file = curr_tu.get_file(vim.current.buffer.name)
+    file = tu.get_file(vim.current.buffer.name)
     if file == None:
         return
 
     w_top = int(vim.eval("line('w0')"))
     w_bottom = int(vim.eval("line('w$')"))
-    window = [int(vim.eval("w:window[0]")), int(vim.eval("w:window[1]"))]
+    window = vim.current.window.vars["window"]
 
     resemantic = w_top < window[0] or w_bottom > window[1] or ParsingObject.dict[vim.current.buffer.number].applied == 0
 
     window_size = int(vim.eval('g:clighter_window_size'))
 
+    buflinenr = len(vim.current.buffer);
     if (window_size < 0):
-        vim.command("let w:window=[0, %d]" % len(vim.current.buffer))
-        window_tokens = curr_tu.cursor.get_tokens()
+        vim.command("let w:window=[0, %d]" % buflinenr)
+        window_tokens = tu.cursor.get_tokens()
     else:
         top_line = max(w_top - 100 * window_size, 1);
-        bottom_line = min(w_bottom + 100 * window_size, len(vim.current.buffer))
+        bottom_line = min(w_bottom + 100 * window_size, buflinenr)
         vim.command("let w:window=[%d, %d]" %(top_line, bottom_line))
-        top = cindex.SourceLocation.from_position(curr_tu, file, top_line, 1)
-        bottom = cindex.SourceLocation.from_position(curr_tu, file, bottom_line, 1)
+        top = cindex.SourceLocation.from_position(tu, file, top_line, 1)
+        bottom = cindex.SourceLocation.from_position(tu, file, bottom_line, 1)
         range = cindex.SourceRange.from_locations(top, bottom)
-        window_tokens = curr_tu.get_tokens(extent=range)
+        window_tokens = tu.get_tokens(extent=range)
 
     vim_cursor = None
     if int(vim.eval("s:cursor_decl_ref_hl_on")) == 1:
         (row, col) = vim.current.window.cursor
-        vim_cursor = cindex.Cursor.from_location(curr_tu, cindex.SourceLocation.from_position(curr_tu, file, row, col + 1)) # cusor under vim-cursor
+        vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, row, col + 1)) # cusor under vim-cursor
 
     def_cursor = None
     if vim_cursor is not None:
@@ -116,8 +120,7 @@ def try_highlight():
         else:
             def_cursor = vim_cursor.get_definition()
 
-
-    highlight_window(curr_tu, window_tokens, def_cursor, file, resemantic)
+    highlight_window(tu, window_tokens, def_cursor, file, resemantic)
 
 
 def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic):
