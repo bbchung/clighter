@@ -8,7 +8,7 @@ if vim.eval("g:clighter_libclang_file") != "":
 
 class Parsing:
     thread = None
-    onoff= 0
+    run= 0
     dict={}
     def __init__(self, bufnr, bufname):
         self.tu=None
@@ -21,13 +21,15 @@ class Parsing:
 def join_parsing_loop():
     Parsing.dict[vim.current.buffer.number] = Parsing(vim.current.buffer.number, vim.current.buffer.name) 
 
-join_parsing_loop()
+def leave_parsing_loop():
+    Parsing.dict.pop(vim.current.buffer.number, None)
+
 
 def start_parsing_thread():
     if Parsing.thread is not None:
         return
 
-    Parsing.onoff = 1
+    Parsing.run = 1
     Parsing.thread = Thread(target=parsing_worker, args=[vim.eval('g:clighter_clang_options')])
     Parsing.thread.start()
 
@@ -35,7 +37,7 @@ def stop_parsing_thread():
     if Parsing.thread is None:
         return
 
-    Parsing.onoff = 0
+    Parsing.run = 0
     Parsing.thread.join()
     Parsing.thread = None
     
@@ -49,7 +51,7 @@ def reset_timeup():
 
 
 def parsing_worker(option):
-    while Parsing.onoff == 1:
+    while Parsing.run == 1:
         for d in Parsing.dict.values():
             if d.timeup != None and time.time() * 1000.0 > d.timeup:
                 d.timeup = None
@@ -70,15 +72,16 @@ def do_parsing(bufnr, options):
 
 
 def try_highlight():
-    parsing_desc = Parsing.dict.get(vim.current.buffer.number)
-    if parsing_desc is None:
+    pobj = Parsing.dict.get(vim.current.buffer.number)
+    if pobj is None:
         return
 
-    curr_tu = parsing_desc.tu
+    curr_tu = pobj.tu
     if curr_tu is None:
         return
 
-    if curr_tu.get_file(vim.current.buffer.name) == None:
+    file = curr_tu.get_file(vim.current.buffer.name)
+    if file == None:
         return
 
     w_top = int(vim.eval("line('w0')"))
@@ -88,7 +91,6 @@ def try_highlight():
     resemantic = w_top < window[0] or w_bottom > window[1] or Parsing.dict[vim.current.buffer.number].applied == 0
 
     window_size = int(vim.eval('g:clighter_window_size'))
-    file = cindex.File.from_name(curr_tu, vim.current.buffer.name)
 
     if (window_size < 0):
         vim.command("let w:window=[0, %d]" % len(vim.current.buffer))
