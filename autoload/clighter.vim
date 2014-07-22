@@ -48,14 +48,13 @@ fun! clighter#Enable()
         au TextChanged *.[ch],*.[ch]pp,*.m py clighter.reset_timeup()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.join_parsing_loop()
         au BufDelete *.[ch],*.[ch]pp,*.m py clighter.join_parsing_loop()
-        au VimLeavePre * py clighter.stop_parsing_thread()
+        au VimLeavePre * py clighter.stop_parsing_loop()
     augroup END
 endf
 
 fun! clighter#Disable()
     au! ClighterEnable
-    py clighter.stop_parsing_thread()
-    let a:winnr = winnr()
+    py clighter.stop_parsing_loop()
     windo call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
-    exe a:winnr."wincmd w"
+    exe winnr()."wincmd w"
 endf

@@ -33,7 +33,7 @@ def start_parsing_loop():
     ParsingObject.thread = Thread(target=parsing_worker, args=[vim.eval('g:clighter_clang_options')])
     ParsingObject.thread.start()
 
-def stop_parsing_thread():
+def stop_parsing_loop():
     if ParsingObject.thread is None:
         return
 
