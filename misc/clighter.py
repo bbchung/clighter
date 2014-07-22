@@ -61,7 +61,7 @@ def parsing_worker(option):
                 pobj.timeup = None
                 do_parsing(pobj.bufnr, option)
 
-        time.sleep (500.0 / 1000.0);
+        time.sleep(0.5)
 
 
 def do_parsing(bufnr, options):
