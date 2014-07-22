@@ -10,7 +10,7 @@ let s:cursor_decl_ref_hl_on = 1
 fun! clighter#ToggleCursorHL()
     if s:cursor_decl_ref_hl_on==1
         let s:cursor_decl_ref_hl_on=0
-        call s:clear_match('cursor_def_ref')
+        call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
     else
         let s:cursor_decl_ref_hl_on=1
         "augroup CursorHighlight
@@ -22,26 +22,17 @@ fun! clighter#ToggleCursorHL()
 endf
 
 fun! s:clear_match(type)
-    if !exists('w:highlight_dict')
-        return
-    endif
-
-    for i in w:highlight_dict[a:type]
-        call matchdelete(i)
+    for m in getmatches()
+        if index(a:type, m['group']) >= 0
+            call matchdelete(m['id'])
+        endif
     endfor
-
-    let w:highlight_dict[a:type] = []
 endf
 
 fun! s:try_highlight()
-    let w:highlight_dict = get(w:, 'highlight_dict', {'semantic':[], 'cursor_def_ref':[]})
     let w:window = get(w:, 'window', [0, 0])
 
     py clighter.try_highlight()
-endf
-
-fun! clighter#See()
-    let g:see = w:highlight_dict['cursor_def_ref']
 endf
 
 fun! clighter#Enable()
@@ -63,7 +54,6 @@ fun! clighter#Disable()
     au! ClighterEnable
     py clighter.stop_parsing_thread()
     let a:winnr = winnr()
-    windo call s:clear_match('semantic')
-    windo call s:clear_match('cursor_def_ref')
+    windo call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
     exe a:winnr."wincmd w"
 endf

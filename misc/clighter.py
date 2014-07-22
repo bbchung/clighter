@@ -6,66 +6,61 @@ import time
 if vim.eval("g:clighter_libclang_file") != "":
     cindex.Config.set_library_file(vim.eval("g:clighter_libclang_file"))
 
-g_tu = [None, 0] # [translation unit, have new tu for semantic]
-g_parsing = [None, None, 0] # [thread, timeup, on/off]
+class Parsing:
+    thread = None
+    timeup = None
+    onoff= 0
+    def __init__(self):
+        tu=None
+        applied=1
+
+g_parsing = Parsing()
 
 def start_parsing_thread():
-    global g_parsing
-
-    if g_parsing[0] is not None:
+    if Parsing.thread is not None:
         return
 
-    g_parsing[1] = time.time()*1000.0
-    g_parsing[2] = 1
-    g_parsing[0] = Thread(target=parsing_worker)
-    g_parsing[0].start()
+    Parsing.timeup = time.time()*1000.0
+    Parsing.onoff = 1
+    Parsing.thread = Thread(target=parsing_worker)
+    Parsing.thread.start()
 
 def stop_parsing_thread():
-    global g_parsing
-
-    if g_parsing[0] is None:
+    if Parsing.thread is None:
         return
 
-    g_parsing[2] = 0
-    g_parsing[0].join()
-    g_parsing[0] = None
-    g_parsing[1] = None
+    Parsing.onoff = 0
+    Parsing.thread.join()
+    Parsing.thread = None
+    Parsing.timeup = None
     
 
 def reset_timeup():
-    global g_parsing
-
-    g_parsing[1] = time.time()*1000.0 + 500
+    Parsing.timeup = time.time()*1000.0 + 500
 
 
 def parsing_worker():
-    global g_parsing
-
-    while g_parsing[2] == 1:
-        if g_parsing[1] != None and time.time() * 1000.0 > g_parsing[1]:
-            g_parsing[1] = None
+    while Parsing.onoff == 1:
+        if Parsing.timeup != None and time.time() * 1000.0 > Parsing.timeup:
+            Parsing.timeup = None
             do_parsing(vim.eval('g:clighter_clang_options'))
 
         time.sleep (500.0 / 1000.0);
 
 
 def do_parsing(options):
-    global g_tu
-
     try:
         idx = cindex.Index.create()
     except:
         vim.command('echohl WarningMsg | echomsg "Clighter runtime error: libclang error" | echohl None')
         return
 
-    g_tu[0] = idx.parse(vim.current.buffer.name, options, [(vim.current.buffer.name, "\n".join(vim.current.buffer))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-    g_tu[1] = 1
+    g_parsing.tu = idx.parse(vim.current.buffer.name, options, [(vim.current.buffer.name, "\n".join(vim.current.buffer))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    g_parsing.applied = 0
 
 
 def try_highlight():
-    global g_tu
-
-    curr_tu = g_tu[0]
+    curr_tu = g_parsing.tu
     if curr_tu is None:
         return
 
@@ -76,7 +71,7 @@ def try_highlight():
     w_bottom = int(vim.eval("line('w$')"))
     window = [int(vim.eval("w:window[0]")), int(vim.eval("w:window[1]"))]
 
-    resemantic = w_top < window[0] or w_bottom > window[1] or g_tu[1] == 1
+    resemantic = w_top < window[0] or w_bottom > window[1] or g_parsing.applied == 0
 
     window_size = int(vim.eval('g:clighter_window_size'))
     file = cindex.File.from_name(curr_tu, vim.current.buffer.name)
@@ -110,20 +105,20 @@ def try_highlight():
 
 
 def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic):
-    vim.command('call s:clear_match("cursor_def_ref")')
+    vim.command("call s:clear_match(%s)" % ['CursorDefRef'])
     if resemantic:
-        vim.command('call s:clear_match("semantic")')
-        g_tu[1] = 0
+        vim.command("call s:clear_match(%s)" % ['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr'])
+        g_parsing.applied = 1
 
     """ Do declaring highlighting'
     """
 
     if def_cursor is not None and def_cursor.location.file == curr_file:
         if def_cursor.kind.is_declaration():
-            vim_match_add('cursor_def_ref', 'CursorDeclRef', def_cursor.location.line, def_cursor.location.column, len(def_cursor.spelling), -1)
+            vim_match_add('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(def_cursor.spelling), -1)
         if def_cursor.kind.is_preprocessing():
             t = def_cursor.get_tokens().next()
-            vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
+            vim_match_add('CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
 
     
     #print decl_ref_cursor.kind
@@ -136,28 +131,28 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic):
 
             if resemantic:
                 if t_tu_cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
-                    vim_match_add('semantic', 'MacroInstantiation', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_match_add('MacroInstantiation', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.STRUCT_DECL:
-                    vim_match_add('semantic', 'StructDecl', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_match_add('StructDecl', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.CLASS_DECL:
-                    vim_match_add('semantic', 'ClassDecl', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_match_add('ClassDecl', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.ENUM_DECL:
-                    vim_match_add('semantic', 'EnumDecl', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_match_add('EnumDecl', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
-                    vim_match_add('semantic', 'EnumConstantDecl', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_match_add('EnumConstantDecl', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.TYPE_REF:
-                    vim_match_add('semantic', 'TypeRef', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_match_add('TypeRef', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.DECL_REF_EXPR and t_tu_cursor.type.kind == cindex.TypeKind.ENUM:
-                    vim_match_add('semantic', 'EnumDeclRefExpr', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_match_add('EnumDeclRefExpr', t.location.line, t.location.column, len(t.spelling), -2)
 
             """ Do reference highlighting'
             """
             if def_cursor is not None and def_cursor.location.file.name == curr_file.name:
                 t_def_cursor = t_tu_cursor.get_definition()
                 if t_def_cursor is not None and t_def_cursor == def_cursor:
-                    vim_match_add('cursor_def_ref', 'CursorDeclRef', t.location.line, t.location.column, len(t.spelling), -1)
+                    vim_match_add('CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
 
 
-def vim_match_add(type, group, line, col, len, priority):
-    vim.command("call add(w:highlight_dict['{0}'], matchaddpos('{1}', [[{2}, {3}, {4}]], {5}))".format(type, group, line, col, len, priority))
+def vim_match_add(group, line, col, len, priority):
+    vim.command("call matchaddpos('{0}', [[{1}, {2}, {3}]], {4})".format(group, line, col, len, priority))
     # vim.command("call add(w:semantic_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format(group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
