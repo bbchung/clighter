@@ -46,6 +46,7 @@ fun! clighter#Enable()
             au CursorHold *.[ch],*.[ch]pp,*.m call s:try_highlight()
         endif
         au TextChanged *.[ch],*.[ch]pp,*.m py clighter.reset_timer()
+        au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.reset_timer()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.join_parsing_loop()
         au BufDelete *.[ch],*.[ch]pp,*.m py clighter.leave_parsing_loop()
         au VimLeavePre * py clighter.stop_parsing_loop()
