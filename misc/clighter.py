@@ -7,10 +7,11 @@ class ParsingObject:
     thread = None
     run= 0
     dict={}
+    idx = cindex.Index.create()
     def __init__(self, bufnr, bufname):
         self.tu=None
         self.applied=1
-        self.timeup = time.time()*1000.0
+        self.timeup = time.time()
         self.bufnr = bufnr
         self.bufname = bufname
 
@@ -25,10 +26,6 @@ def join_parsing_loop():
     ft = vim.eval("&filetype") 
     if ft in ["c", "cpp", "objc"]:
         ParsingObject.dict[vim.current.buffer.number] = ParsingObject(vim.current.buffer.number, vim.current.buffer.name) 
-
-
-def leave_parsing_loop():
-    ParsingObject.dict.pop(vim.current.buffer.number, None)
 
 
 def start_parsing_loop():
@@ -54,28 +51,19 @@ def reset_timer():
     if pobj is None:
         return
 
-    pobj.timeup = time.time()*1000.0 + 500
+    pobj.timeup = time.time() + 0.5
 
 
-def parsing_worker(option):
+def parsing_worker(args):
     while ParsingObject.run == 1:
-        for pobj in ParsingObject.dict.values():
-            if pobj.timeup is not None and time.time() * 1000.0 > pobj.timeup:
-                pobj.timeup = None
-                do_parsing(pobj, option)
-
-        time.sleep(0.2)
-
-
-def do_parsing(pobj, options):
-    try:
-        idx = cindex.Index.create()
-    except:
-        vim.command('echohl WarningMsg | echomsg "Clighter runtime error: libclang error" | echohl None')
-        return
-
-    pobj.tu = idx.parse(pobj.bufname, options, [(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-    pobj.applied = 0
+        try:
+            for pobj in ParsingObject.dict.values():
+                if pobj.timeup is not None and time.time() > pobj.timeup:
+                    pobj.tu = ParsingObject.idx.parse(pobj.bufname, args, [(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                    pobj.applied = 0
+                    pobj.timeup = None
+        finally:
+            time.sleep(0.2)
 
 
 def try_highlight():
