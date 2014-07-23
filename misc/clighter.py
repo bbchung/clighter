@@ -21,7 +21,9 @@ if g_libclang_file:
 
 
 def join_parsing_loop():
-    ParsingObject.dict[vim.current.buffer.number] = ParsingObject(vim.current.buffer.number, vim.current.buffer.name) 
+    ft = vim.eval("&filetype") 
+    if ft in ["c", "cpp", "objc"]:
+        ParsingObject.dict[vim.current.buffer.number] = ParsingObject(vim.current.buffer.number, vim.current.buffer.name) 
 
 
 def leave_parsing_loop():
@@ -61,7 +63,7 @@ def parsing_worker(option):
                 pobj.timeup = None
                 do_parsing(pobj.bufnr, option)
 
-        time.sleep(0.5)
+        time.sleep(0.2)
 
 
 def do_parsing(bufnr, options):
