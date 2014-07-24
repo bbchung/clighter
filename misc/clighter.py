@@ -1,3 +1,4 @@
+import os.path
 import vim
 from clang import cindex
 from threading import Thread
@@ -21,6 +22,13 @@ window_size = int(vim.eval('g:clighter_window_size')) * 100
 g_libclang_file = vim.eval("g:clighter_libclang_file")
 if g_libclang_file:
     cindex.Config.set_library_file(g_libclang_file)
+
+
+def join_parsing_loop_all():
+    for buf in vim.buffers:
+        ext = os.path.splitext(buf.name)[1]
+        if ext in ['.c', '.cpp', '.h', '.hpp', '.m']:
+            ParsingObject.dict[buf.number] = ParsingObject(buf, buf.number, buf.name) 
 
 
 def join_parsing_loop():

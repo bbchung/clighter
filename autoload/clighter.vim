@@ -35,8 +35,7 @@ fun! s:try_highlight()
     py clighter.try_highlight()
 endf
 
-fun! clighter#Enable()
-    silent bufdo py clighter.join_parsing_loop()
+fun! clighter#Init()
     py clighter.start_parsing_loop()
 
     augroup ClighterEnable
@@ -54,9 +53,15 @@ fun! clighter#Enable()
     augroup END
 endf
 
+fun! clighter#Enable()
+    py clighter.join_parsing_loop_all()
+    call clighter#Init()
+endf
+
 fun! clighter#Disable()
     au! ClighterEnable
     py clighter.stop_parsing_loop()
+    let a:wnr = winnr()
     windo call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
-    exe winnr()."wincmd w"
+    exe a:wnr."wincmd w"
 endf

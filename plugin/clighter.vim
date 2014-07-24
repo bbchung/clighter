@@ -37,8 +37,5 @@ hi link EnumDeclRefExpr Identifier
 hi link CursorDefRef Search
 
 if g:clighter_autostart == 1
-    augroup ClighterStart
-        au!
-        au VimEnter *.[ch],*.[ch]pp,*.m call clighter#Enable()
-    augroup END
+    call clighter#Init()
 endif
