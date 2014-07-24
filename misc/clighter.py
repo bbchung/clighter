@@ -8,12 +8,13 @@ class ParsingObject:
     run= 0
     dict={}
     idx = cindex.Index.create()
-    def __init__(self, bufnr, bufname):
+    def __init__(self, buf, bufnr, bufname):
         self.tu=None
         self.applied=1
         self.timeup = time.time()
         self.bufnr = bufnr
         self.bufname = bufname
+        self.buf = buf
 
 window_size = int(vim.eval('g:clighter_window_size')) * 100
 
@@ -25,7 +26,7 @@ if g_libclang_file:
 def join_parsing_loop():
     ft = vim.eval("&filetype") 
     if ft in ["c", "cpp", "objc"]:
-        ParsingObject.dict[vim.current.buffer.number] = ParsingObject(vim.current.buffer.number, vim.current.buffer.name) 
+        ParsingObject.dict[vim.current.buffer.number] = ParsingObject(vim.current.buffer, vim.current.buffer.number, vim.current.buffer.name) 
 
 
 def start_parsing_loop():
@@ -52,6 +53,7 @@ def reset_timer():
         return
 
     pobj.timeup = time.time() + 0.5
+    pobj.buf = vim.current.buffer
 
 
 def parsing_worker(args):
@@ -60,9 +62,9 @@ def parsing_worker(args):
             for pobj in ParsingObject.dict.values():
                 if pobj.timeup is not None and time.time() > pobj.timeup:
                     if pobj.tu is None:
-                        pobj.tu = ParsingObject.idx.parse(pobj.bufname, args, [(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                        pobj.tu = ParsingObject.idx.parse(pobj.bufname, args, [(pobj.bufname, "\n".join(pobj.buf))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
                     else:
-                        pobj.tu.reparse([(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                        pobj.tu.reparse([(pobj.bufname, "\n".join(pobj.buf))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
                     pobj.applied = 0
                     pobj.timeup = None
