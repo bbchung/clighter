@@ -11,7 +11,7 @@ the semantic highlighting into the code.
 Clighter provides the following features:
 
 * Automatically do semantic highlighting for c-family source code.
-* Automatically mark all words that are same as the word under cursor
+* Automatically mark all words that with the same definition
 * Options to customize the colors
 
 ![clighter demo](http://goo.gl/ivfipF "Enable Clighter")
