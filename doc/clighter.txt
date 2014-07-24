@@ -3,7 +3,7 @@ on Clang
 *clighter*
 
 Author: bbchung (afafaf4@gmail.com)
-For Vim version 7.3 or above
+For Vim version 7.4+
 
 ==============================================================================
 CONTENTS                                                  *clighter-contents*
@@ -44,10 +44,10 @@ The Github repository is at:
 
 The clighter plugin requires the following:
 
-    * Vim version 7.3(or above) with python2 enabled
+    * Vim version 7.4+ with python2 enabled
     * libclang
 
-Clighter currently works only at linux platform, others have not been tested.
+Clighter has been tested in linux platform only
 
 ==============================================================================
 						*clighter-options*
@@ -73,8 +73,8 @@ Default: 1
 g:clighter_window_size~
 Clighter uses vim regular expression engine to do syntax highlighting,
 but vim's RE engine performs very bad when there are too many rules. Clighter
-can only highlight a given region instead of whole buffer each time to get
-the good performance even when the file is very large. 
+highlights a given region instead of whole buffer while cursor is moved, to get
+the good performance even when the buffer is very large. 
 	
 < 0: highlight whole buffer.
 >= 0: highlight from top line number reduce 100 * clighter_window_size to bottom 
@@ -89,8 +89,7 @@ Default: 1
 g:clighter_clang_options~
 The compiler options for Clang. Sometimes Clighter doesn't do correct
 highlighting cause Clang can't parse the source code without necessary
-options, so you need tell Clang how to parse the code. You can set the
-compiler options to g:clighter_clang_options with list.
+options, so you need tell Clang how to parse the code.
 
 Default: []
 >
@@ -107,9 +106,12 @@ Default: ''
 <
 						*'clighter_realtime'*
 g:clighter_realtime~
-Highlight the code in realtime(simulating), rather than when cursor is idle.
+Highlight the code in realtime(CursorMoved event), rather than when cursor is
+idle for a while(CursorHold event). By testing, a normal x86 machine can turn
+on the realtime highlighting without delay. If you feel vim is laggy, turn off
+this option.
 
-Default: 0
+Default: 1
 >
 	let g:clighter_realtime = 1
 <
@@ -171,9 +173,9 @@ EnumConstantDecl~
 	hi link EnumConstantDecl Identifier
 >
 
-EnumDeclRefExpr~
+EnumDefRefExpr~
 >
-	hi link EnumDeclRefExpr Identifier
+	hi link EnumDefRefExpr Identifier
 >
 
 You can customize these colors in your colorscheme, for example:
@@ -187,17 +189,19 @@ You can customize these colors in your colorscheme, for example:
 7.. FAQ
 
 Q. The clighter plugin doesn't work.
-A. Vim version 7.3(or above) is required, and make sure libclang is installed
+A. Vim version 7.4+ is required, and make sure libclang is installed
 correctly and set g:clighter_libclang_file if need.
 
 Q. Highlighting is not quick-response
 A. Clighter use CursorHold event to update the current window highlighting,
 and only highlight the code when parsing is done. To get the better response
-time, you can change updatetime smaller and pray your Clang run faster.
-Notice that many other plugins will change updatetime. If the code includes
-the header file that was modified, you must save the header.
+time, you can set g:clighter_realtime = 1, or change updatetime to a smaller
+value and pray your Clang run faster. Notice that many other plugins will
+change updatetime. If the code includes the header file that was modified,
+you must save the header.
 >
-	set updatetime=1200
+	let g:clighter_realtime = 1 " use realtime render
+	set updatetime=1200 " set smaller value
 <
 
 ==============================================================================
