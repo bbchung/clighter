@@ -59,7 +59,11 @@ def parsing_worker(args):
         try:
             for pobj in ParsingObject.dict.values():
                 if pobj.timeup is not None and time.time() > pobj.timeup:
-                    pobj.tu = ParsingObject.idx.parse(pobj.bufname, args, [(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                    if pobj.tu is None:
+                        pobj.tu = ParsingObject.idx.parse(pobj.bufname, args, [(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                    else:
+                        pobj.tu.reparse([(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+
                     pobj.applied = 0
                     pobj.timeup = None
         finally:
@@ -114,9 +118,9 @@ def try_highlight():
 
 
 def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic, show_def_ref):
-    vim.command("call s:clear_match(%s)" % ['CursorDefRef'])
+    vim.command("call s:clear_match(['CursorDefRef'])")
     if resemantic:
-        vim.command("call s:clear_match(%s)" % ['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr'])
+        vim.command("call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr'])")
         ParsingObject.dict[vim.current.buffer.number].applied = 1
 
     """ Do declaring highlighting'
