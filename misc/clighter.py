@@ -3,6 +3,7 @@ import vim
 from clang import cindex
 from threading import Thread
 import time
+import threading
 
 class ParsingObject:
     thread = None
@@ -16,6 +17,7 @@ class ParsingObject:
         self.bufnr = bufnr
         self.bufname = bufname
         self.buf = buf
+        self.lock = threading.Lock()
 
 window_size = int(vim.eval('g:clighter_window_size')) * 100
 
@@ -60,22 +62,24 @@ def reset_timer():
     if pobj is None:
         return
 
-    pobj.timeup = time.time() + 0.5
-    pobj.buf = vim.current.buffer
+    with pobj.lock:
+        pobj.timeup = time.time() + 0.5
+        pobj.buf = vim.current.buffer
 
 
 def parsing_worker(args):
     while ParsingObject.run == 1:
         try:
             for pobj in ParsingObject.dict.values():
-                if pobj.timeup is not None and time.time() > pobj.timeup:
-                    if pobj.tu is None:
-                        pobj.tu = ParsingObject.idx.parse(pobj.bufname, args, [(pobj.bufname, "\n".join(pobj.buf))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-                    else:
-                        pobj.tu.reparse([(pobj.bufname, "\n".join(pobj.buf))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                with pobj.lock:
+                    if pobj.timeup is not None and time.time() > pobj.timeup:
+                        if pobj.tu is None:
+                            pobj.tu = ParsingObject.idx.parse(pobj.bufname, args, [(pobj.bufname, "\n".join(pobj.buf))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                        else:
+                            pobj.tu.reparse([(pobj.bufname, "\n".join(pobj.buf))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
-                    pobj.applied = 0
-                    pobj.timeup = None
+                        pobj.applied = 0
+                        pobj.timeup = None
         finally:
             time.sleep(0.2)
 
