@@ -49,6 +49,7 @@ fun! clighter#Init()
         au TextChanged *.[ch],*.[ch]pp,*.m py clighter.reset_timer()
         au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.reset_timer()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.join_parsing_loop()
+        au BufWinEnter * call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
         au VimLeavePre * py clighter.stop_parsing_loop()
     augroup END
 endf
