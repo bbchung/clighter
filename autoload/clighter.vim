@@ -35,7 +35,8 @@ fun! s:try_highlight()
     py clighter.try_highlight()
 endf
 
-fun! clighter#Init()
+fun! clighter#Enable()
+    py clighter.join_parsing_loop_all()
     py clighter.start_parsing_loop()
 
     augroup ClighterEnable
@@ -52,11 +53,6 @@ fun! clighter#Init()
         au BufWinEnter * call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
         au VimLeavePre * py clighter.stop_parsing_loop()
     augroup END
-endf
-
-fun! clighter#Enable()
-    py clighter.join_parsing_loop_all()
-    call clighter#Init()
 endf
 
 fun! clighter#Disable()
