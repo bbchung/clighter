@@ -88,47 +88,48 @@ def try_highlight():
     global window_size
     pobj = ParsingObject.dict.get(vim.current.buffer.number)
 
-    if pobj is None or pobj.tu is None:
-        return
+    with pobj.lock:
+        if pobj is None or pobj.tu is None:
+            return
 
-    file = pobj.tu.get_file(vim.current.buffer.name)
-    if file == None: # should not happened
-        return
+        file = pobj.tu.get_file(vim.current.buffer.name)
+        if file == None: # should not happened
+            return
 
-    w_top = int(vim.eval("line('w0')"))
-    w_bottom = int(vim.eval("line('w$')"))
-    window = vim.current.window.vars["window"]
+        w_top = int(vim.eval("line('w0')"))
+        w_bottom = int(vim.eval("line('w$')"))
+        window = vim.current.window.vars["window"]
 
-    resemantic = w_top < window[0] or w_bottom > window[1] or ParsingObject.dict[vim.current.buffer.number].applied == 0
+        resemantic = w_top < window[0] or w_bottom > window[1] or ParsingObject.dict[vim.current.buffer.number].applied == 0
 
-    buflinenr = len(vim.current.buffer);
-    if (window_size < 0):
-        vim.command("let w:window=[0, %d]" % buflinenr)
-        window_tokens = pobj.tu.cursor.get_tokens()
-    else:
-        top_line = max(w_top - window_size, 1);
-        bottom_line = min(w_bottom + window_size, buflinenr)
-        vim.command("let w:window=[%d, %d]" %(top_line, bottom_line))
-        top = cindex.SourceLocation.from_position(pobj.tu, file, top_line, 1)
-        bottom = cindex.SourceLocation.from_position(pobj.tu, file, bottom_line, 1)
-        range = cindex.SourceRange.from_locations(top, bottom)
-        window_tokens = pobj.tu.get_tokens(extent=range)
-
-    vim_cursor = None
-    if int(vim.eval("s:cursor_decl_ref_hl_on")) == 1:
-        (row, col) = vim.current.window.cursor
-        vim_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(pobj.tu, file, row, col + 1)) # cusor under vim-cursor
-
-    def_cursor = None
-    if vim_cursor is not None:
-        if vim_cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
-            def_cursor = vim_cursor
+        buflinenr = len(vim.current.buffer);
+        if (window_size < 0):
+            vim.command("let w:window=[0, %d]" % buflinenr)
+            window_tokens = pobj.tu.cursor.get_tokens()
         else:
-            def_cursor = vim_cursor.get_definition()
+            top_line = max(w_top - window_size, 1);
+            bottom_line = min(w_bottom + window_size, buflinenr)
+            vim.command("let w:window=[%d, %d]" %(top_line, bottom_line))
+            top = cindex.SourceLocation.from_position(pobj.tu, file, top_line, 1)
+            bottom = cindex.SourceLocation.from_position(pobj.tu, file, bottom_line, 1)
+            range = cindex.SourceRange.from_locations(top, bottom)
+            window_tokens = pobj.tu.get_tokens(extent=range)
 
-    show_def_ref = def_cursor is not None and def_cursor.location.file.name == file.name
+        vim_cursor = None
+        if int(vim.eval("s:cursor_decl_ref_hl_on")) == 1:
+            (row, col) = vim.current.window.cursor
+            vim_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(pobj.tu, file, row, col + 1)) # cusor under vim-cursor
 
-    highlight_window(pobj.tu, window_tokens, def_cursor, file, resemantic, show_def_ref)
+        def_cursor = None
+        if vim_cursor is not None:
+            if vim_cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
+                def_cursor = vim_cursor
+            else:
+                def_cursor = vim_cursor.get_definition()
+
+        show_def_ref = def_cursor is not None and def_cursor.location.file.name == file.name
+
+        highlight_window(pobj.tu, window_tokens, def_cursor, file, resemantic, show_def_ref)
 
 
 def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic, show_def_ref):
