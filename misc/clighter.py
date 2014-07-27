@@ -127,7 +127,7 @@ def try_highlight():
             else:
                 def_cursor = vim_cursor.get_definition()
 
-        show_def_ref = def_cursor is not None and def_cursor.location.file.name == file.name
+        show_def_ref = def_cursor is not None and def_cursor.location.file.name == file.name and def_cursor.displayname == vim.eval('expand("<cword>")')
 
         highlight_window(pobj.tu, window_tokens, def_cursor, file, resemantic, show_def_ref)
 
@@ -173,7 +173,7 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic, show_
             """
             if show_def_ref:
                 t_def_cursor = t_tu_cursor.get_definition()
-                if t_def_cursor is not None and t_def_cursor == def_cursor:
+                if t_def_cursor is not None and t_def_cursor == def_cursor and t.spelling == def_cursor.displayname:
                     vim_match_add('CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
 
 
