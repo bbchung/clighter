@@ -127,7 +127,7 @@ def try_highlight():
             else:
                 def_cursor = vim_cursor.get_definition()
 
-        show_def_ref = def_cursor is not None and def_cursor.location.file.name == file.name and def_cursor.displayname == vim.eval('expand("<cword>")')
+        show_def_ref = def_cursor is not None and def_cursor.location.file.name == file.name and get_spelling_or_displayname(def_cursor) == vim.eval('expand("<cword>")')
 
         highlight_window(pobj.tu, window_tokens, def_cursor, file, resemantic, show_def_ref)
 
@@ -142,7 +142,7 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic, show_
     """
 
     if show_def_ref == 1 and def_cursor.kind.is_preprocessing():
-        vim_match_add('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(def_cursor.displayname), -1)
+        vim_match_add('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(get_spelling_or_displayname(def_cursor)), -1)
 
     
     #print decl_ref_cursor.kind
@@ -173,8 +173,14 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic, show_
             """
             if show_def_ref:
                 t_def_cursor = t_tu_cursor.get_definition()
-                if t_def_cursor is not None and t_def_cursor == def_cursor and t.spelling == def_cursor.displayname:
+                if t_def_cursor is not None and t_def_cursor == def_cursor and t.spelling == get_spelling_or_displayname(def_cursor):
                     vim_match_add('CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
+
+def get_spelling_or_displayname(cursor):
+    if cursor.spelling is not None:
+        return cursor.spelling
+
+    return cursor.displayname
 
 
 def vim_match_add(group, line, col, len, priority):
