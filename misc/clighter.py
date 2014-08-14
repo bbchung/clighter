@@ -5,19 +5,72 @@ from threading import Thread
 import time
 import threading
 
-class ParsingObject:
+class ParsingService:
     thread = None
-    run= 0
-    dict={}
-    idx = cindex.Index.create()
-    def __init__(self, buf, bufnr, bufname):
+    is_running= 0
+    instances={}
+    clang_idx = cindex.Index.create()
+    def __init__(self, bufnr, bufname):
         self.tu=None
         self.applied=1
-        self.timeup = time.time()
+        self.sched_time = time.time()
         self.bufnr = bufnr
         self.bufname = bufname
-        self.buf = buf
         self.lock = threading.Lock()
+
+    @staticmethod
+    def start_parsing_loop():
+        ParsingService.is_running = 1
+        ParsingService.thread = Thread(target=ParsingService.__parsing_worker, args=[vim.eval('g:clighter_clang_options')])
+        ParsingService.thread.start()
+
+    @staticmethod
+    def stop_parsing_loop():
+        ParsingService.is_running = 0
+        ParsingService.thread.join()
+        ParsingService.thread = None
+
+    @staticmethod
+    def __parsing_worker(args):
+        while ParsingService.is_running == 1:
+            try:
+                for pobj in ParsingService.instances.values():
+                    with pobj.lock:
+                        if pobj.sched_time is not None and time.time() > pobj.sched_time:
+                            if pobj.tu is None:
+                                pobj.tu = ParsingService.clang_idx.parse(pobj.bufname, args, [(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                            else:
+                                pobj.tu.reparse([(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+
+                            pobj.applied = 0
+                            pobj.sched_time = None
+            finally:
+                time.sleep(0.2)
+
+    @staticmethod
+    def join_all():
+        for buf in vim.buffers:
+            ext = os.path.splitext(buf.name)[1]
+            if ext in ['.c', '.cpp', '.h', '.hpp', '.m']:
+                ParsingService.instances[buf.number] = ParsingService(buf.number, buf.name) 
+
+    @staticmethod
+    def join():
+        ft = vim.eval("&filetype") 
+        if ft in ["c", "cpp", "objc"]:
+            ParsingService.instances[vim.current.buffer.number] = ParsingService(vim.current.buffer.number, vim.current.buffer.name) 
+
+    @staticmethod
+    def reset_current_sched():
+        pobj = ParsingService.instances.get(vim.current.buffer.number)
+        if pobj is None:
+            return
+
+        with pobj.lock:
+            pobj.sched_time = time.time() + 0.5
+
+
+
 
 window_size = int(vim.eval('g:clighter_window_size')) * 100
 
@@ -26,93 +79,36 @@ if g_libclang_file:
     cindex.Config.set_library_file(g_libclang_file)
 
 
-def join_parsing_loop_all():
-    for buf in vim.buffers:
-        ext = os.path.splitext(buf.name)[1]
-        if ext in ['.c', '.cpp', '.h', '.hpp', '.m']:
-            ParsingObject.dict[buf.number] = ParsingObject(buf, buf.number, buf.name) 
+def try_highlight():
+    global window_size
 
+    vim_win_top = int(vim.eval("line('w0')"))
+    vim_win_bottom = int(vim.eval("line('w$')"))
+    clighter_window = vim.current.window.vars["clighter_window"]
 
-def join_parsing_loop():
-    ft = vim.eval("&filetype") 
-    if ft in ["c", "cpp", "objc"]:
-        ParsingObject.dict[vim.current.buffer.number] = ParsingObject(vim.current.buffer, vim.current.buffer.number, vim.current.buffer.name) 
-
-
-def start_parsing_loop():
-    if ParsingObject.thread is not None:
-        return
-
-    ParsingObject.run = 1
-    ParsingObject.thread = Thread(target=parsing_worker, args=[vim.eval('g:clighter_clang_options')])
-    ParsingObject.thread.start()
-
-
-def stop_parsing_loop():
-    if ParsingObject.thread is None:
-        return
-
-    ParsingObject.run = 0
-    ParsingObject.thread.join()
-    ParsingObject.thread = None
-    
-
-def reset_timer():
-    pobj = ParsingObject.dict.get(vim.current.buffer.number)
+    pobj = ParsingService.instances.get(vim.current.buffer.number)
     if pobj is None:
         return
 
     with pobj.lock:
-        pobj.timeup = time.time() + 0.5
-        pobj.buf = vim.current.buffer
-
-
-def parsing_worker(args):
-    while ParsingObject.run == 1:
-        try:
-            for pobj in ParsingObject.dict.values():
-                with pobj.lock:
-                    if pobj.timeup is not None and time.time() > pobj.timeup:
-                        if pobj.tu is None:
-                            pobj.tu = ParsingObject.idx.parse(pobj.bufname, args, [(pobj.bufname, "\n".join(pobj.buf))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-                        else:
-                            pobj.tu.reparse([(pobj.bufname, "\n".join(pobj.buf))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-
-                        pobj.applied = 0
-                        pobj.timeup = None
-        finally:
-            time.sleep(0.2)
-
-
-def try_highlight():
-    global window_size
-    pobj = ParsingObject.dict.get(vim.current.buffer.number)
-
-    with pobj.lock:
-        if pobj is None or pobj.tu is None:
+        if pobj.tu is None:
             return
 
         file = pobj.tu.get_file(vim.current.buffer.name)
         if file == None: # should not happened
             return
 
-        w_top = int(vim.eval("line('w0')"))
-        w_bottom = int(vim.eval("line('w$')"))
-        window = vim.current.window.vars["window"]
-
-        resemantic = w_top < window[0] or w_bottom > window[1] or ParsingObject.dict[vim.current.buffer.number].applied == 0
+        need_update = vim_win_top < clighter_window[0] or vim_win_bottom > clighter_window[1] or pobj.applied == 0
 
         buflinenr = len(vim.current.buffer);
         if (window_size < 0):
-            vim.command("let w:window=[0, %d]" % buflinenr)
+            vim.command("let w:clighter_window=[0, %d]" % buflinenr)
             window_tokens = pobj.tu.cursor.get_tokens()
         else:
-            top_line = max(w_top - window_size, 1);
-            bottom_line = min(w_bottom + window_size, buflinenr)
-            vim.command("let w:window=[%d, %d]" %(top_line, bottom_line))
-            top = cindex.SourceLocation.from_position(pobj.tu, file, top_line, 1)
-            bottom = cindex.SourceLocation.from_position(pobj.tu, file, bottom_line, 1)
-            range = cindex.SourceRange.from_locations(top, bottom)
+            top_linenr = max(vim_win_top - window_size, 1);
+            bottom_linenr = min(vim_win_bottom + window_size, buflinenr)
+            vim.command("let w:clighter_window=[%d, %d]" %(top_linenr, bottom_linenr))
+            range = cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(pobj.tu, file, top_linenr, 1), cindex.SourceLocation.from_position(pobj.tu, file, bottom_linenr, 1))
             window_tokens = pobj.tu.get_tokens(extent=range)
 
         vim_cursor = None
@@ -121,28 +117,26 @@ def try_highlight():
             vim_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(pobj.tu, file, row, col + 1)) # cusor under vim-cursor
 
         def_cursor = None
-        if vim_cursor is not None:
+        if vim_cursor is not None and get_spelling_or_displayname(vim_cursor) == vim.eval('expand("<cword>")'):
             if vim_cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
                 def_cursor = vim_cursor
             else:
-                def_cursor = vim_cursor.get_definition()
+                def_cursor = get_definition_or_declaration(vim_cursor)
 
-        show_def_ref = def_cursor is not None and def_cursor.location.file.name == file.name and get_spelling_or_displayname(def_cursor) == vim.eval('expand("<cword>")')
-
-        highlight_window(pobj.tu, window_tokens, def_cursor, file, resemantic, show_def_ref)
+        highlight_window(pobj.tu, window_tokens, def_cursor, file, need_update)
 
 
-def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic, show_def_ref):
+def highlight_window(tu, window_tokens, def_cursor, file, need_update):
     vim.command("call s:clear_match(['CursorDefRef'])")
-    if resemantic:
+    if need_update:
         vim.command("call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr'])")
-        ParsingObject.dict[vim.current.buffer.number].applied = 1
+        ParsingService.instances[vim.current.buffer.number].applied = 1
 
     """ Do declaring highlighting'
     """
 
-    if show_def_ref == 1 and def_cursor.kind.is_preprocessing():
-        vim_match_add('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(get_spelling_or_displayname(def_cursor)), -1)
+    if def_cursor is not None and def_cursor.location.file.name == file.name and def_cursor.kind.is_preprocessing():
+        vim_matchaddpos('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(get_spelling_or_displayname(def_cursor)), -1)
 
     
     #print decl_ref_cursor.kind
@@ -151,30 +145,30 @@ def highlight_window(tu, window_tokens, def_cursor, curr_file, resemantic, show_
         """ Do semantic highlighting'
         """
         if t.kind.value == 2:
-            t_tu_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, curr_file, t.location.line, t.location.column))
+            t_tu_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, t.location.line, t.location.column))
 
-            if resemantic:
+            if need_update:
                 if t_tu_cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
-                    vim_match_add('MacroInstantiation', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_matchaddpos('MacroInstantiation', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.STRUCT_DECL:
-                    vim_match_add('StructDecl', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_matchaddpos('StructDecl', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.CLASS_DECL:
-                    vim_match_add('ClassDecl', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_matchaddpos('ClassDecl', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.ENUM_DECL:
-                    vim_match_add('EnumDecl', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_matchaddpos('EnumDecl', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
-                    vim_match_add('EnumConstantDecl', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_matchaddpos('EnumConstantDecl', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.TYPE_REF:
-                    vim_match_add('TypeRef', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_matchaddpos('TypeRef', t.location.line, t.location.column, len(t.spelling), -2)
                 elif t_tu_cursor.kind == cindex.CursorKind.DECL_REF_EXPR and t_tu_cursor.type.kind == cindex.TypeKind.ENUM:
-                    vim_match_add('EnumDeclRefExpr', t.location.line, t.location.column, len(t.spelling), -2)
+                    vim_matchaddpos('EnumDeclRefExpr', t.location.line, t.location.column, len(t.spelling), -2)
 
             """ Do definition/reference highlighting'
             """
-            if show_def_ref:
-                t_def_cursor = t_tu_cursor.get_definition()
+            if def_cursor is not None:
+                t_def_cursor = get_definition_or_declaration(t_tu_cursor)
                 if t_def_cursor is not None and t_def_cursor == def_cursor and t.spelling == get_spelling_or_displayname(def_cursor):
-                    vim_match_add('CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
+                    vim_matchaddpos('CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
 
 def get_spelling_or_displayname(cursor):
     if cursor.spelling is not None:
@@ -182,7 +176,14 @@ def get_spelling_or_displayname(cursor):
 
     return cursor.displayname
 
+def get_definition_or_declaration(cursor):
+    definition = cursor.get_definition()
+    if definition is not None:
+        return definition
 
-def vim_match_add(group, line, col, len, priority):
+    return cursor.referenced
+    
+
+def vim_matchaddpos(group, line, col, len, priority):
     vim.command("call matchaddpos('{0}', [[{1}, {2}, {3}]], {4})".format(group, line, col, len, priority))
     # vim.command("call add(w:semantic_list, matchadd('{0}', '\%{1}l\%>{2}c.\%<{3}c', -1))".format(group, t.location.line, t.location.column-1, t.location.column+len(t.spelling) + 1));
