@@ -65,5 +65,9 @@ endf
 
 fun! clighter#Rename()
     let a:new_name = input('rename '.expand('<cword>').' to: ')
+    if (empty(a:new_name))
+        return
+    endif
+
     py clighter.rename(vim.eval('a:new_name'))
 endf
