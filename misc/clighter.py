@@ -234,7 +234,12 @@ def rename(new):
     (row, col) = vim.current.window.cursor
     vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, row, col + 1)) # cusor under vim-cursor
     locs = []
-    dfs(tu.cursor, locs, get_definition_or_declaration(vim_cursor))
+
+    def_cur = get_definition_or_declaration(vim_cursor)
+    if def_cur.kind.is_preprocessing():
+        locs.append(def_cur.location)
+
+    dfs(tu.cursor, locs, def_cur)
 
     vim_replace(locs, get_spelling_or_displayname(vim_cursor), new)
 
