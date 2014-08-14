@@ -62,3 +62,8 @@ fun! clighter#Disable()
     windo call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
     exe a:wnr."wincmd w"
 endf
+
+fun! clighter#Rename()
+    let a:new_name = input('rename '.expand('<cword>').' to: ')
+    py clighter.rename(vim.eval('a:new_name'))
+endf

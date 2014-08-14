@@ -78,6 +78,47 @@ g_libclang_file = vim.eval("g:clighter_libclang_file")
 if g_libclang_file:
     cindex.Config.set_library_file(g_libclang_file)
 
+#def try_highlight2():
+    #vim_win_top = int(vim.eval("line('w0')"))
+    #vim_win_bottom = int(vim.eval("line('w$')"))
+    #clighter_window = vim.current.window.vars["clighter_window"]
+
+    #pobj = ParsingService.instances.get(vim.current.buffer.number)
+    #if pobj is None:
+        #return
+
+    #with pobj.lock:
+        #if pobj.tu is None:
+            #return
+
+        #file = pobj.tu.get_file(vim.current.buffer.name)
+        #if file == None: # should not happened
+            #return
+
+        #dfs(pobj.tu.cursor, vim_win_top, vim_win_bottom)
+
+#def bfs(c, top, bottom, queue):
+    #if c.location.line >= top and c.location.line <= bottom:
+        #draw_syntax_color(c)
+
+    #queue.put(c.get_children())
+
+    #while not queue.empty():
+        #curs = queue.get()
+        #for cur in curs:
+            #if cur.location.line >= top and cur.location.line <= bottom:
+                #draw_syntax_color(cur)
+
+            #queue.put(cur.get_children())
+
+
+#def dfs(cursor, top, bottom):
+    #if cursor.location.line >= top and cursor.location.line <= bottom:
+        #draw_syntax_color(cursor)
+
+    #for c in cursor.get_children():
+        #dfs(c, top, bottom)
+
 
 def try_highlight():
     global window_size
@@ -148,20 +189,7 @@ def highlight_window(tu, window_tokens, def_cursor, file, need_update):
             t_tu_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, t.location.line, t.location.column))
 
             if need_update:
-                if t_tu_cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
-                    vim_matchaddpos('MacroInstantiation', t.location.line, t.location.column, len(t.spelling), -2)
-                elif t_tu_cursor.kind == cindex.CursorKind.STRUCT_DECL:
-                    vim_matchaddpos('StructDecl', t.location.line, t.location.column, len(t.spelling), -2)
-                elif t_tu_cursor.kind == cindex.CursorKind.CLASS_DECL:
-                    vim_matchaddpos('ClassDecl', t.location.line, t.location.column, len(t.spelling), -2)
-                elif t_tu_cursor.kind == cindex.CursorKind.ENUM_DECL:
-                    vim_matchaddpos('EnumDecl', t.location.line, t.location.column, len(t.spelling), -2)
-                elif t_tu_cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
-                    vim_matchaddpos('EnumConstantDecl', t.location.line, t.location.column, len(t.spelling), -2)
-                elif t_tu_cursor.kind == cindex.CursorKind.TYPE_REF:
-                    vim_matchaddpos('TypeRef', t.location.line, t.location.column, len(t.spelling), -2)
-                elif t_tu_cursor.kind == cindex.CursorKind.DECL_REF_EXPR and t_tu_cursor.type.kind == cindex.TypeKind.ENUM:
-                    vim_matchaddpos('EnumDeclRefExpr', t.location.line, t.location.column, len(t.spelling), -2)
+                draw_syntax_color(t_tu_cursor)
 
             """ Do definition/reference highlighting'
             """
@@ -182,7 +210,56 @@ def get_definition_or_declaration(cursor):
         return definition
 
     return cursor.referenced
-    
+
+def draw_syntax_color(cursor):
+    if cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
+        vim_matchaddpos('MacroInstantiation', cursor.location.line, cursor.location.column, len(get_spelling_or_displayname(cursor)), -2)
+    elif cursor.kind == cindex.CursorKind.STRUCT_DECL:
+        vim_matchaddpos('StructDecl', cursor.location.line, cursor.location.column, len(get_spelling_or_displayname(cursor)), -2)
+    elif cursor.kind == cindex.CursorKind.CLASS_DECL:
+        vim_matchaddpos('ClassDecl', cursor.location.line, cursor.location.column, len(get_spelling_or_displayname(cursor)), -2)
+    elif cursor.kind == cindex.CursorKind.ENUM_DECL:
+        vim_matchaddpos('EnumDecl', cursor.location.line, cursor.location.column, len(get_spelling_or_displayname(cursor)), -2)
+    elif cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
+        vim_matchaddpos('EnumConstantDecl', cursor.location.line, cursor.location.column, len(get_spelling_or_displayname(cursor)), -2)
+    elif cursor.kind == cindex.CursorKind.TYPE_REF:
+        vim_matchaddpos('TypeRef', cursor.location.line, cursor.location.column, len(get_spelling_or_displayname(cursor)), -2)
+    elif cursor.kind == cindex.CursorKind.DECL_REF_EXPR and cursor.type.kind == cindex.TypeKind.ENUM:
+        vim_matchaddpos('EnumDeclRefExpr', cursor.location.line, cursor.location.column, len(get_spelling_or_displayname(cursor)), -2)
+
+def rename(new):
+    idx = cindex.Index.create()
+    tu = idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), [(vim.current.buffer.name, "\n".join(vim.buffers[vim.current.buffer.number]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    file = cindex.File.from_name(tu, vim.current.buffer.name)
+    (row, col) = vim.current.window.cursor
+    vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, row, col + 1)) # cusor under vim-cursor
+    locs = []
+    dfs(tu.cursor, locs, get_definition_or_declaration(vim_cursor))
+
+    vim_replace(locs, get_spelling_or_displayname(vim_cursor), new)
+
+
+def dfs(cursor, locs, def_cur):
+    if get_definition_or_declaration(cursor) is not None and get_definition_or_declaration(cursor) == def_cur:
+        locs.append(cursor.location)
+
+    for c in cursor.get_children():
+        dfs(c, locs, def_cur)
+
+
+def vim_replace(locs, old, new):
+    pattern = ""
+
+    for loc in locs:
+        if pattern:
+            pattern += "\|"
+
+        pattern += "\%" + str(loc.line) + "l" + "\%>" + str(loc.column - 1) + "v\%<" + str(loc.column + len(old) + 1) + "v" + old 
+
+    cmd = ":%s/" + pattern + "/" + new
+
+    vim.command(cmd)
+
 
 def vim_matchaddpos(group, line, col, len, priority):
     vim.command("call matchaddpos('{0}', [[{1}, {2}, {3}]], {4})".format(group, line, col, len, priority))
