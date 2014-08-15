@@ -158,10 +158,7 @@ def __try_highlight():
 
         def_cursor = None
         if vim_cursor is not None and get_spelling_or_displayname(vim_cursor) == vim.eval('expand("<cword>")'):
-            if vim_cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
-                def_cursor = vim_cursor
-            else:
-                def_cursor = get_definition_or_declaration(vim_cursor)
+            def_cursor = get_definition_or_declaration(vim_cursor)
 
         __highlight_window(pobj.tu, window_tokens, def_cursor, file, need_update)
 
@@ -197,13 +194,18 @@ def __highlight_window(tu, window_tokens, def_cursor, file, need_update):
                 if t_def_cursor is not None and t_def_cursor == def_cursor and t.spelling == get_spelling_or_displayname(def_cursor):
                     __vim_matchaddpos('CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
 
+
 def get_spelling_or_displayname(cursor):
     if cursor.spelling is not None:
         return cursor.spelling
 
     return cursor.displayname
 
+
 def get_definition_or_declaration(cursor):
+    if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
+        return cursor
+
     definition = cursor.get_definition()
     if definition is not None:
         return definition
@@ -249,7 +251,7 @@ def rename():
 
     __dfs(tu.cursor, locs, def_cur)
 
-    vim_replace(locs, get_spelling_or_displayname(vim_cursor), vim.eval("a:new_name"))
+    vim_replace(locs, get_spelling_or_displayname(def_cur), vim.eval("a:new_name"))
 
 
 def __dfs(cursor, locs, def_cur):
