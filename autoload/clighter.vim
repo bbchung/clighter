@@ -32,7 +32,7 @@ endf
 fun! s:try_highlight()
     let w:clighter_window = get(w:, 'clighter_window', [0, 0])
 
-    py clighter.try_highlight()
+    py clighter.__try_highlight()
 endf
 
 fun! clighter#Enable()
@@ -64,10 +64,5 @@ fun! clighter#Disable()
 endf
 
 fun! clighter#Rename()
-    let a:new_name = input('rename '.expand('<cword>').' to: ')
-    if (empty(a:new_name))
-        return
-    endif
-
-    py clighter.rename(vim.eval('a:new_name'))
+    py clighter.rename()
 endf
