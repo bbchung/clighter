@@ -65,4 +65,5 @@ endf
 
 fun! clighter#Rename()
     py clighter.rename()
+    syntax on
 endf
