@@ -218,10 +218,10 @@ def draw_token(token):
         _vim_matchaddpos('EnumDeclRefExpr', token.location.line, token.location.column, len(token.spelling), -2)
 
 
-def search_and_rename_global_symbol(sym_name, kind, new_name):
+def search_and_rename_global_symbol(sym_name, kind, parent_kind, new_name):
     tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), [(vim.current.buffer.name, "\n".join(vim.buffers[vim.current.buffer.number]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
     locs = set()
-    def_cursor = _search_global_cursor(tu, tu.cursor, sym_name, kind)
+    def_cursor = _search_global_cursor(tu, tu.cursor, sym_name, kind, parent_kind)
     if def_cursor is None:
         return
 
@@ -263,9 +263,9 @@ def rename():
     if choice == 2:
         return
 
-    cmd = "bufdo! py clighter.search_and_rename_global_symbol(\"{0}\", clighter.cindex.{1}, \"{2}\")".format(get_spelling_or_displayname(def_cur), def_cur.kind, vim.eval("a:new_name"))
+    cmd = "bufdo! py clighter.search_and_rename_global_symbol(\"{0}\", clighter.cindex.{1}, clighter.cindex.{2}, \"{3}\")".format(get_spelling_or_displayname(def_cur), def_cur.kind, def_cur.semantic_parent.kind, vim.eval("a:new_name"))
     vim.command(cmd)
-    vim.command(":bn")
+    vim.command(":silent! bn")
 
 
 def _search_cursors_with_define(cursor, def_cur, locs):
@@ -278,12 +278,12 @@ def _search_cursors_with_define(cursor, def_cur, locs):
         _search_cursors_with_define(c, def_cur, locs)
 
 
-def _search_global_cursor(tu, cursor, symbol, kind):
-    if get_spelling_or_displayname(cursor) == symbol and (cursor.kind.is_preprocessing() or cursor.semantic_parent.kind == cindex.CursorKind.TRANSLATION_UNIT or cursor.semantic_parent.kind == cindex.CursorKind.STRUCT_DECL or cursor.semantic_parent.kind == cindex.CursorKind.CLASS_DECL):
+def _search_global_cursor(tu, cursor, symbol, kind, parent_kind):
+    if get_spelling_or_displayname(cursor) == symbol and (cursor.kind.is_preprocessing() or cursor.semantic_parent.kind == parent_kind):
         return cursor
 
     for c in cursor.get_children():
-        result = _search_global_cursor(tu, c, symbol, kind)
+        result = _search_global_cursor(tu, c, symbol, kind, parent_kind)
         if result is not None:
             return result
 
