@@ -32,7 +32,7 @@ endf
 fun! s:try_highlight()
     let w:clighter_window = get(w:, 'clighter_window', [0, 0])
 
-    py clighter.__try_highlight()
+    py clighter._highlight_window()
 endf
 
 fun! clighter#Enable()
@@ -47,8 +47,8 @@ fun! clighter#Enable()
             au CursorHold *.[ch],*.[ch]pp,*.m call s:try_highlight()
         endif
         au WinEnter *.[ch],*.[ch]pp,*.m call s:try_highlight()
-        au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ParsingService.reset_current_sched()
-        au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ParsingService.reset_current_sched()
+        au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ParsingService.reset_sched()
+        au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ParsingService.reset_sched()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ParsingService.join()
         au BufWinEnter * call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
         au VimLeavePre * py clighter.ParsingService.stop_parsing_loop()
