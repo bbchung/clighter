@@ -221,7 +221,6 @@ def draw_token(token):
 def search_and_rename_global_symbol(sym_name, kind, new_name):
     tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), [(vim.current.buffer.name, "\n".join(vim.buffers[vim.current.buffer.number]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
     locs = set()
-
     def_cursor = _search_global_cursor(tu, tu.cursor, sym_name, kind)
     if def_cursor is None:
         return
@@ -280,7 +279,7 @@ def _search_cursors_with_define(cursor, def_cur, locs):
 
 
 def _search_global_cursor(tu, cursor, symbol, kind):
-    if get_spelling_or_displayname(cursor) == symbol and (cursor.kind.is_preprocessing() or cursor.semantic_parent.displayname == vim.current.buffer.name):
+    if get_spelling_or_displayname(cursor) == symbol and (cursor.kind.is_preprocessing() or cursor.semantic_parent.kind == cindex.CursorKind.TRANSLATION_UNIT or cursor.semantic_parent.kind == cindex.CursorKind.STRUCT_DECL or cursor.semantic_parent.kind == cindex.CursorKind.CLASS_DECL):
         return cursor
 
     for c in cursor.get_children():
