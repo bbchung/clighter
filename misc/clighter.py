@@ -152,7 +152,7 @@ def _highlight_window():
 
         def_cursor = None
         if vim_cursor is not None:
-            def_cursor = get_definition_or_declaration(vim_cursor)
+            def_cursor = get_definition_or_declaration(vim_cursor, True)
 
         vim.command("call s:clear_match(['CursorDefRef'])")
         invalid = vim_win_top < clighter_window[0] or vim_win_bottom > clighter_window[1] or pobj.applied == 0
@@ -175,7 +175,7 @@ def _highlight_window():
                 """ Do definition/reference highlighting'
                 """
                 if def_cursor is not None and def_cursor.location.file.name == file.name:
-                    t_def_cursor = get_definition_or_declaration(t_tu_cursor)
+                    t_def_cursor = get_definition_or_declaration(t_tu_cursor, False)
                     if t_def_cursor is not None and t_def_cursor == def_cursor:
                         _vim_matchaddpos('CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
 
@@ -188,7 +188,7 @@ def get_spelling_or_displayname(cursor):
     return cursor.displayname
 
 
-def get_definition_or_declaration(cursor):
+def get_definition_or_declaration(cursor, check_cword):
     if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
         return cursor
 
@@ -196,7 +196,7 @@ def get_definition_or_declaration(cursor):
     if def_cur is None:
         def_cur = cursor.referenced
 
-    if def_cur is not None and vim.eval('expand("<cword>")') != get_spelling_or_displayname(def_cur):
+    if check_cword and def_cur is not None and vim.eval('expand("<cword>")') != get_spelling_or_displayname(def_cur):
         def_cur = None
 
     return def_cur
@@ -217,18 +217,19 @@ def draw_token(token):
     elif token.kind == cindex.CursorKind.DECL_REF_EXPR and token.type.kind == cindex.TypeKind.ENUM:
         _vim_matchaddpos('EnumDeclRefExpr', token.location.line, token.location.column, len(token.spelling), -2)
 
+
 def search_and_rename_global_symbol(sym_name, kind, new_name):
     tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), [(vim.current.buffer.name, "\n".join(vim.buffers[vim.current.buffer.number]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-    locs = []
+    locs = set()
 
-    cursor = _search_global_cursor(tu, tu.cursor, sym_name, kind)
-    if cursor is None:
+    def_cursor = _search_global_cursor(tu, tu.cursor, sym_name, kind)
+    if def_cursor is None:
         return
 
-    if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
-        locs.append(cursor.location)
+    if def_cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
+        locs.add((def_cursor.location.line, def_cursor.location.column))
 
-    _search_cursors_with_define(tu.cursor, cursor, locs)
+    _search_cursors_with_define(tu.cursor, def_cursor, locs)
 
     _vim_replace(locs, sym_name, new_name)
 
@@ -238,37 +239,48 @@ def rename():
     file = cindex.File.from_name(tu, vim.current.buffer.name)
     (row, col) = vim.current.window.cursor
     vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, row, col + 1)) # cusor under vim-cursor
-    locs = []
+    locs = set()
 
-    def_cur = get_definition_or_declaration(vim_cursor)
-    if def_cur is None or def_cur.location.file.name != file.name:
+    def_cur = get_definition_or_declaration(vim_cursor, True)
+    if def_cur is None:
+        print "nnnn"
         return
 
-    vim.command("let a:new_name = input('rename {0} to: ')".format(def_cur.spelling))
+    vim.command("let a:new_name = input('rename {0} to: ')".format(get_spelling_or_displayname(def_cur)))
     
     if not vim.eval("a:new_name"):
         return
 
     if def_cur.kind.is_preprocessing():
-        locs.append(def_cur.location)
+        locs.add((def_cur.location.line, def_cur.location.column))
 
     _search_cursors_with_define(tu.cursor, def_cur, locs)
 
     _vim_replace(locs, get_spelling_or_displayname(def_cur), vim.eval("a:new_name"))
-    #search_and_rename_global_symbol("foo", cindex.CursorKind.FUNCTION_DECL, "bar")
+
+    cmd = "let l:choice = confirm(\"also rename other buffers?\", \"&Yes\n&No\", 2)"
+    vim.command(cmd)
+
+    choice = int(vim.eval("l:choice"))
+    if choice == 2:
+        return
+
+    cmd = "bufdo! py clighter.search_and_rename_global_symbol(\"{0}\", clighter.cindex.{1}, \"{2}\")".format(get_spelling_or_displayname(def_cur), def_cur.kind, vim.eval("a:new_name"))
+    vim.command(cmd)
 
 
 def _search_cursors_with_define(cursor, def_cur, locs):
-    cur_def = get_definition_or_declaration(cursor)
+    cur_def = get_definition_or_declaration(cursor, False)
+
     if cur_def is not None and cur_def == def_cur:
-        locs.append(cursor.location)
+        locs.add((cursor.location.line, cursor.location.column))
 
     for c in cursor.get_children():
         _search_cursors_with_define(c, def_cur, locs)
 
 
 def _search_global_cursor(tu, cursor, symbol, kind):
-    if get_spelling_or_displayname(cursor) == symbol and cursor.kind == kind and cursor.semantic_parent.displayname == vim.current.buffer.name:
+    if get_spelling_or_displayname(cursor) == symbol and cursor.kind == kind and (cursor.kind.is_preprocessing() or cursor.semantic_parent.displayname == vim.current.buffer.name):
         return cursor
 
     for c in cursor.get_children():
@@ -292,13 +304,13 @@ def _vim_replace(locs, old, new):
 
     pattern = ""
 
-    for loc in locs:
+    for line, column in locs:
         if pattern:
             pattern += "\|"
 
-        pattern += "\%" + str(loc.line) + "l" + "\%>" + str(loc.column - 1) + "v\%<" + str(loc.column + len(old) + 1) + "v" + old 
+        pattern += "\%" + str(line) + "l" + "\%>" + str(column - 1) + "v\%<" + str(column + len(old) + 1) + "v" + old 
 
-    cmd = ":%s/" + pattern + "/" + new + "/gI"
+    cmd = ":silent! %s/" + pattern + "/" + new + "/gI"
 
     vim.command(cmd)
 
