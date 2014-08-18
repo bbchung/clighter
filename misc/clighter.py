@@ -243,7 +243,6 @@ def rename():
 
     def_cur = get_definition_or_declaration(vim_cursor, True)
     if def_cur is None:
-        print "nnnn"
         return
 
     vim.command("let a:new_name = input('rename {0} to: ')".format(get_spelling_or_displayname(def_cur)))
@@ -281,7 +280,7 @@ def _search_cursors_with_define(cursor, def_cur, locs):
 
 
 def _search_global_cursor(tu, cursor, symbol, kind):
-    if get_spelling_or_displayname(cursor) == symbol and cursor.kind == kind and (cursor.kind.is_preprocessing() or cursor.semantic_parent.displayname == vim.current.buffer.name):
+    if get_spelling_or_displayname(cursor) == symbol and (cursor.kind.is_preprocessing() or cursor.semantic_parent.displayname == vim.current.buffer.name):
         return cursor
 
     for c in cursor.get_children():
