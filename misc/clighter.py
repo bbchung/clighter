@@ -267,6 +267,7 @@ def rename():
 
     cmd = "bufdo! py clighter.search_and_rename_global_symbol(\"{0}\", clighter.cindex.{1}, \"{2}\")".format(get_spelling_or_displayname(def_cur), def_cur.kind, vim.eval("a:new_name"))
     vim.command(cmd)
+    vim.command(":bn")
 
 
 def _search_cursors_with_define(cursor, def_cur, locs):
