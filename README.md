@@ -1,4 +1,4 @@
-# Clighter: Plugin to improve c-family development environment based on Clang
+# Clighter: VIM plugin to improve c-family development environment based on Clang
 
 ## Intro
 
