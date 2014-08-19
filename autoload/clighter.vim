@@ -64,6 +64,5 @@ fun! clighter#Disable()
 endf
 
 fun! clighter#Rename()
-    py clighter.rename()
-    syntax on
+    py clighter.refactor_rename()
 endf
