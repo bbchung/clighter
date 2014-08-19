@@ -131,6 +131,11 @@ Rename-refactor the variable/function name under vim cursor~
 >
 	clighter#Rename()
 <
+    	For convenience, you can add this key map:
+>
+    	nmap <silent> <Leader>r :call clighter#Rename()<CR>
+>
+
 
 ==============================================================================
 						*clighter-colors*

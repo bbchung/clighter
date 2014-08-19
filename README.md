@@ -98,6 +98,11 @@ Clighter provides these commands and functions
 	* Makesure that you have save all files before calling this function.
 
 	`clighter#Rename()`
+    
+    For convenience, you can add this key map:
+	```vim
+    nmap <silent> <Leader>r :call clighter#Rename()<CR>
+	```
 
 
 ## Customize Colors
