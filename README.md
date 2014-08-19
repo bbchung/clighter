@@ -2,36 +2,32 @@
 
 ## Intro
 
-Clighter(Clang Highlighter) is a c-family semantic highlighting plugin for
-Vim, based on Clang. Clighter use libclang to enhance c-family source code
-highlighting from Vim builtin syntax highlighting to semantic highlighting.
-Clighter doesn't disable the builtin syntax highlighting, but just "append"
-the semantic highlighting into the code.  
+Clighter(C Lighter) is a vim plugin that integrates the libclang to improve c-family development environment.
+Currently.
 
-Clighter provides the following features:
+Clighter currently provides the following features(for c-family):
 
-* Automatically do semantic highlighting for c-family source code.
-* Automatically mark all words that with the same definition
+* Automatically do semantic highlighting
+* Automatically highlight all words that with the same definition
 * Options to customize the colors
+* Experimental function to do rename-refactoring
 
 ![clighter demo](http://goo.gl/ivfipF "Enable Clighter")
 ![clighter demo](http://goo.gl/zq2Epq "Disable Clighter")
 
 ## Requirements
 
-The clighter plugin requires the following:
+Clighter requires the following:
 
 * Vim version 7.4+ with python2.x enabled
-* libclang
+* libclang(only 3.5 has been tested)
 
-Clighter has been tested in linux platform only
-
+Clighter only has been tested in linux platform
 
 ## Options
 
 ### g:clighter_autostart
-Clighter will automatically start with Vim if set g:clighter_autostart to `1`,
-otherwise, you have to manually start Clighter by ClighterEnable command.
+Clighter will automatically start syntax highlight engine if g:clighter_autostart == `1`.
 
 Default: `1`
 ```vim
@@ -40,10 +36,9 @@ let g:clighter_autostart = 0
 
 ### g:clighter_window_size
 
-Clighter uses vim regular expression engine to do syntax highlighting,
-but vim's RE engine performs very bad when there are too many rules. Clighter
-highlights a given region instead of whole buffer while cursor is moved, to get
-the good performance even when the buffer is very large. 
+Clighter uses vim's regular expression engine to do syntax highlighting,
+however, vim's RE engine performs bad while there are too many re rules. To avoid too many re rules,
+Clighter only highlights a given region(window) instead of whole buffer.
 	
 * `< 0`: highlight whole buffer.
 * `>= 0`: highlight from top line number reduce 100 * clighter_window_size to bottom line number plug 100 * clighter_window_size of screen.
@@ -56,9 +51,8 @@ let g:clighter_window_size = 0 " highlight current screen of window
 
 ### g:clighter_clang_options
 
-The compiler options for Clang. Sometimes Clighter doesn't do correct
-highlighting cause Clang can't parse the source code without necessary
-options, so you need tell Clang how to parse the code.
+The compiler options for Clang. Clighter will pass these options to libclang
+to parse the code.
 
 Default: `[]`
 ```vim
@@ -67,8 +61,7 @@ let g:clighter_clang_options = ['-std=c++', '-DLinux']
 
 ### g:clighter_libclang_file
 
-If your libclang is not in default path of system, tell Clighter by this
-option.
+The path of libclang.
 
 Default: `''`
 ```vim
@@ -76,37 +69,38 @@ let g:clighter_libclang_file = '/usr/lib/libclang.so'
 ```
 ### g:clighter_realtime
 
-Highlight the code in realtime(CursorMoved event), rather than when cursor is
-idle for a while(CursorHold event). By testing, a normal x86 machine can turn
-on the realtime highlighting without delay, however if you feel vim is
-delay, turn off this option.
+Do syntax highlighting in realtime(CursorMoved event), rather than while cursor is
+idle for a time(CursorHold event). Turn off this option may improve the performance.
 
 Default: `1`
 ```vim
 let g:clighter_realtime = 1
 ```
 
-## Commands
+## Commands and Functions
 
-Clighter provides command to control it
+Clighter provides these commands and functions
 
-* Enable Clighter
+* Enable Clighter's syntax highlight engine
 
-	`ClighterEnable`
+	`ClighterEnable` command
 
-* Disable Clighter
+* Disable Clighter's syntax highlight engine
 
-	Notice that is will not disable the cursor highlighting.
-
-	`ClighterDisable`
+	`ClighterDisable` command
 
 * Toggle cursor highlighting
 
-	`ClighterToggleCursorHL`
+	`ClighterToggleCursorHL` command
+
+* Rename-refactor the variable/function name under vim cursor
+
+	`clighter#Rename()` function
+
 
 ## Customize Colors
 
-Clighter defines the following syntax group corresponding to CursorKing of Clang.
+Clighter defines the following syntax group corresponding to CursorKind of libclang.
 
 * MacroInstantiation
 	```vim
