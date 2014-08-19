@@ -217,10 +217,10 @@ def draw_token(token):
         _vim_matchaddpos('EnumDeclRefExpr', token.location.line, token.location.column, len(token.spelling), -2)
 
 
-def search_and_rename_symbol(sym_name, new_name, kind, parent_kind):
+def search_and_rename_symbol(sym_name, new_name, kind, parent_kind, parent_sym):
     tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), [(vim.current.buffer.name, "\n".join(vim.buffers[vim.current.buffer.number]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
     locs = set()
-    def_cursor = _search_first_cursor_by_kind(tu, tu.cursor, sym_name, kind, parent_kind)
+    def_cursor = _search_first_cursor_by_kind(tu, tu.cursor, sym_name, kind, parent_kind, parent_sym)
     if def_cursor is None:
         return
 
@@ -266,11 +266,11 @@ def refactor_rename():
         return
 
     saved_bufnr = vim.current.buffer.number 
-    parent_kind = None
+    parent = [None, None]
     if def_cursor.semantic_parent is not None:
-       parent_kind = "clighter.cindex.{0}".format(def_cursor.semantic_parent.kind)
+       parent = ["clighter.cindex.{0}".format(def_cursor.semantic_parent.kind), get_spelling_or_displayname(def_cursor.semantic_parent)]
 
-    cmd = "bufdo! py clighter.search_and_rename_symbol(\"{0}\", \"{1}\", clighter.cindex.{2}, {3})".format(get_spelling_or_displayname(def_cursor), vim.eval("a:new_name"), def_cursor.kind, parent_kind)
+    cmd = "bufdo! py clighter.search_and_rename_symbol(\"{0}\", \"{1}\", clighter.cindex.{2}, {3}, \"{4}\")".format(get_spelling_or_displayname(def_cursor), vim.eval("a:new_name"), def_cursor.kind, parent[0], parent[1])
     vim.command(cmd)
     vim.command(":silent! buf {0}".format(saved_bufnr))
     vim.command("syntax on")
@@ -286,12 +286,12 @@ def _search_all_cursors_by_define(cursor, def_cursor, locs):
         _search_all_cursors_by_define(c, def_cursor, locs)
 
 
-def _search_first_cursor_by_kind(tu, cursor, symbol, kind, parent_kind):
-    if get_spelling_or_displayname(cursor) == symbol and (cursor.kind.is_preprocessing() or cursor.semantic_parent.kind == parent_kind):
+def _search_first_cursor_by_kind(tu, cursor, symbol, kind, parent_kind, parent_sym):
+    if get_spelling_or_displayname(cursor) == symbol and (cursor.kind.is_preprocessing() or cursor.semantic_parent.kind.is_translation_unit() or (cursor.semantic_parent.kind == parent_kind and get_spelling_or_displayname(cursor.semantic_parent) == parent_sym)):
         return cursor
 
     for c in cursor.get_children():
-        cursor = _search_first_cursor_by_kind(tu, c, symbol, kind, parent_kind)
+        cursor = _search_first_cursor_by_kind(tu, c, symbol, kind, parent_kind, parent_sym)
         if cursor is not None:
             return cursor
 
