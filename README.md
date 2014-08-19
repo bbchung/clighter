@@ -1,9 +1,9 @@
-# Clighter: plugin to improve c-family development environment based on Clang
+# Clighter: Plugin to improve c-family development environment based on Clang
 
 ## Intro
 
-Clighter(C Lighter) is a vim plugin that integrates the libclang to improve c-family development environment,
-and it currently provides the following features(for c-family):
+Clighter(C Lighter) is a vim plugin that integrates the libclang to improve c-family
+development environment, and it currently provides the following features(for c-family):
 
 * Automatically do semantic highlighting
 * Automatically highlight all words that with the same definition
@@ -34,12 +34,13 @@ let g:clighter_autostart = 0
 
 ### g:clighter_window_size
 
-Clighter uses vim's regular expression(RE) engine to do syntax highlighting,
-however, vim's RE engine performs bad while there are too many RE rules. To avoid too many RE rules,
-Clighter only highlights a given region(window) instead of whole buffer.
+Clighter uses vim's regular expression(RE) engine to do syntax highlighting, however,
+vim's RE engine performs bad while there are too many RE rules. To avoid too many RE
+rules, Clighter only highlights a given region(window) instead of whole buffer.
 	
 * `< 0`: highlight whole buffer.
-* `>= 0`: highlight from top line number reduce 100 * clighter_window_size to bottom line number plug 100 * clighter_window_size of screen.
+* `>= 0`: highlight from top line number reduce 100 * clighter_window_size to bottom line
+number plug 100 * clighter_window_size of screen.
 
 Default: `1`
 ```vim
@@ -67,7 +68,8 @@ let g:clighter_libclang_file = '/usr/lib/libclang.so'
 ```
 ### g:clighter_realtime
 
-Do syntax highlighting in realtime(by CursorMoved event). Turn off this option may improve the performance.
+Do syntax highlighting in realtime(by CursorMoved event). Turn off this option may improve
+the performance.
 
 Default: `1`
 ```vim
@@ -80,15 +82,15 @@ Clighter provides these commands and functions
 
 * Enable Clighter's syntax highlight engine
 
-	`ClighterEnable` command
+	`ClighterEnable`
 
 * Disable Clighter's syntax highlight engine
 
-	`ClighterDisable` command
+	`ClighterDisable`
 
 * Toggle cursor highlighting
 
-	`ClighterToggleCursorHL` command
+	`ClighterToggleCursorHL`
 
 * Rename-refactor the variable/function name under vim cursor
 	* It's a experimental function
@@ -147,8 +149,8 @@ You can customize these colors in your colorscheme, for example:
 ## FAQ
 
 ### The clighter plugin doesn't work.
-Vim version 7.4+ with python2.x is required, and make sure libclang(3.5 has been tested only) is installed
-correctly and set g:clighter_libclang_file if need.
+Vim version 7.4+ with python2.x is required, and make sure libclang(3.5 has been tested
+only) is installed correctly and set g:clighter_libclang_file if need.
 
 ### Highlighting is not quick-response
 Clighter use CursorHold event to update the current window highlighting,
@@ -158,13 +160,14 @@ value and pray your Clang run faster. Notice that many other plugins will
 change updatetime. If the code includes the header file that was modified,
 you must save the header.
 ```vim
+	let g:clighter_realtime = 1
 	set updatetime=1200
 ```
 ### Why rename-refactoring function is an experimental function
 Libclang doesn't provide direct way to do rename-refactoring, so Clighter needs to
-give its own way to search the AST. The search method is relatively easy and reliable when there
-is only single file, but when there are many files, Clighter can't gurantee the result of
-rename-factoring is totally correct.
+give its own way to search the AST. The search method is relatively easy and reliable when
+there is only single file, but when there are many files, Clighter can't gurantee the
+result of rename-factoring is totally correct.
 
 
 [1]: http://goo.gl/ncGLYC
