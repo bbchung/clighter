@@ -2,10 +2,8 @@
 
 ## Intro
 
-Clighter(C Lighter) is a vim plugin that integrates the libclang to improve c-family development environment.
-Currently.
-
-Clighter currently provides the following features(for c-family):
+Clighter(C Lighter) is a vim plugin that integrates the libclang to improve c-family development environment,
+and it currently provides the following features(for c-family):
 
 * Automatically do semantic highlighting
 * Automatically highlight all words that with the same definition
