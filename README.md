@@ -92,7 +92,7 @@ Clighter provides these commands and functions
 
 * Rename-refactor the variable/function name under vim cursor
 	* It's a experimental function
-	* It only processes the files that have been opened in vim's buffer already.
+	* It only processes the files that have been opened in vim's buffer list already.
 	* Makesure that you have save all files before calling this function.
 
 	`clighter#Rename()`
