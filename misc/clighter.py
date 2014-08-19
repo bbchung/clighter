@@ -266,7 +266,11 @@ def refactor_rename():
         return
 
     saved_bufnr = vim.current.buffer.number 
-    cmd = "bufdo! py clighter.search_and_rename_symbol(\"{0}\", \"{1}\", clighter.cindex.{2}, clighter.cindex.{3})".format(get_spelling_or_displayname(def_cursor), vim.eval("a:new_name"), def_cursor.kind, def_cursor.semantic_parent.kind)
+    parent_kind = None
+    if def_cursor.semantic_parent is not None:
+       parent_kind = "clighter.cindex.{0}".format(def_cursor.semantic_parent.kind)
+
+    cmd = "bufdo! py clighter.search_and_rename_symbol(\"{0}\", \"{1}\", clighter.cindex.{2}, {3})".format(get_spelling_or_displayname(def_cursor), vim.eval("a:new_name"), def_cursor.kind, parent_kind)
     vim.command(cmd)
     vim.command(":silent! buf {0}".format(saved_bufnr))
     vim.command("syntax on")
@@ -294,7 +298,7 @@ def _search_first_cursor_by_kind(tu, cursor, symbol, kind, parent_kind):
     return None
 
 def _is_symbol_cursor(cursor):
-    return cursor.semantic_parent.kind != cindex.CursorKind.FUNCTION_DECL
+    return cursor.kind.is_preprocessing() or cursor.semantic_parent.kind != cindex.CursorKind.FUNCTION_DECL
 
 
 def _get_identifier_token(cursor):
