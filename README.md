@@ -1,4 +1,4 @@
-# Clighter: plugin for improve c-family development environment based on Clang
+# Clighter: plugin to improve c-family development environment based on Clang
 
 ## Intro
 
