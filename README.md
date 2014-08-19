@@ -34,8 +34,8 @@ let g:clighter_autostart = 0
 
 ### g:clighter_window_size
 
-Clighter uses vim's regular expression engine to do syntax highlighting,
-however, vim's RE engine performs bad while there are too many re rules. To avoid too many re rules,
+Clighter uses vim's regular expression(RE) engine to do syntax highlighting,
+however, vim's RE engine performs bad while there are too many RE rules. To avoid too many RE rules,
 Clighter only highlights a given region(window) instead of whole buffer.
 	
 * `< 0`: highlight whole buffer.
@@ -67,8 +67,7 @@ let g:clighter_libclang_file = '/usr/lib/libclang.so'
 ```
 ### g:clighter_realtime
 
-Do syntax highlighting in realtime(CursorMoved event), rather than while cursor is
-idle for a time(CursorHold event). Turn off this option may improve the performance.
+Do syntax highlighting in realtime(by CursorMoved event). Turn off this option may improve the performance.
 
 Default: `1`
 ```vim
@@ -93,7 +92,12 @@ Clighter provides these commands and functions
 
 * Rename-refactor the variable/function name under vim cursor
 
-	`clighter#Rename()` function
+	`clighter#Rename()` function(Experimental Function)
+
+	Notice:
+		* It's a experimental function
+		* It only processes the files that have been opened in vim's buffer already.
+		* Makesure that you have save all files before calling this function.
 
 
 ## Customize Colors
@@ -145,7 +149,7 @@ You can customize these colors in your colorscheme, for example:
 ## FAQ
 
 ### The clighter plugin doesn't work.
-Vim version 7.4+ with python2.x is required, and make sure libclang is installed
+Vim version 7.4+ with python2.x is required, and make sure libclang(3.5 has been tested only) is installed
 correctly and set g:clighter_libclang_file if need.
 
 ### Highlighting is not quick-response
@@ -158,5 +162,12 @@ you must save the header.
 ```vim
 	set updatetime=1200
 ```
+### Why rename-refactoring function is an experimental function
+Libclang doesn't provide direct way to do rename-refactoring, so Clighter needs to
+give its own way to search the AST. The search method is relatively easy and reliable when there
+is only single file, but when there are many files, Clighter can't gurantee the result of
+rename-factoring is totally correct.
+
+
 [1]: http://goo.gl/ncGLYC
 [2]: http://goo.gl/4QCv6O
