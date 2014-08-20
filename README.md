@@ -93,8 +93,9 @@ Clighter provides these commands and functions
 	`ClighterToggleCursorHL`
 
 * Rename-refactor the variable/function name under vim cursor
-	* It's a experimental function
-	* It only processes the files that have been opened in vim's buffer list already.
+	* It's a experimental function and maybe not reliable
+	* It's not project based(only processes the files that have been opened in vim's
+	  buffer list already)
 	* Makesure that you have save all files before calling this function.
 
 	`clighter#Rename()`
