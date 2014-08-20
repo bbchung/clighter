@@ -235,7 +235,7 @@ def _search_and_rename(usr, new_name):
         return
 
     locs = set()
-    locs.add((def_cursor.location.line, def_cursor.location.column))
+    locs.add((def_cursor.location.line, def_cursor.location.column, def_cursor.location.file.name))
 
     _search_cursors_by_define(tu.cursor, def_cursor, locs)
     _vim_replace(locs, get_spelling_or_displayname(def_cursor), new_name)
@@ -274,7 +274,7 @@ def refactor_rename():
         return
 
     locs = set()
-    locs.add((def_cursor.location.line, def_cursor.location.column))
+    locs.add((def_cursor.location.line, def_cursor.location.column, def_cursor.location.file.name))
 
     _search_cursors_by_define(tu.cursor, def_cursor, locs)
 
@@ -297,7 +297,7 @@ def _search_cursors_by_define(cursor, def_cursor, locs):
     cursor_def = get_definition_or_declaration(cursor, False)
 
     if cursor_def is not None and cursor_def == def_cursor:
-        locs.add((cursor.location.line, cursor.location.column))
+        locs.add((cursor.location.line, cursor.location.column, cursor.location.file.name))
 
     for c in cursor.get_children():
         _search_cursors_by_define(c, def_cursor, locs)
@@ -313,7 +313,10 @@ def _vim_replace(locs, old, new):
 
     pattern = ""
 
-    for line, column in locs:
+    for line, column, file in locs:
+        if file is None or file != vim.current.buffer.name:
+            continue
+
         if pattern:
             pattern += "\|"
 
