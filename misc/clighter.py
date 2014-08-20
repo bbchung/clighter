@@ -221,9 +221,9 @@ def draw_token(token, type):
 
 def cross_buffer_rename(usr, new_name):
     saved_bufnr = vim.current.buffer.number 
-    cmd = "bufdo! py clighter._search_and_rename(\"{0}\", \"{1}\")".format(usr, new_name)
+    cmd = "silent bufdo! py clighter._search_and_rename(\"{0}\", \"{1}\")".format(usr, new_name)
     vim.command(cmd)
-    vim.command(":silent! buf {0}".format(saved_bufnr))
+    vim.command("silent! buf {0}".format(saved_bufnr))
     vim.command("syntax on")
 
 
