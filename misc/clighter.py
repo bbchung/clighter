@@ -221,7 +221,7 @@ def draw_token(token, type):
 
 def cross_buffer_rename(usr, new_name):
     saved_bufnr = vim.current.buffer.number 
-    cmd = "silent bufdo! py clighter._search_and_rename(\"{0}\", \"{1}\")".format(usr, new_name)
+    cmd = "bufdo! py clighter._search_and_rename(\"{0}\", \"{1}\")".format(usr, new_name)
     vim.command(cmd)
     vim.command("silent! buf {0}".format(saved_bufnr))
     vim.command("syntax on")
@@ -229,6 +229,7 @@ def cross_buffer_rename(usr, new_name):
 
 def _search_and_rename(usr, new_name):
     tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), [(vim.current.buffer.name, "\n".join(vim.buffers[vim.current.buffer.number]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+
     def_cursor = _search_cursor_by_usr(tu, tu.cursor, usr)
     if def_cursor is None:
         return
@@ -241,7 +242,7 @@ def _search_and_rename(usr, new_name):
 
 
 def _search_cursor_by_usr(tu, cursor, usr):
-    if cursor.get_usr() == usr:
+    if cursor.get_usr() == usr and vim.current.buffer.name == cursor.location.file.name:
         return cursor
 
     for c in cursor.get_children():
@@ -253,6 +254,10 @@ def _search_cursor_by_usr(tu, cursor, usr):
 
 
 def refactor_rename():
+    ft = vim.eval("&filetype") 
+    if ft not in ["c", "cpp", "objc"]:
+        return
+
     tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), [(vim.current.buffer.name, "\n".join(vim.buffers[vim.current.buffer.number]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
     file = cindex.File.from_name(tu, vim.current.buffer.name)
     (row, col) = vim.current.window.cursor
