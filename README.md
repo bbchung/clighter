@@ -1,4 +1,4 @@
-# Clighter: Plugin to improve c-family development environment based on Clang
+# Clighter: VIM plugin to improve c-family development environment based on Clang
 
 ## Intro
 
@@ -168,11 +168,6 @@ you must save the header.
 	let g:clighter_realtime = 1
 	set updatetime=1200
 ```
-### Why rename-refactoring function is an experimental function
-Libclang doesn't provide direct way to do rename-refactoring, so Clighter needs to
-give its own way to search the AST. The search method is relatively easy and reliable when
-there is only single file, but when there are many files, Clighter can't gurantee the
-result of rename-factoring is totally correct.
 
 
 [1]: http://goo.gl/ncGLYC
