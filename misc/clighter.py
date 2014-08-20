@@ -230,28 +230,23 @@ def cross_buffer_rename(usr, new_name):
 def _search_and_rename(usr, new_name):
     tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), [(vim.current.buffer.name, "\n".join(vim.buffers[vim.current.buffer.number]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
-    def_cursor = _search_cursor_by_usr(tu, tu.cursor, usr)
-    if def_cursor is None:
-        return
+    symbols = []
+    _search_cursor_by_usr(tu, tu.cursor, usr, symbols)
 
-    locs = set()
-    locs.add((def_cursor.location.line, def_cursor.location.column, def_cursor.location.file.name))
+    for sym in symbols:
+        locs = set()
+        locs.add((sym.location.line, sym.location.column, sym.location.file.name))
 
-    _search_cursors_by_define(tu.cursor, def_cursor, locs)
-    _vim_replace(locs, get_spelling_or_displayname(def_cursor), new_name)
+        _search_cursors_by_define(tu.cursor, sym, locs)
+        _vim_replace(locs, get_spelling_or_displayname(sym), new_name)
 
 
-def _search_cursor_by_usr(tu, cursor, usr):
-    if cursor.get_usr() == usr and vim.current.buffer.name == cursor.location.file.name:
-        return cursor
+def _search_cursor_by_usr(tu, cursor, usr, symbols):
+    if cursor.get_usr() == usr:
+        symbols.append(cursor)
 
     for c in cursor.get_children():
-        cursor = _search_cursor_by_usr(tu, c, usr)
-        if cursor is not None:
-            return cursor
-
-    return None
-
+        _search_cursor_by_usr(tu, c, usr, symbols)
 
 def refactor_rename():
     ft = vim.eval("&filetype") 
