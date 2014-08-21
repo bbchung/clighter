@@ -40,9 +40,9 @@ class ParsingService:
                             continue
 
                         if pobj.tu is None:
-                            pobj.tu = ParsingService.clang_idx.parse(pobj.bufname, args, [(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                            pobj.tu = ParsingService.clang_idx.parse(pobj.bufname, args, get_vim_buffers(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
                         else:
-                            pobj.tu.reparse([(pobj.bufname, "\n".join(vim.buffers[pobj.bufnr]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                            pobj.tu.reparse(get_vim_buffers(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
                         pobj.applied = 0
                         pobj.sched_time = None
@@ -226,9 +226,16 @@ def cross_buffer_rename(usr, new_name):
     vim.command("silent! buf {0}".format(saved_bufnr))
     vim.command("syntax on")
 
+def get_vim_buffers():
+    locs = []
+    for buf in vim.buffers:
+        locs.append((buf.name, "\n".join(buf)))
+
+    return locs
+
 
 def _search_and_rename(usr, new_name):
-    tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), [(vim.current.buffer.name, "\n".join(vim.buffers[vim.current.buffer.number]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), get_vim_buffers(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
     symbols = []
     _search_cursor_by_usr(tu, tu.cursor, usr, symbols)
@@ -253,7 +260,7 @@ def refactor_rename():
     if ft not in ["c", "cpp", "objc"]:
         return
 
-    tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), [(vim.current.buffer.name, "\n".join(vim.buffers[vim.current.buffer.number]))], options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), get_vim_buffers(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
     file = cindex.File.from_name(tu, vim.current.buffer.name)
     (row, col) = vim.current.window.cursor
     vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, row, col + 1)) # cursor under vim
@@ -316,6 +323,9 @@ def _vim_replace(locs, old, new):
             pattern += "\|"
 
         pattern += "\%" + str(line) + "l" + "\%>" + str(column - 1) + "v\%<" + str(column + len(old) + 1) + "v" + old 
+
+    if not pattern:
+        return
 
     cmd = ":silent! %s/" + pattern + "/" + new + "/gI"
     vim.command(cmd)
