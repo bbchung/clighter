@@ -40,9 +40,9 @@ class ParsingService:
                             continue
 
                         if pobj.tu is None:
-                            pobj.tu = ParsingService.clang_idx.parse(pobj.bufname, args, get_unsaved_buffer_list([]), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                            pobj.tu = ParsingService.clang_idx.parse(pobj.bufname, args, get_unsaved_buffer_list(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
                         else:
-                            pobj.tu.reparse(get_unsaved_buffer_list([]), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                            pobj.tu.reparse(get_unsaved_buffer_list(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
                         pobj.applied = 0
                         pobj.sched_time = None
@@ -221,28 +221,28 @@ def draw_token(token, type):
 
 def cross_buffer_rename(usr, new_name, caller):
     saved_bufnr = vim.current.buffer.number 
-    cmd = "bufdo! py clighter._search_and_rename(\"{0}\", \"{1}\", \"{2}\")".format(usr, new_name, caller)
+    cmd = "bufdo! py clighter._search_and_rename(\"{0}\", \"{1}\", \"{2}\", {3})".format(usr, new_name, caller, get_unsaved_buffer_list())
     vim.command(cmd)
     vim.command("silent! buf {0}".format(saved_bufnr))
     vim.command("syntax on")
 
-def get_unsaved_buffer_list(blacklist):
-    locs = set()
+def get_unsaved_buffer_list(blacklist=[]):
+    locs = []
     for buf in vim.buffers:
         ft = vim.eval("getbufvar({0}, \'&filetype\')".format(buf.number))
         if buf.name not in blacklist and ft in ["c", "cpp", "objc"]:
-            locs.add((buf.name, "\n".join(buf)))
+            locs.append((buf.name, "\n".join(buf)))
 
     return locs
 
 
-def _search_and_rename(usr, new_name, caller):
+def _search_and_rename(usr, new_name, caller, unsaved):
     if (vim.current.buffer.name == caller):
         return
-
-    tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), get_unsaved_buffer_list([caller]), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    
+    tu = cindex.Index.create().parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
     symbols = []
-    _search_cursor_by_usr(tu, tu.cursor, usr, symbols)
+    _search_cursor_by_usr(tu.cursor, usr, symbols)
 
     for sym in symbols:
         locs = set()
@@ -251,20 +251,25 @@ def _search_and_rename(usr, new_name, caller):
         _search_cursors_by_define(tu.cursor, sym, locs)
         _vim_replace(locs, get_spelling_or_displayname(sym), new_name)
 
+#def dfs(cursor):
+#    print cursor.location, cursor.spelling
+#    for c in cursor.get_children():
+#        dfs(c)
 
-def _search_cursor_by_usr(tu, cursor, usr, symbols):
+
+def _search_cursor_by_usr(cursor, usr, symbols):
     if cursor.get_usr() == usr and cursor not in symbols:
         symbols.append(cursor)
 
     for c in cursor.get_children():
-        _search_cursor_by_usr(tu, c, usr, symbols)
+        _search_cursor_by_usr(c, usr, symbols)
 
 def refactor_rename():
     ft = vim.eval("&filetype") 
     if ft not in ["c", "cpp", "objc"]:
         return
 
-    tu = ParsingService.clang_idx.parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), get_unsaved_buffer_list([]), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    tu = cindex.Index.create().parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), get_unsaved_buffer_list(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
     file = cindex.File.from_name(tu, vim.current.buffer.name)
     (row, col) = vim.current.window.cursor
     vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, row, col + 1)) # cursor under vim
@@ -279,24 +284,18 @@ def refactor_rename():
     if not new_name:
         return
 
+    if _is_symbol_cursor(def_cursor):
+        cmd = "let l:choice = confirm(\"also rename other buffers?\", \"&Yes\n&No\", 2)"
+        vim.command(cmd)
+
+        choice = int(vim.eval("l:choice"))
+        if choice == 1:
+            cross_buffer_rename(def_cursor.get_usr(), new_name, vim.current.buffer.name)
+
     locs = set()
     locs.add((def_cursor.location.line, def_cursor.location.column, def_cursor.location.file.name))
-
     _search_cursors_by_define(tu.cursor, def_cursor, locs)
-
     _vim_replace(locs, get_spelling_or_displayname(def_cursor), new_name)
-
-    if not _is_symbol_cursor(def_cursor):
-        return
-
-    cmd = "let l:choice = confirm(\"also rename other buffers?\", \"&Yes\n&No\", 2)"
-    vim.command(cmd)
-
-    choice = int(vim.eval("l:choice"))
-    if choice == 2:
-        return
-
-    cross_buffer_rename(def_cursor.get_usr(), new_name, vim.current.buffer.name)
 
 
 def _search_cursors_by_define(cursor, def_cursor, locs):
