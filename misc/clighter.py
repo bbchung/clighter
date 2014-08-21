@@ -291,7 +291,7 @@ def refactor_rename():
 def _search_cursors_by_define(cursor, def_cursor, locs):
     cursor_def = get_definition_or_declaration(cursor, False)
 
-    if cursor_def is not None and cursor_def == def_cursor:
+    if (cursor_def is not None and cursor_def == def_cursor) or (cursor.kind == cindex.CursorKind.CONSTRUCTOR or cursor.kind == cindex.CursorKind.DESTRUCTOR) and cursor.semantic_parent == def_cursor:
         locs.add((cursor.location.line, cursor.location.column, cursor.location.file.name))
 
     for c in cursor.get_children():
