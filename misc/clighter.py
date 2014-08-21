@@ -227,11 +227,11 @@ def cross_buffer_rename(usr, new_name, caller):
     vim.command("syntax on")
 
 def get_unsaved_buffer_list(blacklist):
-    locs = []
+    locs = set()
     for buf in vim.buffers:
         ft = vim.eval("getbufvar({0}, \'&filetype\')".format(buf.number))
         if buf.name not in blacklist and ft in ["c", "cpp", "objc"]:
-            locs.append((buf.name, "\n".join(buf)))
+            locs.add((buf.name, "\n".join(buf)))
 
     return locs
 
@@ -253,7 +253,7 @@ def _search_and_rename(usr, new_name, caller):
 
 
 def _search_cursor_by_usr(tu, cursor, usr, symbols):
-    if cursor.get_usr() == usr:
+    if cursor.get_usr() == usr and cursor not in symbols:
         symbols.append(cursor)
 
     for c in cursor.get_children():
@@ -302,7 +302,7 @@ def refactor_rename():
 def _search_cursors_by_define(cursor, def_cursor, locs):
     cursor_def = get_definition_or_declaration(cursor, False)
 
-    if (cursor_def is not None and cursor_def == def_cursor) or (cursor.kind == cindex.CursorKind.CONSTRUCTOR or cursor.kind == cindex.CursorKind.DESTRUCTOR) and cursor.semantic_parent == def_cursor:
+    if (cursor_def is not None and cursor_def == def_cursor) or ((cursor.kind == cindex.CursorKind.CONSTRUCTOR or cursor.kind == cindex.CursorKind.DESTRUCTOR) and cursor.semantic_parent == def_cursor):
         locs.add((cursor.location.line, cursor.location.column, cursor.location.file.name))
 
     for c in cursor.get_children():
@@ -331,7 +331,7 @@ def _vim_replace(locs, old, new):
     if not pattern:
         return
 
-    cmd = ":silent! %s/" + pattern + "/" + new + "/gI"
+    cmd = "%s/" + pattern + "/" + new + "/gI"
     vim.command(cmd)
 
 
