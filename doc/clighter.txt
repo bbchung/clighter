@@ -53,12 +53,14 @@ Clighter only has been tested in linux platform
 |'g:clighter_clang_options'|		The Compile options for Clang
 |'g:clighter_libclang_file'|		The file path of the libclang
 |'g:clighter_realtime'|			Update highlighting in realtime	
+|'g:clighter_rename_prompt_level'|	Set prompt level of rename-refactoring
+|'g:clighter_enable_cross_rename'|	Enable cross buffer rename-refactoring
 
 						*'clighter_autostart'*
 g:clighter_autostart~
 Clighter will automatically start syntax highlight engine if g:clighter_autostart == `1`.
 
-Default: 1
+Default: `1`
 >
 	let g:clighter_autostart = 0
 <
@@ -69,11 +71,11 @@ Clighter uses vim's regular expression(RE) engine to do syntax highlighting, how
 vim's RE engine performs bad while there are too many RE rules. To avoid too many RE
 rules, Clighter only highlights a given region(window) instead of whole buffer.
 	
-* `< 0`: highlight whole buffer.
-* `>= 0`: highlight from top line number reduce 100 * clighter_window_size to bottom line
+`<0`: highlight whole buffer.
+`>=0`: highlight from top line number reduce 100 * clighter_window_size to bottom line
 number plug 100 * clighter_window_size of screen.
 
-Default: 1
+Default: `1`
 >
 	let g:clighter_window_size = -1 " whole buffer
 	let g:clighter_window_size = 0 " highlight current screen of window
@@ -83,7 +85,7 @@ g:clighter_clang_options~
 The compiler options for Clang. Clighter will pass these options to libclang
 to parse the code.
 
-Default: []
+Default: `[]`
 >
 	let g:clighter_clang_options = ['-std=c++', '-DLinux']
 <
@@ -91,7 +93,7 @@ Default: []
 g:clighter_libclang_file~
 The path of libclang.
 
-Default: ''
+Default: `''`
 >
 	let g:clighter_libclang_file = '/usr/lib/libclang.so'
 <
@@ -100,10 +102,30 @@ g:clighter_realtime~
 Do syntax highlighting in realtime(by CursorMoved event). Turn off this option may improve
 the performance.
 
-Default: 1
+Default: `1`
 >
 	let g:clighter_realtime = 1
 <
+g:clighter_rename_prompt_level~
+The prompt level of rename refactoring.
+
+`0`: no prompt
+`1`: prompt while do cross buffer renaming
+`2`: prompt of each word that going to be replaced
+
+Default: `1`
+>
+	let g:clighter_realtime = 1
+
+### g:clighter_enable_cross_rename
+`0`: disable
+`1`: enable
+
+Default: `1`
+>
+	let g:clighter_realtime = 1
+
+
 
 ==============================================================================
 						*clighter-commands*
