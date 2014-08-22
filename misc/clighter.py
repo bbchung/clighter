@@ -30,24 +30,31 @@ class ParsingService:
         ParsingService._thread.join()
         ParsingService._thread = None
 
+
+    @staticmethod
+    def update_pobj(pobj, args):
+        with pobj.lock:
+            if pobj.sched_time is None or time.time() <= pobj.sched_time:
+                return
+
+            if pobj.tu is None:
+                pobj.tu = ParsingService.clang_idx.parse(pobj.bufname, args, get_unsaved_buffer_list(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+            else:
+                pobj.tu.reparse(get_unsaved_buffer_list(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+
+            pobj.applied = 0
+            pobj.sched_time = None
+
+
     @staticmethod
     def _parsing_worker(args):
         while ParsingService.is_running == 1:
             try:
                 for pobj in ParsingService.instances.values():
-                    with pobj.lock:
-                        if pobj.sched_time is None or time.time() <= pobj.sched_time:
-                            continue
-
-                        if pobj.tu is None:
-                            pobj.tu = ParsingService.clang_idx.parse(pobj.bufname, args, get_unsaved_buffer_list(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-                        else:
-                            pobj.tu.reparse(get_unsaved_buffer_list(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-
-                        pobj.applied = 0
-                        pobj.sched_time = None
+                    ParsingService.update_pobj(pobj, args)
             finally:
                 time.sleep(0.2)
+
 
     @staticmethod
     def join_all():
@@ -220,13 +227,14 @@ def draw_token(token, type):
 
 
 def cross_buffer_rename(usr, new_name, caller):
-    tu_dict = {}
+    #tu_dict = {}
     unsaved = get_unsaved_buffer_list()
     
     start_name = vim.current.buffer.name
     while True:
         if vim.current.buffer.name != caller and vim.eval("&ft") in ["c", "cpp", "objc"]:
-            tu_dict[vim.current.buffer.name] = cindex.Index.create().parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+            #tu_dict[vim.current.buffer.name] = cindex.Index.create().parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+            ParsingService.update_pobj(ParsingService.instances.get(vim.current.buffer.number), vim.eval('g:clighter_clang_options'))
 
         vim.command("bn!")
         if vim.current.buffer.name == start_name:
@@ -234,7 +242,8 @@ def cross_buffer_rename(usr, new_name, caller):
 
     while True:
         if vim.current.buffer.name != caller and vim.eval("&ft") in ["c", "cpp", "objc"]:
-            _search_and_rename(tu_dict.get(vim.current.buffer.name), usr, new_name)
+            #_search_and_rename(tu_dict.get(vim.current.buffer.name), usr, new_name)
+            _search_and_rename(ParsingService.instances.get(vim.current.buffer.number).tu, usr, new_name)
 
         vim.command("bn!")
         if vim.current.buffer.name == start_name:
@@ -246,15 +255,18 @@ def cross_buffer_rename(usr, new_name, caller):
     #vim.command("silent! buf {0}".format(saved_bufnr))
     #vim.command("syntax on")
 
-def get_unsaved_buffer_list(blacklist=[]):
-    locs = set()
-    for buf in vim.buffers:
-        ft = vim.eval("getbufvar({0}, \'&filetype\')".format(buf.number))
-        if buf.name not in blacklist and ft in ["c", "cpp", "objc"]:
-            if len(buf) == 1 and not buf[0]: # vim has free the memory temporarily
-                continue
+unsave_buffers_lock = threading.Lock()
 
-            locs.add((buf.name, "\n".join(buf)))
+def get_unsaved_buffer_list(blacklist=[]):
+    with unsave_buffers_lock:
+        locs = set()
+        for buf in vim.buffers:
+            ft = vim.eval("getbufvar({0}, \'&filetype\')".format(buf.number))
+            if buf.name not in blacklist and ft in ["c", "cpp", "objc"]:
+                if len(buf) == 1 and not buf[0]: # vim has free the memory temporarily
+                    continue
+
+                locs.add((buf.name, "\n".join(buf)))
 
     return locs
 
@@ -295,7 +307,9 @@ def refactor_rename():
     if ft not in ["c", "cpp", "objc"]:
         return
 
-    tu = cindex.Index.create().parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), get_unsaved_buffer_list(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    #tu = cindex.Index.create().parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), get_unsaved_buffer_list(), options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+    ParsingService.update_pobj(ParsingService.instances.get(vim.current.buffer.number), vim.eval('g:clighter_clang_options'))
+    tu = ParsingService.instances[vim.current.buffer.number].tu
     file = cindex.File.from_name(tu, vim.current.buffer.name)
     (row, col) = vim.current.window.cursor
     vim_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(tu, file, row, col + 1)) # cursor under vim
