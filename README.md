@@ -39,6 +39,7 @@ vim's RE engine performs bad while there are too many RE rules. To avoid too man
 rules, Clighter only highlights a given region(window) instead of whole buffer.
 	
 `<0`: highlight whole buffer.
+
 `>=0`: highlight from top line number reduce 100 * clighter_window_size to bottom line
 number plug 100 * clighter_window_size of screen.
 
@@ -80,7 +81,9 @@ let g:clighter_realtime = 1
 The prompt level of rename refactoring.
 
 `0`: no prompt
+
 `1`: prompt while do cross buffer renaming
+
 `2`: prompt of each word that going to be replaced
 
 Default: `1`
@@ -90,6 +93,7 @@ let g:clighter_realtime = 1
 
 ### g:clighter_enable_cross_rename
 `0`: disable
+
 `1`: enable
 
 Default: `1`
