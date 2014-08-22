@@ -239,10 +239,17 @@ def get_unsaved_buffer_list(blacklist=[]):
 def _search_and_rename(usr, new_name, caller, unsaved):
     if (vim.current.buffer.name == caller):
         return
-    
+
     tu = cindex.Index.create().parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
     symbols = []
     _search_cursor_by_usr(tu.cursor, usr, symbols)
+
+    if symbols and int(vim.eval('g:clighter_rename_prompt_level')) >= 1:
+        cmd = "let l:choice = confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 2)".format(vim.current.buffer.name)
+        vim.command(cmd)
+
+        if int(vim.eval("l:choice")) == 2:
+            return
 
     for sym in symbols:
         locs = set()
@@ -284,13 +291,8 @@ def refactor_rename():
     if not new_name:
         return
 
-    if _is_symbol_cursor(def_cursor):
-        cmd = "let l:choice = confirm(\"also rename other buffers?\", \"&Yes\n&No\", 2)"
-        vim.command(cmd)
-
-        choice = int(vim.eval("l:choice"))
-        if choice == 1:
-            cross_buffer_rename(def_cursor.get_usr(), new_name, vim.current.buffer.name)
+    if _is_symbol_cursor(def_cursor) and int(vim.eval('g:clighter_enable_cross_rename')) == 1:
+        cross_buffer_rename(def_cursor.get_usr(), new_name, vim.current.buffer.name)
 
     locs = set()
     locs.add((def_cursor.location.line, def_cursor.location.column, def_cursor.location.file.name))
@@ -331,6 +333,10 @@ def _vim_replace(locs, old, new):
         return
 
     cmd = "%s/" + pattern + "/" + new + "/gI"
+    
+    if int(vim.eval('g:clighter_rename_prompt_level')) >= 2:
+        cmd = cmd + "c"
+
     vim.command(cmd)
 
 
