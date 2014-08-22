@@ -220,32 +220,51 @@ def draw_token(token, type):
 
 
 def cross_buffer_rename(usr, new_name, caller):
-    saved_bufnr = vim.current.buffer.number 
-    cmd = "bufdo! py clighter._search_and_rename(\"{0}\", \"{1}\", \"{2}\", {3})".format(usr, new_name, caller, get_unsaved_buffer_list())
-    vim.command(cmd)
-    vim.command("silent! buf {0}".format(saved_bufnr))
-    vim.command("syntax on")
+    tu_dict = {}
+    unsaved = get_unsaved_buffer_list()
+    
+    start_name = vim.current.buffer.name
+    while True:
+        if vim.current.buffer.name != caller and vim.eval("&ft") in ["c", "cpp", "objc"]:
+            tu_dict[vim.current.buffer.name] = cindex.Index.create().parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+
+        vim.command("bn!")
+        if vim.current.buffer.name == start_name:
+            break
+
+    while True:
+        if vim.current.buffer.name != caller and vim.eval("&ft") in ["c", "cpp", "objc"]:
+            _search_and_rename(tu_dict.get(vim.current.buffer.name), usr, new_name)
+
+        vim.command("bn!")
+        if vim.current.buffer.name == start_name:
+            break
+
+    #saved_bufnr = vim.current.buffer.number 
+    #cmd = "bufdo! py clighter._search_and_rename(\"{0}\", \"{1}\", \"{2}\")".format(usr, new_name, caller)
+    #vim.command(cmd)
+    #vim.command("silent! buf {0}".format(saved_bufnr))
+    #vim.command("syntax on")
 
 def get_unsaved_buffer_list(blacklist=[]):
-    locs = []
+    locs = set()
     for buf in vim.buffers:
         ft = vim.eval("getbufvar({0}, \'&filetype\')".format(buf.number))
         if buf.name not in blacklist and ft in ["c", "cpp", "objc"]:
-            locs.append((buf.name, "\n".join(buf)))
+            if len(buf) == 1 and not buf[0]: # vim has free the memory temporarily
+                continue
+
+            locs.add((buf.name, "\n".join(buf)))
 
     return locs
 
 
-def _search_and_rename(usr, new_name, caller, unsaved):
-    if (vim.current.buffer.name == caller):
-        return
-
-    tu = cindex.Index.create().parse(vim.current.buffer.name, vim.eval('g:clighter_clang_options'), unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+def _search_and_rename(tu, usr, new_name):
     symbols = []
     _search_cursor_by_usr(tu.cursor, usr, symbols)
 
     if symbols and int(vim.eval('g:clighter_rename_prompt_level')) >= 1:
-        cmd = "let l:choice = confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 2)".format(vim.current.buffer.name)
+        cmd = "let l:choice = confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 1)".format(vim.current.buffer.name)
         vim.command(cmd)
 
         if int(vim.eval("l:choice")) == 2:
