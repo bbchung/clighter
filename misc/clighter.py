@@ -12,16 +12,16 @@ class ParsingObject:
     def __init__(self, idx, bufname):
         self.__clang_idx = idx
         self.__bufname = bufname
-        self.__unsaved = None
+        self.unsaved = None
         self.tu=None
         self.applied=1
         self.sched_time = time.time()
 
     def parse(self, args, unsaved = None):
         if unsaved is None:
-            unsaved = self.__unsaved
+            unsaved = self.unsaved
 
-        self.tu = self.__clang_idx.parse(self.__bufname, args, self.__unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+        self.tu = self.__clang_idx.parse(self.__bufname, args, self.unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
         self.applied = 0
 
@@ -165,7 +165,7 @@ def highlight_window():
 
     def_cursor = None
     if vim_cursor is not None:
-        def_cursor = get_definition_or_declaration(vim_cursor, True)
+        def_cursor = __get_definition_or_declaration(vim_cursor, True)
 
     vim.command("call s:clear_match(['CursorDefRef'])")
     invalid = vim_win_top < clighter_window[0] or vim_win_bottom > clighter_window[1] or pobj.applied == 0
@@ -188,7 +188,7 @@ def highlight_window():
             """ Do definition/reference highlighting'
             """
             if def_cursor is not None and def_cursor.location.file.name == file.name:
-                t_def_cursor = get_definition_or_declaration(t_tu_cursor, False)
+                t_def_cursor = __get_definition_or_declaration(t_tu_cursor, False)
                 if t_def_cursor is not None and t_def_cursor == def_cursor:
                     __vim_matchaddpos('CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
 
@@ -200,7 +200,7 @@ def __get_spelling_or_displayname(cursor):
     return cursor.displayname
 
 
-def get_definition_or_declaration(cursor, check_cword):
+def __get_definition_or_declaration(cursor, check_cword):
     if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
         return cursor
 
@@ -320,7 +320,7 @@ def refactor_rename():
     (row, col) = vim.current.window.cursor
     vim_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(pobj.tu, file, row, col + 1)) # cursor under vim
 
-    def_cursor = get_definition_or_declaration(vim_cursor, True)
+    def_cursor = __get_definition_or_declaration(vim_cursor, True)
     if def_cursor is None:
         return
 
@@ -340,7 +340,7 @@ def refactor_rename():
 
 
 def __search_cursors_by_define(cursor, def_cursor, locs):
-    cursor_def = get_definition_or_declaration(cursor, False)
+    cursor_def = __get_definition_or_declaration(cursor, False)
 
     if (cursor_def is not None and cursor_def == def_cursor) or ((cursor.kind == cindex.CursorKind.CONSTRUCTOR or cursor.kind == cindex.CursorKind.DESTRUCTOR) and cursor.semantic_parent == def_cursor):
         locs.add((cursor.location.line, cursor.location.column, cursor.location.file.name))
