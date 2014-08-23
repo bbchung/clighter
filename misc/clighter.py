@@ -59,7 +59,11 @@ class ParsingService:
                     if pobj.sched_time is None or time.time() <= pobj.sched_time:
                         continue
 
-                    pobj.parse(args)
+                    try:
+                        pobj.parse(args)
+                    except:
+                        pass 
+
                     pobj.sched_time = None
             finally:
                 time.sleep(0.2)
