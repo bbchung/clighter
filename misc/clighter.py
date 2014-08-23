@@ -21,7 +21,10 @@ class ParsingObject:
         if unsaved is None:
             unsaved = self.unsaved
 
-        self.tu = self.__clang_idx.parse(self.__bufname, args, self.unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+        try:
+            self.tu = self.__clang_idx.parse(self.__bufname, args, self.unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+        except:
+            pass 
 
         self.applied = 0
 
@@ -59,11 +62,7 @@ class ParsingService:
                     if pobj.sched_time is None or time.time() <= pobj.sched_time:
                         continue
 
-                    try:
-                        pobj.parse(args)
-                    except:
-                        pass 
-
+                    pobj.parse(args)
                     pobj.sched_time = None
             finally:
                 time.sleep(0.2)
@@ -250,7 +249,7 @@ def cross_buffer_rename(usr, new_name, caller):
     while True:
         if vim.current.buffer.name != caller and vim.eval("&ft") in ["c", "cpp", "objc"]:
             pobj = ParsingService.objects.get(vim.current.buffer.number)
-            if pobj is not None:
+            if pobj is not None and pobj.tu is not None:
                 __search_and_rename(pobj.tu, usr, new_name)
 
         vim.command("bn!")
