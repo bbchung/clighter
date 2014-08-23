@@ -81,13 +81,13 @@ class ParsingService:
 
     @staticmethod
     def update_sched_and_unsaved():
+        unsaved = get_unsaved_buffer_list()
+        for pobj in ParsingService.objects.values():
+            pobj.unsaved = unsaved
+
         pobj = ParsingService.objects.get(vim.current.buffer.number)
-        if pobj is None:
-            return
-
-        pobj.unsaved = get_unsaved_buffer_list()
-        pobj.sched_time = time.time() + 0.5
-
+        if pobj is not None:
+            pobj.sched_time = time.time() + 0.5
 
 
 #def try_highlight2():
