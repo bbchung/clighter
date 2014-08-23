@@ -32,12 +32,12 @@ endf
 fun! s:try_highlight()
     let w:clighter_window = get(w:, 'clighter_window', [0, 0])
 
-    py clighter._highlight_window()
+    py clighter.highlight_window()
 endf
 
 fun! clighter#Enable()
     py clighter.ParsingService.join_all()
-    py clighter.ParsingService.start_parsing_loop()
+    py clighter.ParsingService.start_sched_looping()
 
     augroup ClighterEnable
         au!
@@ -47,17 +47,17 @@ fun! clighter#Enable()
             au CursorHold *.[ch],*.[ch]pp,*.m call s:try_highlight()
         endif
         au WinEnter *.[ch],*.[ch]pp,*.m call s:try_highlight()
-        au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ParsingService.reset_sched()
-        au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ParsingService.reset_sched()
+        au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_sched_and_unsaved()
+        au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_sched_and_unsaved()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ParsingService.join()
         au BufWinEnter * call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
-        au VimLeavePre * py clighter.ParsingService.stop_parsing_loop()
+        au VimLeavePre * py clighter.ParsingService.stop_sched_looping()
     augroup END
 endf
 
 fun! clighter#Disable()
     au! ClighterEnable
-    py clighter.ParsingService.stop_parsing_loop()
+    py clighter.ParsingService.stop_sched_looping()
     let a:wnr = winnr()
     windo call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
     exe a:wnr."wincmd w"
