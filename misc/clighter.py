@@ -259,18 +259,15 @@ def cross_buffer_rename(usr, new_name, caller):
     #vim.command("silent! buf {0}".format(saved_bufnr))
     #vim.command("syntax on")
 
-unsave_buffers_lock = threading.Lock()
-
 def get_unsaved_buffer_list(blacklist=[]):
-    with unsave_buffers_lock:
-        locs = set()
-        for buf in vim.buffers:
-            ft = vim.eval("getbufvar({0}, \'&filetype\')".format(buf.number))
-            if buf.name not in blacklist and ft in ["c", "cpp", "objc"]:
-                if len(buf) == 1 and not buf[0]: # vim has free the memory temporarily
-                    continue
+    locs = set()
+    for buf in vim.buffers:
+        ft = vim.eval("getbufvar({0}, \'&filetype\')".format(buf.number))
+        if buf.name not in blacklist and ft in ["c", "cpp", "objc"]:
+            if len(buf) == 1 and not buf[0]: # vim has free the memory temporarily
+                continue
 
-                locs.add((buf.name, "\n".join(buf)))
+            locs.add((buf.name, "\n".join(buf)))
 
     return locs
 
