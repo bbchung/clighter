@@ -16,11 +16,11 @@ class ParsingObject:
         self.invalid=True
 
     def parse(self, args, unsaved = None):
-        if unsaved is None:
-            unsaved = self.unsaved
+        if unsaved is not None:
+            self.unsaved = unsaved
 
         try:
-            self.tu = self.__clang_idx.parse(self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+            self.tu = self.__clang_idx.parse(self.__bufname, args, self.unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
         except:
             pass 
 
