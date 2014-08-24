@@ -12,6 +12,7 @@ class ParsingObject:
         self.__bufname = bufname
         self.unsaved = None
         self.tu=None
+        self.file=None
         self.drawn=False
         self.invalid=True
 
@@ -21,6 +22,7 @@ class ParsingObject:
 
         try:
             self.tu = self.__clang_idx.parse(self.__bufname, args, self.unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+            self.file = self.tu.get_file(self.__bufname)
         except:
             pass 
 
@@ -69,15 +71,13 @@ class ParsingService:
     @staticmethod
     def join_all():
         for buf in vim.buffers:
-            ft = vim.eval("getbufvar({0}, \'&filetype\')".format(buf.number))
-            if ft in ["c", "cpp", "objc"] and buf.number not in ParsingService.objects.keys():
+            if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.number not in ParsingService.objects.keys():
                 ParsingService.objects[buf.number] = ParsingObject(ParsingService.clang_idx, buf.name) 
 
 
     @staticmethod
     def join():
-        ft = vim.eval("&filetype") 
-        if ft in ["c", "cpp", "objc"] and vim.current.buffer.number not in ParsingService.objects.keys():
+        if vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"] and vim.current.buffer.number not in ParsingService.objects.keys():
             ParsingService.objects[vim.current.buffer.number] = ParsingObject(ParsingService.clang_idx, vim.current.buffer.name) 
 
     @staticmethod
@@ -144,25 +144,21 @@ def highlight_window():
     if pobj is None or pobj.tu is None:
         return
 
-    file = pobj.tu.get_file(vim.current.buffer.name)
-    if file == None: # should not happened
-        return
-
     buflinenr = len(vim.current.buffer);
     if (window_size < 0):
-        vim.command("let w:clighter_window=[0, %d]" % buflinenr)
+        clighter_window = [0, buflinenr]
         tokens = pobj.tu.cursor.get_tokens()
     else:
         top_linenr = max(vim_win_top - window_size, 1);
         bottom_linenr = min(vim_win_bottom + window_size, buflinenr)
-        vim.command("let w:clighter_window=[%d, %d]" %(top_linenr, bottom_linenr))
-        range = cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(pobj.tu, file, top_linenr, 1), cindex.SourceLocation.from_position(pobj.tu, file, bottom_linenr, 1))
+        clighter_window = [top_linenr, bottom_linenr]
+        range = cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(pobj.tu, pobj.file, top_linenr, 1), cindex.SourceLocation.from_position(pobj.tu, pobj.file, bottom_linenr, 1))
         tokens = pobj.tu.get_tokens(extent=range)
 
     vim_cursor = None
     if int(vim.eval("s:cursor_decl_ref_hl_on")) == 1:
         (row, col) = vim.current.window.cursor
-        vim_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(pobj.tu, file, row, col + 1)) # cursor under vim
+        vim_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(pobj.tu, pobj.file, row, col + 1)) # cursor under vim
 
     def_cursor = None
     if vim_cursor is not None:
@@ -174,21 +170,21 @@ def highlight_window():
         vim.command("call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr'])")
         ParsingService.objects[vim.current.buffer.number].drawn = True
 
-    if def_cursor is not None and def_cursor.location.file.name == file.name and def_cursor.kind.is_preprocessing():
+    if def_cursor is not None and def_cursor.location.file.name == vim.current.buffer.name and def_cursor.kind.is_preprocessing():
         __vim_matchaddpos('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(__get_spelling_or_displayname(def_cursor)), -1)
 
     for t in tokens:
         """ Do semantic highlighting'
         """
         if t.kind.value == 2:
-            t_tu_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(pobj.tu, file, t.location.line, t.location.column))
+            t_tu_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(pobj.tu, pobj.file, t.location.line, t.location.column))
 
             if invalid:
                 __draw_token(t, t_tu_cursor.type.kind)
 
             """ Do definition/reference highlighting'
             """
-            if def_cursor is not None and def_cursor.location.file.name == file.name:
+            if def_cursor is not None and def_cursor.location.file.name == vim.current.buffer.name:
                 t_def_cursor = __get_definition_or_declaration(t_tu_cursor, False)
                 if t_def_cursor is not None and t_def_cursor == def_cursor:
                     __vim_matchaddpos('CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
@@ -214,6 +210,7 @@ def __get_definition_or_declaration(cursor, check_cword):
 
     return def_cursor
 
+
 def __draw_token(token, type):
     if token.cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
         __vim_matchaddpos('MacroInstantiation', token.location.line, token.location.column, len(token.spelling), -2)
@@ -234,37 +231,25 @@ def __draw_token(token, type):
 def cross_buffer_rename(usr, new_name, caller):
     start_bufnr = vim.current.buffer.number
     while True:
-        if vim.current.buffer.name != caller and vim.eval("&ft") in ["c", "cpp", "objc"]:
-            ParsingService.join()
+        if vim.current.buffer.number != caller and vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
             pobj = ParsingService.objects.get(vim.current.buffer.number)
             if pobj is not None:
                 pobj.parse(vim.eval('g:clighter_clang_options'), get_unsaved_buffer_list())
-
-        vim.command("bn!")
-        if vim.current.buffer.number == start_bufnr:
-            break
-
-    while True:
-        if vim.current.buffer.name != caller and vim.eval("&ft") in ["c", "cpp", "objc"]:
-            pobj = ParsingService.objects.get(vim.current.buffer.number)
-            if pobj is not None and pobj.tu is not None:
-                __search_and_rename(pobj.tu, usr, new_name)
-                pobj.parse(vim.eval('g:clighter_clang_options'), get_unsaved_buffer_list())
+                if pobj.tu is not None:
+                    __search_and_rename(pobj.tu, usr, new_name)
 
         vim.command("bn!")
         if vim.current.buffer.number == start_bufnr:
             break
 
 
-def get_unsaved_buffer_list(blacklist=[]):
+def get_unsaved_buffer_list():
     locs = set()
     for buf in vim.buffers:
-        ft = vim.eval("getbufvar({0}, \'&filetype\')".format(buf.number))
-        if buf.name not in blacklist and ft in ["c", "cpp", "objc"]:
-            if len(buf) == 1 and not buf[0]: # vim has free the memory temporarily
-                continue
+        if buf.options['filetype'] not in ["c", "cpp", "objc"] or not buf.valid:
+            continue
 
-            locs.add((buf.name, "\n".join(buf)))
+        locs.add((buf.name, "\n".join(buf)))
 
     return locs
 
@@ -301,8 +286,7 @@ def __search_cursor_by_usr(cursor, usr, symbols):
         __search_cursor_by_usr(c, usr, symbols)
 
 def refactor_rename():
-    ft = vim.eval("&filetype") 
-    if ft not in ["c", "cpp", "objc"]:
+    if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"]:
         return
 
     pobj = ParsingService.objects.get(vim.current.buffer.number)
@@ -329,7 +313,7 @@ def refactor_rename():
         return
 
     if __is_symbol_cursor(def_cursor) and int(vim.eval('g:clighter_enable_cross_rename')) == 1:
-        cross_buffer_rename(def_cursor.get_usr(), new_name, vim.current.buffer.name)
+        cross_buffer_rename(def_cursor.get_usr(), new_name, vim.current.buffer.number)
 
     locs = set()
     locs.add((def_cursor.location.line, def_cursor.location.column, def_cursor.location.file.name))
