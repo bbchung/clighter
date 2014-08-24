@@ -246,7 +246,7 @@ def cross_buffer_rename(usr, new_name, caller):
 def get_unsaved_buffer_list():
     locs = set()
     for buf in vim.buffers:
-        if buf.options['filetype'] not in ["c", "cpp", "objc"] or not buf.valid:
+        if buf.options['filetype'] not in ["c", "cpp", "objc"] or ((len(buf) == 1 and not buf[0])):
             continue
 
         locs.add((buf.name, "\n".join(buf)))
