@@ -20,7 +20,7 @@ class ParsingObject:
             unsaved = self.unsaved
 
         try:
-            self.tu = self.__clang_idx.parse(self.__bufname, args, self.unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+            self.tu = self.__clang_idx.parse(self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
         except:
             pass 
 
@@ -232,7 +232,7 @@ def __draw_token(token, type):
 
 
 def cross_buffer_rename(usr, new_name, caller):
-    start_name = vim.current.buffer.name
+    start_bufnr = vim.current.buffer.number
     while True:
         if vim.current.buffer.name != caller and vim.eval("&ft") in ["c", "cpp", "objc"]:
             ParsingService.join()
@@ -241,7 +241,7 @@ def cross_buffer_rename(usr, new_name, caller):
                 pobj.parse(vim.eval('g:clighter_clang_options'), get_unsaved_buffer_list())
 
         vim.command("bn!")
-        if vim.current.buffer.name == start_name:
+        if vim.current.buffer.number == start_bufnr:
             break
 
     while True:
@@ -249,16 +249,12 @@ def cross_buffer_rename(usr, new_name, caller):
             pobj = ParsingService.objects.get(vim.current.buffer.number)
             if pobj is not None and pobj.tu is not None:
                 __search_and_rename(pobj.tu, usr, new_name)
+                pobj.parse(vim.eval('g:clighter_clang_options'), get_unsaved_buffer_list())
 
         vim.command("bn!")
-        if vim.current.buffer.name == start_name:
+        if vim.current.buffer.number == start_bufnr:
             break
 
-    #saved_bufnr = vim.current.buffer.number 
-    #cmd = "bufdo! py clighter.__search_and_rename(\"{0}\", \"{1}\", \"{2}\")".format(usr, new_name, caller)
-    #vim.command(cmd)
-    #vim.command("silent! buf {0}".format(saved_bufnr))
-    #vim.command("syntax on")
 
 def get_unsaved_buffer_list(blacklist=[]):
     locs = set()
