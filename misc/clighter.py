@@ -318,6 +318,9 @@ def refactor_rename():
     if def_cursor is None:
         return
 
+    if def_cursor.kind == cindex.CursorKind.CONSTRUCTOR:
+        def_cursor = def_cursor.semantic_parent
+
     old_name = __get_spelling_or_displayname(def_cursor)
     vim.command("let a:new_name = input('rename \"{0}\" to: ', '{1}')".format(old_name, old_name))
     
@@ -337,7 +340,7 @@ def refactor_rename():
 def __search_cursors_by_define(cursor, def_cursor, locs):
     cursor_def = __get_definition_or_declaration(cursor, False)
 
-    if (cursor_def is not None and cursor_def == def_cursor) or ((cursor.kind == cindex.CursorKind.CONSTRUCTOR or cursor.kind == cindex.CursorKind.DESTRUCTOR) and cursor.semantic_parent == def_cursor):
+    if (cursor_def is not None and cursor_def == def_cursor) or (cursor.kind == cindex.CursorKind.CONSTRUCTOR and cursor.semantic_parent == def_cursor):
         locs.add((cursor.location.line, cursor.location.column, cursor.location.file.name))
 
     for c in cursor.get_children():
@@ -361,7 +364,7 @@ def __vim_replace(locs, old, new):
         if pattern:
             pattern += "\|"
 
-        pattern += "\%" + str(line) + "l" + "\%>" + str(column - 1) + "v\%<" + str(column + len(old) + 1) + "v" + old 
+        pattern += "\%" + str(line) + "l" + "\%>" + str(column - 1) + "v\%<" + str(column + len(old)) + "v" + old 
 
     if not pattern:
         return
