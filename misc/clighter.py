@@ -112,7 +112,7 @@ class ParsingService:
 
 #def bfs(c, top, bottom, queue):
     #if c.location.line >= top and c.location.line <= bottom:
-        #draw_token(c)
+        #__draw_token(c)
 
     #queue.put(c.get_children())
 
@@ -120,14 +120,14 @@ class ParsingService:
         #curs = queue.get()
         #for cur in curs:
             #if cur.location.line >= top and cur.location.line <= bottom:
-                #draw_token(cur)
+                #__draw_token(cur)
 
             #queue.put(cur.get_children())
 
 
 #def dfs(cursor, top, bottom):
     #if cursor.location.line >= top and cursor.location.line <= bottom:
-        #draw_token(cursor)
+        #__draw_token(cursor)
 
     #for c in cursor.get_children():
         #dfs(c, top, bottom)
@@ -172,7 +172,7 @@ def highlight_window():
     invalid = vim_win_top < clighter_window[0] or vim_win_bottom > clighter_window[1] or pobj.drawn == False
     if invalid:
         vim.command("call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr'])")
-        ParsingService.objects[vim.current.buffer.number].drawn = False
+        ParsingService.objects[vim.current.buffer.number].drawn = True
 
     if def_cursor is not None and def_cursor.location.file.name == file.name and def_cursor.kind.is_preprocessing():
         __vim_matchaddpos('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(__get_spelling_or_displayname(def_cursor)), -1)
@@ -184,7 +184,7 @@ def highlight_window():
             t_tu_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(pobj.tu, file, t.location.line, t.location.column))
 
             if invalid:
-                draw_token(t, t_tu_cursor.type.kind)
+                __draw_token(t, t_tu_cursor.type.kind)
 
             """ Do definition/reference highlighting'
             """
@@ -214,7 +214,7 @@ def __get_definition_or_declaration(cursor, check_cword):
 
     return def_cursor
 
-def draw_token(token, type):
+def __draw_token(token, type):
     if token.cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
         __vim_matchaddpos('MacroInstantiation', token.location.line, token.location.column, len(token.spelling), -2)
     elif token.cursor.kind == cindex.CursorKind.STRUCT_DECL:
