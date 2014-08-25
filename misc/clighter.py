@@ -22,6 +22,9 @@ class ParsingObject:
         if unsaved is not None:
             self.unsaved = unsaved
 
+        if self.invalid == False:
+            return
+
         try:
             self.tu = self.__clang_idx.parse(
                 self.__bufname, args, self.unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
@@ -29,6 +32,7 @@ class ParsingObject:
         except:
             pass
 
+        self.invalid = False
         self.drawn = False
 
 
@@ -62,11 +66,7 @@ class ParsingService:
         while ParsingService.__is_running == True:
             try:
                 for pobj in ParsingService.objects.values():
-                    if pobj.invalid == False:
-                        continue
-
                     pobj.parse(args)
-                    pobj.invalid = False
             finally:
                 time.sleep(0.5)
 
@@ -83,15 +83,29 @@ class ParsingService:
             ParsingService.objects[vim.current.buffer.number] = ParsingObject(
                 ParsingService.clang_idx, vim.current.buffer.name)
 
+
     @staticmethod
-    def invalidate_and_update_unsaved():
+    def invalidate_current_pobj():
+        pobj = ParsingService.objects.get(vim.current.buffer.number)
+        if pobj is not None:
+            pobj.invalid = True
+        
+
+    @staticmethod
+    def update_unsaved():
+        pobj = ParsingService.objects.get(vim.current.buffer.number)
+        if pobj is not None:
+            pobj.invalid = True
+
         unsaved = get_unsaved_buffer_list()
         for pobj in ParsingService.objects.values():
             pobj.unsaved = unsaved
 
-        pobj = ParsingService.objects.get(vim.current.buffer.number)
-        if pobj is not None:
-            pobj.invalid = True
+
+def on_vim_cursor_hold():
+    ParsingService.invalidate_current_pobj()
+    ParsingService.update_unsaved()
+
 
 
 # def try_highlight2():
@@ -138,7 +152,6 @@ class ParsingService:
 
 def highlight_window():
     window_size = int(vim.eval('g:clighter_window_size')) * 100
-
     vim_win_top = int(vim.eval("line('w0')"))
     vim_win_bottom = int(vim.eval("line('w$')"))
 
@@ -147,39 +160,30 @@ def highlight_window():
         return
 
     buflinenr = len(vim.current.buffer)
-    if (window_size < 0):
-        vim.current.window.vars["clighter_window"] = [0, buflinenr]
-        tokens = pobj.tu.cursor.get_tokens()
-    else:
-        top_linenr = max(vim_win_top - window_size, 1)
-        bottom_linenr = min(vim_win_bottom + window_size, buflinenr)
-        vim.current.window.vars["clighter_window"] = [
-            top_linenr, bottom_linenr]
-        range = cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
-            pobj.tu, pobj.file, top_linenr, 1), cindex.SourceLocation.from_position(pobj.tu, pobj.file, bottom_linenr, 1))
-        tokens = pobj.tu.get_tokens(extent=range)
+    target_window = [0, buflinenr] if window_size < 0 else [max(vim_win_top - window_size, 1), min(vim_win_bottom + window_size, buflinenr)]
+    range = cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(pobj.tu, pobj.file, target_window[0], 1), cindex.SourceLocation.from_position(pobj.tu, pobj.file, target_window[1], 1))
+    tokens = pobj.tu.get_tokens(extent=range)
+
+    clighter_window = vim.current.window.vars.get("clighter_window")
+    in_window = clighter_window is not None and vim_win_top >= clighter_window[0] and vim_win_bottom <= clighter_window[1]
 
     vim_cursor = None
     if int(vim.eval("s:cursor_decl_ref_hl_on")) == 1:
         (row, col) = vim.current.window.cursor
-        vim_cursor = cindex.Cursor.from_location(
-            pobj.tu, cindex.SourceLocation.from_position(pobj.tu, pobj.file, row, col + 1))  # cursor under vim
+        vim_cursor = cindex.Cursor.from_location( pobj.tu, cindex.SourceLocation.from_position(pobj.tu, pobj.file, row, col + 1))  # cursor under vim
 
     def_cursor = None
     if vim_cursor is not None:
         def_cursor = __get_definition_or_declaration(vim_cursor, True)
 
     vim.command("call s:clear_match(['CursorDefRef'])")
-    invalid = vim_win_top < vim.current.window.vars["clighter_window"][0] or vim_win_bottom > vim.current.window.vars["clighter_window"][
-        1] or pobj.drawn == False
-    if invalid:
-        vim.command(
-            "call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr'])")
-        ParsingService.objects[vim.current.buffer.number].drawn = True
+
+    if not in_window or not pobj.drawn:
+        vim.current.window.vars["clighter_window"] = target_window
+        vim.command( "call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr'])")
 
     if def_cursor is not None and def_cursor.location.file.name == vim.current.buffer.name and def_cursor.kind.is_preprocessing():
-        __vim_matchaddpos('CursorDefRef', def_cursor.location.line,
-                          def_cursor.location.column, len(__get_spelling_or_displayname(def_cursor)), -1)
+        __vim_matchaddpos('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(__get_spelling_or_displayname(def_cursor)), -1)
 
     for t in tokens:
         """ Do semantic highlighting'
@@ -188,7 +192,7 @@ def highlight_window():
             t_tu_cursor = cindex.Cursor.from_location(
                 pobj.tu, cindex.SourceLocation.from_position(pobj.tu, pobj.file, t.location.line, t.location.column))
 
-            if invalid:
+            if not in_window or not pobj.drawn:
                 __draw_token(t, t_tu_cursor.type.kind)
 
             """ Do definition/reference highlighting'
@@ -197,8 +201,9 @@ def highlight_window():
                 t_def_cursor = __get_definition_or_declaration(
                     t_tu_cursor, False)
                 if t_def_cursor is not None and t_def_cursor == def_cursor:
-                    __vim_matchaddpos(
-                        'CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
+                    __vim_matchaddpos( 'CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
+
+    pobj.drawn = True
 
 
 def __get_spelling_or_displayname(cursor):
