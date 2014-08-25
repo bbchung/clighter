@@ -16,8 +16,8 @@ class ParsingObject:
         self.drawn = False
         self.invalid = True
 
-    def try_parse(self, args, unsaved):
-        if not self.invalid:
+    def try_parse(self, args, unsaved, force=False):
+        if not self.invalid and not force:
             return
 
         try:
@@ -242,8 +242,7 @@ def cross_buffer_rename(usr, new_name, caller):
         if vim.current.buffer.number != caller and vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
             pobj = ParsingService.objects.get(vim.current.buffer.number)
             if pobj is not None:
-                pobj.try_parse(
-                    vim.eval('g:clighter_clang_options'), ParsingService.unsaved)
+                pobj.try_parse( vim.eval('g:clighter_clang_options'), ParsingService.unsaved, True)
                 if pobj.tu is not None:
                     __search_and_rename(pobj.tu, usr, new_name)
 
@@ -275,13 +274,13 @@ def __search_and_rename(tu, usr, new_name):
         if int(vim.eval("l:choice")) == 2:
             return
 
+    locs = set()
     for sym in symbols:
-        locs = set()
-        locs.add(
-            (sym.location.line, sym.location.column, sym.location.file.name))
+        locs.add( (sym.location.line, sym.location.column, sym.location.file.name))
 
         __search_cursors_by_define(tu.cursor, sym, locs)
-        __vim_replace(locs, __get_spelling_or_displayname(sym), new_name)
+
+    __vim_replace(locs, __get_spelling_or_displayname(sym), new_name)
 
 # def dfs(cursor):
 #    print cursor.location, cursor.spelling
@@ -306,7 +305,7 @@ def refactor_rename():
         return
 
     ParsingService.unsaved = get_unsaved_buffer_list()
-    pobj.try_parse(vim.eval('g:clighter_clang_options'), ParsingService.unsaved)
+    pobj.try_parse(vim.eval('g:clighter_clang_options'), ParsingService.unsaved, True)
     file = cindex.File.from_name(pobj.tu, vim.current.buffer.name)
     (row, col) = vim.current.window.cursor
     vim_cursor = cindex.Cursor.from_location(
