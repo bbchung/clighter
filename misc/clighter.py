@@ -8,26 +8,21 @@ if vim.eval("g:clighter_libclang_file"):
 
 
 class ParsingObject:
-
     def __init__(self, idx, bufname):
         self.__clang_idx = idx
         self.__bufname = bufname
-        self.unsaved = None
         self.tu = None
         self.file = None
         self.drawn = False
         self.invalid = True
 
-    def parse(self, args, unsaved=None):
-        if unsaved is not None:
-            self.unsaved = unsaved
-
-        if self.invalid == False:
+    def try_parse(self, args, unsaved):
+        if not self.invalid:
             return
 
         try:
             self.tu = self.__clang_idx.parse(
-                self.__bufname, args, self.unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
             self.file = self.tu.get_file(self.__bufname)
         except:
             pass
@@ -39,6 +34,7 @@ class ParsingObject:
 class ParsingService:
     __thread = None
     __is_running = False
+    unsaved = None
     objects = {}
     clang_idx = cindex.Index.create()
 
@@ -63,10 +59,10 @@ class ParsingService:
 
     @staticmethod
     def __parsing_worker(args):
-        while ParsingService.__is_running == True:
+        while ParsingService.__is_running:
             try:
                 for pobj in ParsingService.objects.values():
-                    pobj.parse(args)
+                    pobj.try_parse(args, ParsingService.unsaved)
             finally:
                 time.sleep(0.5)
 
@@ -91,20 +87,9 @@ class ParsingService:
             pobj.invalid = True
         
 
-    @staticmethod
-    def update_unsaved():
-        pobj = ParsingService.objects.get(vim.current.buffer.number)
-        if pobj is not None:
-            pobj.invalid = True
-
-        unsaved = get_unsaved_buffer_list()
-        for pobj in ParsingService.objects.values():
-            pobj.unsaved = unsaved
-
-
 def on_vim_cursor_hold():
     ParsingService.invalidate_current_pobj()
-    ParsingService.update_unsaved()
+    ParsingService.unsaved = get_unsaved_buffer_list()
 
 
 
@@ -251,14 +236,14 @@ def __draw_token(token, type):
                           token.location.column, len(token.spelling), -2)
 
 
-def cross_buffer_rename(usr, new_name, unsaved, caller):
+def cross_buffer_rename(usr, new_name, caller):
     start_bufnr = vim.current.buffer.number
     while True:
         if vim.current.buffer.number != caller and vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
             pobj = ParsingService.objects.get(vim.current.buffer.number)
             if pobj is not None:
-                pobj.parse(
-                    vim.eval('g:clighter_clang_options'), unsaved)
+                pobj.try_parse(
+                    vim.eval('g:clighter_clang_options'), ParsingService.unsaved)
                 if pobj.tu is not None:
                     __search_and_rename(pobj.tu, usr, new_name)
 
@@ -320,8 +305,8 @@ def refactor_rename():
     if pobj is None:
         return
 
-    unsaved = get_unsaved_buffer_list()
-    pobj.parse(vim.eval('g:clighter_clang_options'), unsaved)
+    ParsingService.unsaved = get_unsaved_buffer_list()
+    pobj.try_parse(vim.eval('g:clighter_clang_options'), ParsingService.unsaved)
     file = cindex.File.from_name(pobj.tu, vim.current.buffer.name)
     (row, col) = vim.current.window.cursor
     vim_cursor = cindex.Cursor.from_location(
@@ -349,8 +334,7 @@ def refactor_rename():
     __vim_replace(locs, old_name, new_name)
 
     if __is_symbol_cursor(def_cursor) and int(vim.eval('g:clighter_enable_cross_rename')) == 1:
-        cross_buffer_rename(
-            def_cursor.get_usr(), new_name, unsaved, vim.current.buffer.number)
+        cross_buffer_rename( def_cursor.get_usr(), new_name, vim.current.buffer.number)
 
 
 def __search_cursors_by_define(cursor, def_cursor, locs):
