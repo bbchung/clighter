@@ -21,18 +21,12 @@ fun! clighter#ToggleCursorHL()
     endif
 endf
 
-fun! s:clear_match(type)
+fun! s:clear_match(groups)
     for m in getmatches()
-        if index(a:type, m['group']) >= 0
+        if index(a:groups, m['group']) >= 0
             call matchdelete(m['id'])
         endif
     endfor
-endf
-
-fun! s:try_highlight()
-    let w:clighter_window = get(w:, 'clighter_window', [0, 0])
-
-    py clighter.highlight_window()
 endf
 
 fun! clighter#Enable()
@@ -42,11 +36,11 @@ fun! clighter#Enable()
     augroup ClighterEnable
         au!
         if g:clighter_realtime == 1
-            au CursorMoved *.[ch],*.[ch]pp,*.m call s:try_highlight()
+            au CursorMoved *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         else
-            au CursorHold *.[ch],*.[ch]pp,*.m call s:try_highlight()
+            au CursorHold *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         endif
-        au WinEnter *.[ch],*.[ch]pp,*.m call s:try_highlight()
+        au WinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au CursorHold *.[ch],*.[ch]pp,*.m py clighter.ParsingService.invalidate_and_update_unsaved()
         au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.ParsingService.invalidate_and_update_unsaved()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ParsingService.join()

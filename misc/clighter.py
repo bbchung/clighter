@@ -141,7 +141,6 @@ def highlight_window():
 
     vim_win_top = int(vim.eval("line('w0')"))
     vim_win_bottom = int(vim.eval("line('w$')"))
-    clighter_window = vim.current.window.vars["clighter_window"]
 
     pobj = ParsingService.objects.get(vim.current.buffer.number)
     if pobj is None or pobj.tu is None:
@@ -149,12 +148,13 @@ def highlight_window():
 
     buflinenr = len(vim.current.buffer)
     if (window_size < 0):
-        clighter_window = [0, buflinenr]
+        vim.current.window.vars["clighter_window"] = [0, buflinenr]
         tokens = pobj.tu.cursor.get_tokens()
     else:
         top_linenr = max(vim_win_top - window_size, 1)
         bottom_linenr = min(vim_win_bottom + window_size, buflinenr)
-        clighter_window = [top_linenr, bottom_linenr]
+        vim.current.window.vars["clighter_window"] = [
+            top_linenr, bottom_linenr]
         range = cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
             pobj.tu, pobj.file, top_linenr, 1), cindex.SourceLocation.from_position(pobj.tu, pobj.file, bottom_linenr, 1))
         tokens = pobj.tu.get_tokens(extent=range)
@@ -170,7 +170,7 @@ def highlight_window():
         def_cursor = __get_definition_or_declaration(vim_cursor, True)
 
     vim.command("call s:clear_match(['CursorDefRef'])")
-    invalid = vim_win_top < clighter_window[0] or vim_win_bottom > clighter_window[
+    invalid = vim_win_top < vim.current.window.vars["clighter_window"][0] or vim_win_bottom > vim.current.window.vars["clighter_window"][
         1] or pobj.drawn == False
     if invalid:
         vim.command(
