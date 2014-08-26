@@ -3,8 +3,8 @@ from clang import cindex
 from threading import Thread
 import time
 
-if vim.eval("g:clighter_libclang_file"):
-    cindex.Config.set_library_file(vim.eval("g:clighter_libclang_file"))
+if vim.vars['clighter_libclang_file']:
+    cindex.Config.set_library_file(vim.vars['clighter_libclang_file'])
 
 
 class ParsingObject:
@@ -46,7 +46,7 @@ class ParsingService:
 
         ParsingService.__is_running = True
         ParsingService.__thread = Thread(
-            target=ParsingService.__parsing_worker, args=[vim.eval('g:clighter_clang_options')])
+            target=ParsingService.__parsing_worker, args=[vim.vars['clighter_clang_options']])
         ParsingService.__thread.start()
 
     @staticmethod
@@ -111,8 +111,8 @@ def highlight_window():
     if pobj is None or pobj.tu is None:
         return
 
-    vim_win_top = int(vim.eval("line('w0')"))
-    vim_win_bottom = int(vim.eval("line('w$')"))
+    vim_win_top = vim.bindeval("line('w0')")
+    vim_win_bottom = vim.bindeval("line('w$')")
 
     clighter_window = vim.current.window.vars.get("clighter_window")
     in_window = clighter_window is not None and vim_win_top >= clighter_window[
@@ -121,7 +121,7 @@ def highlight_window():
     def_cursor = None
     redraw_def_ref = False
 
-    if int(vim.eval("s:cursor_decl_ref_hl_on")) == 1:
+    if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
         (row, col) = vim.current.window.cursor
         vim_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(
             pobj.tu, pobj.file, row, col + 1))  # cursor under vim
@@ -144,7 +144,7 @@ def highlight_window():
 
             highlight_window.last_dc = def_cursor
 
-    window_size = int(vim.eval('g:clighter_window_size')) * 100
+    window_size = vim.vars['clighter_window_size'] * 100
     buflinenr = len(vim.current.buffer)
     target_window = [0, buflinenr] if window_size < 0 else [
         max(vim_win_top - window_size, 1), min(vim_win_bottom + window_size, buflinenr)]
@@ -261,12 +261,12 @@ def __search_and_rename(tu, usr, new_name):
     if not symbols:
         return
 
-    if int(vim.eval('g:clighter_rename_prompt_level')) >= 1:
+    if vim.vars['clighter_rename_prompt_level'] >= 1:
         cmd = "let l:choice = confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 1)".format(
             vim.current.buffer.name)
         vim.command(cmd)
 
-        if int(vim.eval("l:choice")) == 2:
+        if vim.bindeval('l:choice') == 2:
             return
 
     old_name = __get_spelling_or_displayname(symbols[0])
@@ -303,7 +303,7 @@ def refactor_rename():
 
     ParsingService.unsaved = get_unsaved_buffer_list()
     pobj.try_parse(
-        vim.eval('g:clighter_clang_options'), ParsingService.unsaved, True)
+        vim.vars['clighter_clang_options'], ParsingService.unsaved, True)
     file = cindex.File.from_name(pobj.tu, vim.current.buffer.name)
     (row, col) = vim.current.window.cursor
     vim_cursor = cindex.Cursor.from_location(
@@ -317,10 +317,9 @@ def refactor_rename():
         def_cursor = def_cursor.semantic_parent
 
     old_name = __get_spelling_or_displayname(def_cursor)
-    vim.command(
-        "let a:new_name = input('rename \"{0}\" to: ', '{1}')".format(old_name, old_name))
+    new_name = vim.bindeval(
+        "input('rename \"{0}\" to: ', '{1}')".format(old_name, old_name))
 
-    new_name = vim.eval("a:new_name")
     if not new_name or old_name == new_name:
         return
 
@@ -330,7 +329,7 @@ def refactor_rename():
     __search_cursors_by_define(pobj.tu.cursor, def_cursor, locs)
     __vim_replace(locs, old_name, new_name)
 
-    if __is_symbol_cursor(def_cursor) and int(vim.eval('g:clighter_enable_cross_rename')) == 1:
+    if __is_symbol_cursor(def_cursor) and vim.vars['clighter_enable_cross_rename'] == 1:
         cross_buffer_rename(
             def_cursor.get_usr(), new_name, vim.current.buffer.number)
 
@@ -371,7 +370,7 @@ def __vim_replace(locs, old, new):
 
     cmd = "%s/" + pattern + "/" + new + "/gI"
 
-    if int(vim.eval('g:clighter_rename_prompt_level')) >= 2:
+    if vim.vars['clighter_rename_prompt_level'] >= 2:
         cmd = cmd + "c"
 
     vim.command(cmd)
