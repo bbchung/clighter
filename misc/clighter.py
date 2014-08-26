@@ -127,13 +127,14 @@ def highlight_window():
             pobj.tu, pobj.file, row, col + 1))  # cursor under vim
         def_cursor = __get_definition_or_declaration(vim_cursor, True)
 
-        try:
-            if def_cursor is None or def_cursor != highlight_window.__last_dc:
-                vim.command("call s:clear_match(['CursorDefRef'])")
-        except AttributeError:
-            pass
+        if not hasattr(highlight_window, 'last_dc'):
+            highlight_window.last_dc = None
 
-        if def_cursor is not None:
+        if highlight_window.last_dc is not None and (def_cursor is None or highlight_window.last_dc != def_cursor):
+            vim.command("call s:clear_match(['CursorDefRef'])")
+            highlight_window.last_dc = None
+
+        if def_cursor is not None and (highlight_window.last_dc is None or def_cursor != highlight_window.last_dc):
             redraw_def_ref = True
 
             # special case for preprocessor
@@ -141,8 +142,9 @@ def highlight_window():
                 __vim_matchaddpos('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(
                     __get_spelling_or_displayname(def_cursor)), -1)
 
-            highlight_window.__last_dc = def_cursor
+            highlight_window.last_dc = def_cursor
 
+    
     window_size = int(vim.eval('g:clighter_window_size')) * 100
     buflinenr = len(vim.current.buffer)
     target_window = [0, buflinenr] if window_size < 0 else [
