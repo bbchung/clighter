@@ -144,7 +144,6 @@ def highlight_window():
 
             highlight_window.last_dc = def_cursor
 
-    
     window_size = int(vim.eval('g:clighter_window_size')) * 100
     buflinenr = len(vim.current.buffer)
     target_window = [0, buflinenr] if window_size < 0 else [
@@ -259,7 +258,10 @@ def __search_and_rename(tu, usr, new_name):
     symbols = []
     __search_cursors_by_usr(tu.cursor, usr, symbols)
 
-    if symbols and int(vim.eval('g:clighter_rename_prompt_level')) >= 1:
+    if not symbols:
+        return
+
+    if int(vim.eval('g:clighter_rename_prompt_level')) >= 1:
         cmd = "let l:choice = confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 1)".format(
             vim.current.buffer.name)
         vim.command(cmd)
@@ -267,14 +269,15 @@ def __search_and_rename(tu, usr, new_name):
         if int(vim.eval("l:choice")) == 2:
             return
 
+    old_name = __get_spelling_or_displayname(symbols[0])
+
     locs = set()
     for sym in symbols:
         locs.add(
             (sym.location.line, sym.location.column, sym.location.file.name))
-
         __search_cursors_by_define(tu.cursor, sym, locs)
 
-    __vim_replace(locs, __get_spelling_or_displayname(sym), new_name)
+    __vim_replace(locs, old_name, new_name)
 
 # def dfs(cursor):
 #    print cursor.location, cursor.spelling
