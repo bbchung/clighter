@@ -363,7 +363,7 @@ def __vim_replace(locs, old, new):
             pattern += "\|"
 
         pattern += "\%" + str(line) + "l" + "\%>" + str(
-            column - 1) + "v\%<" + str(column + len(old)) + "v" + old
+            column - 1) + "c\%<" + str(column + len(old)) + "c" + old
 
     if not pattern:
         return
