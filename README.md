@@ -5,10 +5,10 @@
 Clighter(C Lighter) is a vim plugin that integrates the libclang to improve c-family
 development environment, and it currently provides the following features(for c-family):
 
-* Automatically do semantic highlighting
-* Automatically highlight all words that with the same definition
-* Options to customize the colors
-* Experimental function to do rename-refactoring
+* Automatically do syntax(semantic) highlighting.
+* Automatically highlight all words that with the same definition.
+* Options to customize the colors.
+* Experimental function to do rename-refactoring.
 
 ![clighter demo](http://goo.gl/ivfipF "Enable Clighter")
 ![clighter demo](http://goo.gl/zq2Epq "Disable Clighter")
@@ -20,12 +20,12 @@ Clighter requires the following:
 * Vim version 7.4+ with python2.x enabled
 * libclang(only 3.5 has been tested)
 
-Clighter only has been tested in linux platform
+Clighter only has been tested in linux platform.
 
 ## Options
 
 ### g:clighter_autostart
-Clighter will automatically start syntax highlight engine if g:clighter_autostart == `1`.
+Clighter will automatically start if g:clighter_autostart == `1`.
 
 Default: `1`
 ```vim
@@ -106,11 +106,11 @@ let g:clighter_realtime = 1
 
 Clighter provides these commands and functions
 
-* Enable Clighter's syntax highlight engine
+* Enable Clighter
 
 	`ClighterEnable`
 
-* Disable Clighter's syntax highlight engine
+* Disable Clighter
 
 	`ClighterDisable`
 
@@ -126,7 +126,7 @@ Clighter provides these commands and functions
 
 	`clighter#Rename()`
     
-    For convenience, you can add this key map:
+    For convenience, you can add this key map in you vimrc:
 	```vim
     nmap <silent> <Leader>r :call clighter#Rename()<CR>
 	```
