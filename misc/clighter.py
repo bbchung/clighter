@@ -122,10 +122,8 @@ def highlight_window():
     redraw_def_ref = False
 
     if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
-        (row, col) = vim.current.window.cursor
-        vim_cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(
-            pobj.tu, pobj.file, row, col + 1))  # cursor under vim
-        def_cursor = __get_definition_or_declaration(vim_cursor, True)
+        vim_cursor = __get_vim_cursor(pobj)
+        def_cursor = __get_definition_or_declaration(vim_cursor)
 
         if not hasattr(highlight_window, 'last_dc'):
             highlight_window.last_dc = None
@@ -173,8 +171,7 @@ def highlight_window():
             """ Do definition/reference highlighting'
             """
             if redraw_def_ref:
-                t_def_cursor = __get_definition_or_declaration(
-                    t_tu_cursor, False)
+                t_def_cursor = __get_definition_or_declaration(t_tu_cursor)
                 if t_def_cursor is not None and t_def_cursor == def_cursor:
                     __vim_matchaddpos(
                         'CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
@@ -189,16 +186,16 @@ def __get_spelling_or_displayname(cursor):
     return cursor.displayname
 
 
-def __get_definition_or_declaration(cursor, check_cword):
+def __get_definition_or_declaration(cursor):
+    if cursor is None:
+        return None
+
     if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
         return cursor
 
     def_cursor = cursor.get_definition()
     if def_cursor is None:
         def_cursor = cursor.referenced
-
-    if check_cword and def_cursor is not None and vim.eval('expand("<cword>")') != __get_spelling_or_displayname(def_cursor):
-        def_cursor = None
 
     return def_cursor
 
@@ -305,15 +302,13 @@ def refactor_rename():
     pobj.try_parse(
         vim.vars['clighter_clang_options'], ParsingService.unsaved, True)
     file = cindex.File.from_name(pobj.tu, vim.current.buffer.name)
-    (row, col) = vim.current.window.cursor
-    vim_cursor = cindex.Cursor.from_location(
-        pobj.tu, cindex.SourceLocation.from_position(pobj.tu, file, row, col + 1))  # cursor under vim
+    vim_cursor = __get_vim_cursor(pobj)
 
-    def_cursor = __get_definition_or_declaration(vim_cursor, True)
+    def_cursor = __get_definition_or_declaration(vim_cursor)
     if def_cursor is None:
         return
 
-    if def_cursor.kind == cindex.CursorKind.CONSTRUCTOR:
+    if def_cursor.kind == cindex.CursorKind.CONSTRUCTOR or def_cursor.kind == cindex.CursorKind.DESTRUCTOR:
         def_cursor = def_cursor.semantic_parent
 
     old_name = __get_spelling_or_displayname(def_cursor)
@@ -335,9 +330,9 @@ def refactor_rename():
 
 
 def __search_cursors_by_define(cursor, def_cursor, locs):
-    cursor_def = __get_definition_or_declaration(cursor, False)
+    cursor_def = __get_definition_or_declaration(cursor)
 
-    if (cursor_def is not None and cursor_def == def_cursor) or (cursor.kind == cindex.CursorKind.CONSTRUCTOR and cursor.semantic_parent == def_cursor):
+    if (cursor_def is not None and cursor_def == def_cursor) or ((cursor.kind == cindex.CursorKind.CONSTRUCTOR or cursor.kind == cindex.CursorKind.DESTRUCTOR) and cursor.semantic_parent == def_cursor):
         locs.add(
             (cursor.location.line, cursor.location.column, cursor.location.file.name))
 
@@ -347,6 +342,16 @@ def __search_cursors_by_define(cursor, def_cursor, locs):
 
 def __is_symbol_cursor(cursor):
     return cursor.kind.is_preprocessing() or cursor.semantic_parent.kind != cindex.CursorKind.FUNCTION_DECL
+
+
+def __get_vim_cursor(pobj):
+    (row, col) = vim.current.window.cursor
+    cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(
+        pobj.tu, pobj.file, row, col + 1))  # cursor under vim
+    if cursor.location.column <= col + 1 < cursor.location.column + len(__get_spelling_or_displayname(cursor)):
+        return cursor
+
+    return None
 
 
 def __vim_replace(locs, old, new):
