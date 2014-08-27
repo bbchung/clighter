@@ -42,7 +42,6 @@ fun! clighter#Enable()
         endif
         au WinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au CursorHold *.[ch],*.[ch]pp,*.m py clighter.on_vim_cursor_hold()
-        au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.on_vim_cursor_hold()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ParsingService.join()
         au BufWinEnter * call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
         au VimLeavePre * py clighter.ParsingService.stop_sched_looping()

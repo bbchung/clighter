@@ -246,7 +246,7 @@ def get_unsaved_buffer_list():
         if buf.options['filetype'] not in ["c", "cpp", "objc"] or ((len(buf) == 1 and not buf[0])):
             continue
 
-        unsaved_list.add((buf.name, "\n".join(buf)))
+        unsaved_list.add((buf.name, '\n'.join(buf)))
 
     return unsaved_list
 
