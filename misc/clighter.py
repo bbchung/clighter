@@ -155,35 +155,34 @@ def highlight_window():
     if in_window and pobj.drawn and not redraw_def_ref:
         return
 
-    range = cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
-        pobj.tu, pobj.file, target_window[0], 1), cindex.SourceLocation.from_position(pobj.tu, pobj.file, target_window[1], 1))
-    tokens = pobj.tu.get_tokens(extent=range)
+    tokens = pobj.tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position( pobj.tu, pobj.file, target_window[0], 1), cindex.SourceLocation.from_position(pobj.tu, pobj.file, target_window[1], 1)))
     for t in tokens:
         """ Do semantic highlighting'
         """
-        if t.kind.value == 2:
-            t_tu_cursor = cindex.Cursor.from_location(
-                pobj.tu, cindex.SourceLocation.from_position(pobj.tu, pobj.file, t.location.line, t.location.column))
+        if t.kind.value != 2:
+            continue
 
-            if not in_window or not pobj.drawn:
-                __draw_token(t, t_tu_cursor.type.kind)
+        t_tu_cursor = cindex.Cursor.from_location(
+            pobj.tu, cindex.SourceLocation.from_position(pobj.tu, pobj.file, t.location.line, t.location.column))
 
-            """ Do definition/reference highlighting'
-            """
-            if redraw_def_ref:
-                t_def_cursor = __get_definition_or_declaration(t_tu_cursor)
-                if t_def_cursor is not None and t_def_cursor == def_cursor:
-                    __vim_matchaddpos(
-                        'CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
+        if not in_window or not pobj.drawn:
+            __draw_token(t, t_tu_cursor.type.kind)
+
+        """ Do definition/reference highlighting'
+        """
+        if not redraw_def_ref:
+            continue
+
+        t_def_cursor = __get_definition_or_declaration(t_tu_cursor)
+        if t_def_cursor is not None and t_def_cursor == def_cursor:
+            __vim_matchaddpos(
+                    'CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
 
     pobj.drawn = True
 
 
 def __get_spelling_or_displayname(cursor):
-    if cursor.spelling is not None:
-        return cursor.spelling
-
-    return cursor.displayname
+    return cursor.spelling if cursor.spelling is not None else cursor.displayname
 
 
 def __get_definition_or_declaration(cursor):
@@ -194,10 +193,8 @@ def __get_definition_or_declaration(cursor):
         return cursor
 
     def_cursor = cursor.get_definition()
-    if def_cursor is None:
-        def_cursor = cursor.referenced
-
-    return def_cursor
+    
+    return def_cursor if def_cursor is not None else cursor.referenced
 
 
 def __draw_token(token, type):
@@ -301,9 +298,8 @@ def refactor_rename():
     ParsingService.unsaved = get_unsaved_buffer_list()
     pobj.try_parse(
         vim.vars['clighter_clang_options'], ParsingService.unsaved, True)
-    file = cindex.File.from_name(pobj.tu, vim.current.buffer.name)
-    vim_cursor = __get_vim_cursor(pobj)
 
+    vim_cursor = __get_vim_cursor(pobj)
     def_cursor = __get_definition_or_declaration(vim_cursor)
     if def_cursor is None:
         return
@@ -348,10 +344,8 @@ def __get_vim_cursor(pobj):
     (row, col) = vim.current.window.cursor
     cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(
         pobj.tu, pobj.file, row, col + 1))  # cursor under vim
-    if cursor.location.column <= col + 1 < cursor.location.column + len(__get_spelling_or_displayname(cursor)):
-        return cursor
 
-    return None
+    return cursor if cursor.location.column <= col + 1 < cursor.location.column + len(__get_spelling_or_displayname(cursor)) else None
 
 
 def __vim_replace(locs, old, new):
