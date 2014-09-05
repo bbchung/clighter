@@ -133,7 +133,7 @@ def highlight_window():
 
     if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
         vim_cursor = __get_vim_cursor(pobj, vim.current.window.cursor)
-        def_cursor = __get_definition_or_declaration(vim_cursor)
+        def_cursor = __get_definition(vim_cursor)
 
         if not hasattr(highlight_window, 'last_dc'):
             highlight_window.last_dc = None
@@ -154,7 +154,7 @@ def highlight_window():
 
     window_size = vim.vars['clighter_window_size'] * 100
     buflinenr = len(vim.current.buffer)
-    target_window = [0, buflinenr] if window_size < 0 else [
+    target_window = [1, buflinenr] if window_size < 0 else [
         max(vim_win_top - window_size, 1), min(vim_win_bottom + window_size, buflinenr)]
 
     if not in_window or not pobj.drawn:
@@ -167,6 +167,7 @@ def highlight_window():
 
     tokens = pobj.tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
         pobj.tu, pobj.file, target_window[0], 1), cindex.SourceLocation.from_position(pobj.tu, pobj.file, target_window[1], 1)))
+
     for t in tokens:
         """ Do semantic highlighting'
         """
@@ -184,7 +185,7 @@ def highlight_window():
         if not redraw_def_ref:
             continue
 
-        t_def_cursor = __get_definition_or_declaration(t_tu_cursor)
+        t_def_cursor = __get_definition(t_tu_cursor)
         if t_def_cursor is not None and t_def_cursor == def_cursor:
             __vim_matchaddpos(
                 'CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
@@ -205,7 +206,7 @@ def refactor_rename():
         vim.vars['clighter_clang_options'], ParsingService.unsaved, True)
 
     vim_cursor = __get_vim_cursor(pobj, vim.current.window.cursor)
-    def_cursor = __get_definition_or_declaration(vim_cursor)
+    def_cursor = __get_definition(vim_cursor)
     if def_cursor is None:
         return
 
@@ -233,16 +234,14 @@ def __get_spelling_or_displayname(cursor):
     return cursor.spelling if cursor.spelling is not None else cursor.displayname
 
 
-def __get_definition_or_declaration(cursor):
+def __get_definition(cursor):
     if cursor is None:
         return None
 
     if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
         return cursor
 
-    def_cursor = cursor.get_definition()
-
-    return def_cursor if def_cursor is not None else cursor.referenced
+    return cursor.get_definition()
 
 
 def __draw_token(token, type):
@@ -328,7 +327,7 @@ def __find_cursors_by_usr(cursor, usr, symbols):
 
 
 def __search_ref_cursors(cursor, def_cursor, locs):
-    cursor_def = __get_definition_or_declaration(cursor)
+    cursor_def = __get_definition(cursor)
 
     if (cursor_def is not None and cursor_def == def_cursor) or ((cursor.kind == cindex.CursorKind.CONSTRUCTOR or cursor.kind == cindex.CursorKind.DESTRUCTOR) and cursor.semantic_parent == def_cursor):
         locs.add(
