@@ -43,3 +43,6 @@ if g:clighter_autostart == 1
         au VimEnter * call clighter#Enable()
     augroup END
 endif
+
+let g:loaded_clighter=1
+
