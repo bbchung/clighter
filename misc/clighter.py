@@ -174,18 +174,18 @@ def highlight_window():
         if t.kind.value != 2:
             continue
 
-        t_tu_cursor = cindex.Cursor.from_location(
-            pobj.tu, cindex.SourceLocation.from_position(pobj.tu, pobj.file, t.location.line, t.location.column))
+        t_cursor = t.cursor
+        t_cursor._tu = pobj.tu  
 
         if not in_window or not pobj.drawn:
-            __draw_token(t, t_tu_cursor.type.kind)
+            __draw_token(t.location.line, t.location.column, len(t.spelling), t_cursor.kind, t_cursor.type.kind)
 
         """ Do definition/reference highlighting'
         """
         if not redraw_def_ref:
             continue
 
-        t_def_cursor = __get_definition(t_tu_cursor)
+        t_def_cursor = __get_definition(t_cursor)
         if t_def_cursor is not None and t_def_cursor == def_cursor:
             __vim_matchaddpos(
                 'CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
@@ -244,28 +244,21 @@ def __get_definition(cursor):
     return cursor.get_definition()
 
 
-def __draw_token(token, type):
-    if token.cursor.kind == cindex.CursorKind.MACRO_INSTANTIATION:
-        __vim_matchaddpos('ClighterMacroInstantiation', token.location.line,
-                          token.location.column, len(token.spelling), -2)
-    elif token.cursor.kind == cindex.CursorKind.STRUCT_DECL:
-        __vim_matchaddpos('ClighterStructDecl', token.location.line,
-                          token.location.column, len(token.spelling), -2)
-    elif token.cursor.kind == cindex.CursorKind.CLASS_DECL:
-        __vim_matchaddpos('ClighterClassDecl', token.location.line,
-                          token.location.column, len(token.spelling), -2)
-    elif token.cursor.kind == cindex.CursorKind.ENUM_DECL:
-        __vim_matchaddpos('ClighterEnumDecl', token.location.line,
-                          token.location.column, len(token.spelling), -2)
-    elif token.cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
-        __vim_matchaddpos('ClighterEnumConstantDecl', token.location.line,
-                          token.location.column, len(token.spelling), -2)
-    elif token.cursor.kind == cindex.CursorKind.TYPE_REF:
-        __vim_matchaddpos('ClighterTypeRef', token.location.line,
-                          token.location.column, len(token.spelling), -2)
-    elif token.cursor.kind == cindex.CursorKind.DECL_REF_EXPR and type == cindex.TypeKind.ENUM:
-        __vim_matchaddpos('ClighterDeclRefExprEnum', token.location.line,
-                          token.location.column, len(token.spelling), -2)
+def __draw_token(line, col, len, kind, type):
+    if kind == cindex.CursorKind.MACRO_INSTANTIATION:
+        __vim_matchaddpos('ClighterMacroInstantiation', line, col, len, -2)
+    elif kind == cindex.CursorKind.STRUCT_DECL:
+        __vim_matchaddpos('ClighterStructDecl', line, col, len, -2)
+    elif kind == cindex.CursorKind.CLASS_DECL:
+        __vim_matchaddpos('ClighterClassDecl', line, col, len, -2)
+    elif kind == cindex.CursorKind.ENUM_DECL:
+        __vim_matchaddpos('ClighterEnumDecl', line, col, len, -2)
+    elif kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
+        __vim_matchaddpos('ClighterEnumConstantDecl', line, col, len, -2)
+    elif kind == cindex.CursorKind.TYPE_REF:
+        __vim_matchaddpos('ClighterTypeRef', line, col, len, -2)
+    elif kind == cindex.CursorKind.DECL_REF_EXPR and type == cindex.TypeKind.ENUM:
+        __vim_matchaddpos('ClighterDeclRefExprEnum', line, col, len, -2)
 
 
 def __cross_buffer_rename(usr, new_name):
