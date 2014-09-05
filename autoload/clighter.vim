@@ -10,7 +10,7 @@ let s:cursor_decl_ref_hl_on = 1
 fun! clighter#ToggleCursorHL()
     if s:cursor_decl_ref_hl_on==1
         let s:cursor_decl_ref_hl_on=0
-        call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
+        call s:clear_match(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
     else
         let s:cursor_decl_ref_hl_on=1
         "augroup CursorHighlight
@@ -43,7 +43,7 @@ fun! clighter#Enable()
         au WinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au CursorHold *.[ch],*.[ch]pp,*.m py clighter.on_vim_cursor_hold()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ParsingService.join()
-        au BufWinEnter * call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
+        au BufWinEnter * call s:clear_match(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
         au VimLeavePre * py clighter.ParsingService.stop_sched_looping()
     augroup END
 endf
@@ -52,7 +52,7 @@ fun! clighter#Disable()
     au! ClighterEnable
     py clighter.ParsingService.stop_sched_looping()
     let a:wnr = winnr()
-    windo call s:clear_match(['MacroInstantiation', 'StructDecl', 'ClassDecl', 'EnumDecl', 'EnumConstantDecl', 'TypeRef', 'EnumDeclRefExpr', 'CursorDefRef'])
+    windo call s:clear_match(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
     exe a:wnr."wincmd w"
 endf
 

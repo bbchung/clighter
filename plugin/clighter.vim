@@ -28,14 +28,14 @@ command! ClighterEnable call clighter#Enable()
 command! ClighterDisable call clighter#Disable()
 command! ClighterToggleCursorHL call clighter#ToggleCursorHL()
 
-hi link MacroInstantiation Macro
-hi link TypeRef Type
-hi link StructDecl Type
-hi link ClassDecl Type
-hi link EnumDecl Type
-hi link EnumConstantDecl Identifier
+hi link ClighterMacroInstantiation Macro
+hi link ClighterTypeRef Identifier
+hi link ClighterStructDecl Type
+hi link ClighterClassDecl Type
+hi link ClighterEnumDecl Type
+hi link ClighterEnumConstantDecl Identifier
+hi link ClighterDeclRefExprEnum Identifier
 
-hi link EnumDeclRefExpr Identifier
 hi link CursorDefRef Search
 
 if g:clighter_autostart == 1
