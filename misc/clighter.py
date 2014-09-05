@@ -175,10 +175,11 @@ def highlight_window():
             continue
 
         t_cursor = t.cursor
-        t_cursor._tu = pobj.tu  
+        t_cursor._tu = pobj.tu
 
         if not in_window or not pobj.drawn:
-            __draw_token(t.location.line, t.location.column, len(t.spelling), t_cursor.kind, t_cursor.type.kind)
+            __draw_token(t.location.line, t.location.column, len(
+                t.spelling), t_cursor.kind, t_cursor.type.kind)
 
         """ Do definition/reference highlighting'
         """
@@ -194,6 +195,17 @@ def highlight_window():
 
 
 def refactor_rename():
+    __rename()
+    pobj = ParsingService.objects.get(vim.current.buffer.number)
+    if pobj is None:
+        return
+
+    ParsingService.update_unsaved()
+    pobj.try_parse(
+        vim.vars['clighter_clang_options'], ParsingService.unsaved, True)
+
+
+def __rename():
     if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"]:
         return
 
