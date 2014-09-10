@@ -167,45 +167,45 @@ Rename-refactor the variable/function name under vim cursor~
 Clighter defines the following syntax group corresponding to CursorKing of
 Clang.
 
-MacroInstantiation~
+ClighterMacroInstantiation~
 >
-	hi link MacroInstantiation Macro
->
-
-TypeRef~
->
-	hi link TypeRef Type
+	hi link ClighterMacroInstantiation Macro
 >
 
-StructDecl~
+ClighterTypeRef~
 >
-	hi link StructDecl Type
->
-
-ClassDecl~
->
-	hi link ClassDecl Type
+	hi link ClighterTypeRef Type
 >
 
-EnumDecl~
+ClighterStructDecl~
 >
-	hi link EnumDecl Type
->
-
-EnumConstantDecl~
->
-	hi link EnumConstantDecl Identifier
+	hi link ClighterStructDecl Type
 >
 
-EnumDefRefExpr~
+ClighterClassDecl~
 >
-	hi link EnumDefRefExpr Identifier
+	hi link ClighterClassDecl Type
+>
+
+ClighterEnumDecl~
+>
+	hi link ClighterEnumDecl Type
+>
+
+ClighterEnumConstantDecl~
+>
+	hi link ClighterEnumConstantDecl Identifier
+>
+
+ClighterEnumDefRefExpr~
+>
+	hi link ClighterEnumDefRefExpr Identifier
 >
 
 You can customize these colors in your colorscheme, for example:
 >
-	hi TypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
-	hi ClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
+	hi ClighterTypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
+	hi ClighterClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
 <
 
 ==============================================================================

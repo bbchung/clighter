@@ -136,45 +136,45 @@ Clighter provides these commands and functions
 
 Clighter defines the following syntax group corresponding to CursorKind of libclang.
 
-* MacroInstantiation
+* ClighterMacroInstantiation
 	```vim
-	hi link MacroInstantiation Macro
+	hi link ClighterMacroInstantiation Macro
 	```
 
-* TypeRef
+* ClighterTypeRef
 	```vim
-	hi link TypeRef Type
+	hi link ClighterTypeRef Type
 	```
 
-* StructDecl
+* ClighterStructDecl
 	```vim
-	hi link StructDecl Type
+	hi link ClighterStructDecl Type
 	```
 
-* ClassDecl
+* ClighterClassDecl
 	```vim
-	hi link ClassDecl Type
+	hi link ClighterClassDecl Type
 	```
 
-* EnumDecl
+* ClighterEnumDecl
 	```vim
-	hi link EnumDecl Type
+	hi link ClighterEnumDecl Type
 	```
 
-* EnumConstantDecl
+* ClighterEnumConstantDecl
 	```vim
-	hi link EnumConstantDecl Identifier
+	hi link ClighterEnumConstantDecl Identifier
 	```
 
-* EnumDefRefExpr
+* ClighterEnumDefRefExpr
 	```vim
-	hi link EnumDefRefExpr Identifier
+	hi link ClighterEnumDefRefExpr Identifier
 	```
 
 You can customize these colors in your colorscheme, for example:
 ```vim
-	hi TypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
-	hi ClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
+	hi ClighterTypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
+	hi ClighterClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
 ```
 
 
