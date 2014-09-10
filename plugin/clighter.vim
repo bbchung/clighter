@@ -17,7 +17,7 @@ if exists('g:loaded_clighter')
 endif
 
 let g:clighter_autostart = get(g:, 'clighter_autostart', 1)
-let g:clighter_clang_options = get(g:, 'clighter_clang_options', [])
+let g:clighter_clang_options = get(g:, 'clighter_clang_options', ['-Iinclude'])
 let g:clighter_window_size = get(g:, 'clighter_window_size', 1)
 let g:clighter_libclang_file = get(g:, 'clighter_libclang_file', '')
 let g:clighter_realtime = get(g:, 'clighter_realtime', 1)
