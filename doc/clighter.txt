@@ -116,6 +116,7 @@ The prompt level of rename refactoring.
 Default: `1`
 >
 	let g:clighter_rename_prompt_level = 1
+<
 
 ### g:clighter_enable_cross_rename
 `0`: disable
@@ -124,7 +125,7 @@ Default: `1`
 Default: `1`
 >
 	let g:clighter_enable_cross_rename = 1
-
+<
 
 
 ==============================================================================
