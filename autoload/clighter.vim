@@ -31,7 +31,7 @@ endf
 
 fun! clighter#Enable()
     py clighter.ParsingService.join_all()
-    py clighter.ParsingService.start_sched_looping()
+    py clighter.ParsingService.start_looping()
 
     augroup ClighterEnable
         au!
@@ -44,7 +44,7 @@ fun! clighter#Enable()
         au CursorHold *.[ch],*.[ch]pp,*.m py clighter.on_vim_cursor_hold()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ParsingService.join()
         au BufWinEnter * call s:clear_match(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
-        au VimLeavePre * py clighter.ParsingService.stop_sched_looping()
+        au VimLeavePre * py clighter.ParsingService.stop_looping()
     augroup END
 endf
 

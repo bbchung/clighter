@@ -32,6 +32,13 @@ class ParsingObject:
         self.drawn = False
 
 
+    def get_vim_cursor(self):
+        (row, col) = vim.current.window.cursor
+        cursor = cindex.Cursor.from_location(self.tu, cindex.SourceLocation.from_position( self.tu, self.file, row, col + 1))  # cursor under vim
+
+        return cursor if cursor.location.column <= col + 1 < cursor.location.column + len(get_spelling_or_displayname(cursor)) else None
+
+
 class ParsingService:
     __thread = None
     __is_running = False
@@ -40,7 +47,7 @@ class ParsingService:
     clang_idx = cindex.Index.create()
 
     @staticmethod
-    def start_sched_looping():
+    def start_looping():
         if ParsingService.__thread is not None:
             return
 
@@ -50,7 +57,7 @@ class ParsingService:
         ParsingService.__thread.start()
 
     @staticmethod
-    def stop_sched_looping():
+    def stop_looping():
         if ParsingService.__thread is None:
             return
 
@@ -132,7 +139,7 @@ def highlight_window():
     redraw_def_ref = False
 
     if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
-        vim_cursor = __get_vim_cursor(pobj, vim.current.window.cursor)
+        vim_cursor = pobj.get_vim_cursor()
         def_cursor = __get_definition(vim_cursor)
 
         if not hasattr(highlight_window, 'last_dc'):
@@ -148,7 +155,7 @@ def highlight_window():
             # special case for preprocessor
             if def_cursor.kind.is_preprocessing() and def_cursor.location.file.name == vim.current.buffer.name:
                 __vim_matchaddpos('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(
-                    __get_spelling_or_displayname(def_cursor)), -1)
+                    get_spelling_or_displayname(def_cursor)), -1)
 
             highlight_window.last_dc = def_cursor
 
@@ -217,7 +224,7 @@ def __rename():
     pobj.try_parse(
         vim.vars['clighter_clang_options'], ParsingService.unsaved, True)
 
-    vim_cursor = __get_vim_cursor(pobj, vim.current.window.cursor)
+    vim_cursor = pobj.get_vim_cursor()
     def_cursor = __get_definition(vim_cursor)
     if def_cursor is None:
         return
@@ -225,7 +232,7 @@ def __rename():
     if def_cursor.kind == cindex.CursorKind.CONSTRUCTOR or def_cursor.kind == cindex.CursorKind.DESTRUCTOR:
         def_cursor = def_cursor.semantic_parent
 
-    old_name = __get_spelling_or_displayname(def_cursor)
+    old_name = get_spelling_or_displayname(def_cursor)
     new_name = vim.bindeval(
         "input('rename \"{0}\" to: ', '{1}')".format(old_name, old_name))
 
@@ -242,7 +249,7 @@ def __rename():
         __cross_buffer_rename(def_cursor.get_usr(), new_name)
 
 
-def __get_spelling_or_displayname(cursor):
+def get_spelling_or_displayname(cursor):
     return cursor.spelling if cursor.spelling is not None else cursor.displayname
 
 
@@ -250,10 +257,7 @@ def __get_definition(cursor):
     if cursor is None:
         return None
 
-    if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
-        return cursor
-
-    return cursor.get_definition()
+    return cursor if cursor.kind == cindex.CursorKind.MACRO_DEFINITION else cursor.get_definition()
 
 
 def __draw_token(line, col, len, kind, type):
@@ -307,7 +311,7 @@ def __search_usr_and_rename_refs(tu, usr, new_name):
             return
 
     # all symbols with the same name
-    old_name = __get_spelling_or_displayname(symbols[0])
+    old_name = get_spelling_or_displayname(symbols[0])
 
     locs = set()
     for sym in symbols:
@@ -344,14 +348,6 @@ def __search_ref_cursors(cursor, def_cursor, locs):
 
 def __is_symbol_cursor(cursor):
     return cursor.kind.is_preprocessing() or cursor.semantic_parent.kind != cindex.CursorKind.FUNCTION_DECL
-
-
-def __get_vim_cursor(pobj, pos):
-    (row, col) = pos
-    cursor = cindex.Cursor.from_location(pobj.tu, cindex.SourceLocation.from_position(
-        pobj.tu, pobj.file, row, col + 1))  # cursor under vim
-
-    return cursor if cursor.location.column <= col + 1 < cursor.location.column + len(__get_spelling_or_displayname(cursor)) else None
 
 
 def __vim_multi_replace(locs, old, new):
