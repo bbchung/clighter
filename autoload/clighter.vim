@@ -50,7 +50,7 @@ endf
 
 fun! clighter#Disable()
     au! ClighterEnable
-    py clighter.ParsingService.stop_sched_looping()
+    py clighter.ParsingService.stop_looping()
     let a:wnr = winnr()
     windo call s:clear_match(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
     exe a:wnr."wincmd w"
