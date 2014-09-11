@@ -88,7 +88,7 @@ The prompt level of rename refactoring.
 
 Default: `1`
 ```vim
-let g:clighter_realtime = 1
+let g:clighter_rename_prompt_level = 1
 ```
 
 ### g:clighter_enable_cross_rename
@@ -98,7 +98,7 @@ let g:clighter_realtime = 1
 
 Default: `1`
 ```vim
-let g:clighter_realtime = 1
+let g:clighter_enable_cross_rename = 1
 ```
 
 
