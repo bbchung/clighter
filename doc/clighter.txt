@@ -118,7 +118,7 @@ Default: `1`
 	let g:clighter_rename_prompt_level = 1
 <
 
-### g:clighter_enable_cross_rename
+g:clighter_enable_cross_rename~
 `0`: disable
 `1`: enable
 
