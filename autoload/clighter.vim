@@ -37,11 +37,15 @@ fun! clighter#Enable()
         au!
         if g:clighter_realtime == 1
             au CursorMoved *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
+            au CursorMovedI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
+            au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
+            au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
         else
             au CursorHold *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
+            au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
+            au CursorHold *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
         endif
         au WinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
-        au CursorHold *.[ch],*.[ch]pp,*.m py clighter.on_vim_cursor_hold()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ParsingService.join()
         au BufWinEnter * call s:clear_match(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
         au VimLeavePre * py clighter.ParsingService.stop_looping()
