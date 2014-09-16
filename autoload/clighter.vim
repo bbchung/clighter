@@ -41,10 +41,11 @@ fun! clighter#Enable()
             au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
             au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
         else
-            au CursorHold *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
-            au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
             au CursorHold *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
+            au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
         endif
+        au CursorHold *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
+        au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au WinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ParsingService.join()
         au BufWinEnter * call s:clear_match(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
