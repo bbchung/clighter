@@ -94,7 +94,7 @@ class ParsingService:
     def update_unsaved():
         for file in ParsingService.unsaved:
             if file[0] == vim.current.buffer.name:
-                ParsingService.unsaved.remove(file)
+                ParsingService.unsaved.discard(file)
                 break
 
         ParsingService.unsaved.add(
