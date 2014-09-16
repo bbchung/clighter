@@ -37,7 +37,7 @@ class ParsingObject:
 class ParsingService:
     __thread = None
     __is_running = False
-    unsaved = []
+    unsaved = set()
     objects = {}
     clang_idx = cindex.Index.create()
     invalid = True
@@ -97,7 +97,7 @@ class ParsingService:
                 ParsingService.unsaved.remove(file)
                 break
 
-        ParsingService.unsaved.append(
+        ParsingService.unsaved.add(
             (vim.current.buffer.name, '\n'.join(vim.current.buffer)))
 
         ParsingService.invalid = True
