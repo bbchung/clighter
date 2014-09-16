@@ -3,6 +3,9 @@ from clang import cindex
 from threading import Thread
 import time
 
+DEF_REF_PRI = -11
+TOKEN_PRI = -12
+
 if vim.vars['clighter_libclang_file']:
     cindex.Config.set_library_file(vim.vars['clighter_libclang_file'])
 
@@ -140,7 +143,7 @@ def highlight_window():
             highlight_window.last_dc = None
 
         if highlight_window.last_dc is not None and (def_cursor is None or highlight_window.last_dc != def_cursor):
-            vim.command("call s:clear_match(['CursorDefRef'])")
+            vim.command("call s:clear_match_pri({0})".format(DEF_REF_PRI))
             highlight_window.last_dc = None
 
         if def_cursor is not None and (highlight_window.last_dc is None or def_cursor != highlight_window.last_dc):
@@ -149,7 +152,7 @@ def highlight_window():
             # special case for preprocessor
             if def_cursor.kind.is_preprocessing() and def_cursor.location.file.name == vim.current.buffer.name:
                 __vim_matchaddpos('CursorDefRef', def_cursor.location.line, def_cursor.location.column, len(
-                    get_spelling_or_displayname(def_cursor)), -1)
+                    get_spelling_or_displayname(def_cursor)), DEF_REF_PRI)
 
             highlight_window.last_dc = def_cursor
 
@@ -160,8 +163,7 @@ def highlight_window():
 
     if not in_window or not tu[2]:
         vim.current.window.vars["clighter_window"] = target_window
-        vim.command(
-            "call s:clear_match(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum'])")
+        vim.command("call s:clear_match_pri({0})".format(TOKEN_PRI))
     elif not redraw_def_ref:
         return
 
@@ -189,7 +191,7 @@ def highlight_window():
         t_def_cursor = __get_definition(t_cursor)
         if t_def_cursor is not None and t_def_cursor == def_cursor:
             __vim_matchaddpos(
-                'CursorDefRef', t.location.line, t.location.column, len(t.spelling), -1)
+                'CursorDefRef', t.location.line, t.location.column, len(t.spelling), DEF_REF_PRI)
 
     tu[2] = True
 
@@ -242,19 +244,21 @@ def __get_definition(cursor):
 
 def __draw_token(line, col, len, kind, type):
     if kind == cindex.CursorKind.MACRO_INSTANTIATION:
-        __vim_matchaddpos('ClighterMacroInstantiation', line, col, len, -2)
+        __vim_matchaddpos(
+            'ClighterMacroInstantiation', line, col, len, TOKEN_PRI)
     elif kind == cindex.CursorKind.STRUCT_DECL:
-        __vim_matchaddpos('ClighterStructDecl', line, col, len, -2)
+        __vim_matchaddpos('ClighterStructDecl', line, col, len, TOKEN_PRI)
     elif kind == cindex.CursorKind.CLASS_DECL:
-        __vim_matchaddpos('ClighterClassDecl', line, col, len, -2)
+        __vim_matchaddpos('ClighterClassDecl', line, col, len, TOKEN_PRI)
     elif kind == cindex.CursorKind.ENUM_DECL:
-        __vim_matchaddpos('ClighterEnumDecl', line, col, len, -2)
+        __vim_matchaddpos('ClighterEnumDecl', line, col, len, TOKEN_PRI)
     elif kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
-        __vim_matchaddpos('ClighterEnumConstantDecl', line, col, len, -2)
+        __vim_matchaddpos(
+            'ClighterEnumConstantDecl', line, col, len, TOKEN_PRI)
     elif kind == cindex.CursorKind.TYPE_REF:
-        __vim_matchaddpos('ClighterTypeRef', line, col, len, -2)
+        __vim_matchaddpos('ClighterTypeRef', line, col, len, TOKEN_PRI)
     elif kind == cindex.CursorKind.DECL_REF_EXPR and type == cindex.TypeKind.ENUM:
-        __vim_matchaddpos('ClighterDeclRefExprEnum', line, col, len, -2)
+        __vim_matchaddpos('ClighterDeclRefExprEnum', line, col, len, TOKEN_PRI)
 
 
 def __cross_buffer_rename(usr, new_name):
