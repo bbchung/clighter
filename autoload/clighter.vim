@@ -39,6 +39,16 @@ endf
 
 
 fun! clighter#Enable()
+    if !exists("s:clang_initialized")
+        py clighter.ParsingService.init()
+        if !exists("s:clang_initialized")
+            echohl WarningMsg |
+                        \ echomsg "Clighter unavailable: cannot init libclang" |
+                        \ echohl None
+            return
+        endif
+    endif
+
     py clighter.ParsingService.join_all()
     py clighter.ParsingService.start_looping()
 

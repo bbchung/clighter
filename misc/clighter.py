@@ -46,8 +46,16 @@ class ParsingService:
     __is_running = False
     unsaved = set()
     objects = {}
-    clang_idx = cindex.Index.create()
+    clang_idx = None
     invalid = True
+
+    @staticmethod
+    def init():
+        try:
+            ParsingService.clang_idx = cindex.Index.create()
+            vim.command("let s:clang_initialized=1")
+        except:
+            pass
 
     @staticmethod
     def start_looping():
@@ -86,6 +94,8 @@ class ParsingService:
             if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.number not in ParsingService.objects.keys():
                 ParsingService.objects[buf.number] = ParsingObject(
                     ParsingService.clang_idx, buf.name)
+        
+        ParsingService.invalid = True
 
     @staticmethod
     def join():
@@ -94,7 +104,8 @@ class ParsingService:
 
         ParsingService.objects[vim.current.buffer.number] = ParsingObject(
             ParsingService.clang_idx, vim.current.buffer.name)
-        ParsingService.update_unsaved()
+
+        ParsingService.invalid = True
 
     @staticmethod
     def update_unsaved():
