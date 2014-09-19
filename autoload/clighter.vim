@@ -40,7 +40,7 @@ endf
 
 fun! clighter#Enable()
     if !exists("s:clang_initialized")
-        py clighter.ParsingService.init()
+        py clighter.ClangService.init()
         if !exists("s:clang_initialized")
             echohl WarningMsg |
                         \ echomsg "Clighter unavailable: cannot init libclang" |
@@ -49,32 +49,32 @@ fun! clighter#Enable()
         endif
     endif
 
-    py clighter.ParsingService.join_all()
-    py clighter.ParsingService.start_looping()
+    py clighter.ClangService.join_all()
+    py clighter.ClangService.start_looping()
 
     augroup ClighterEnable
         au!
         if g:clighter_realtime == 1
             au CursorMoved *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
             au CursorMovedI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
-            au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
-            au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
+            au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ClangService.update_unsaved()
+            au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ClangService.update_unsaved()
         else
-            au CursorHold *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
-            au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.ParsingService.update_unsaved()
+            au CursorHold *.[ch],*.[ch]pp,*.m py clighter.ClangService.update_unsaved()
+            au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.ClangService.update_unsaved()
         endif
         au CursorHold *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au WinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
-        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ParsingService.join()
+        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.join()
         au BufWinEnter * call s:clear_match_grp(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
-        au VimLeavePre * py clighter.ParsingService.stop_looping()
+        au VimLeavePre * py clighter.ClangService.stop_looping()
     augroup END
 endf
 
 fun! clighter#Disable()
     au! ClighterEnable
-    py clighter.ParsingService.stop_looping()
+    py clighter.ClangService.stop_looping()
     let a:wnr = winnr()
     windo call s:clear_match_grp(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
     exe a:wnr."wincmd w"
