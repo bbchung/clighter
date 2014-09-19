@@ -186,8 +186,8 @@ def highlight_window():
         if t.kind.value != 2:
             continue
 
-        t_cursor = t.cursor
-        t_cursor._tu = tu_cache.tu
+        t_cursor = cindex.Cursor.from_location(tu_cache.tu, cindex.SourceLocation.from_position(
+            tu_cache.tu, tu_cache.file, t.location.line, t.location.column))  # cursor under vim
 
         if draw_syntax:
             __draw_token(t.location.line, t.location.column, len(
