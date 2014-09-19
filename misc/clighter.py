@@ -92,7 +92,7 @@ class ClangService:
     def add_all_bufs():
         for buf in vim.buffers:
             if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.number not in ClangService.buf_ctxs.keys():
-                ClangService.buf_ctxs[buf.number] = BufferCtx(buf.name)
+                ClangService.buf_ctxs[buf.name] = BufferCtx(buf.name)
 
         ClangService.invalid = True
 
@@ -101,7 +101,7 @@ class ClangService:
         if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"] or vim.current.buffer.number in ClangService.buf_ctxs.keys():
             return
 
-        ClangService.buf_ctxs[vim.current.buffer.number] = BufferCtx(
+        ClangService.buf_ctxs[vim.current.buffer.name] = BufferCtx(
             vim.current.buffer.name)
 
         ClangService.invalid = True
@@ -135,7 +135,7 @@ class ClangService:
 
 
 def highlight_window():
-    buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.number)
+    buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)
     if buf_ctx is None:
         return
 
@@ -216,7 +216,7 @@ def refactor_rename():
     if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"]:
         return
 
-    buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.number)
+    buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)
     if buf_ctx is None:
         return
 
@@ -283,7 +283,7 @@ def __cross_buffer_rename(usr, new_name):
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
         if vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
-            buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.number)
+            buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)
             if buf_ctx is not None:
                 buf_ctx.parse(
                     vim.vars['clighter_clang_options'], ClangService.unsaved)
