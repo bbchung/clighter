@@ -43,14 +43,13 @@ fun! clighter#Enable()
         py clighter.ClangService.init()
         if !exists("s:clang_initialized")
             echohl WarningMsg |
-                        \ echomsg "Clighter unavailable: cannot init libclang" |
+                        \ echomsg "Clighter unavailable: set libclang path might solve the problem" |
                         \ echohl None
             return
         endif
     endif
 
-    py clighter.ClangService.join_all()
-    py clighter.ClangService.start_looping()
+    py clighter.ClangService.add_all_bufs()
 
     augroup ClighterEnable
         au!
@@ -66,15 +65,15 @@ fun! clighter#Enable()
         au CursorHold *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au WinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
-        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.join()
+        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_this_buf()
         au BufWinEnter * call s:clear_match_grp(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
-        au VimLeavePre * py clighter.ClangService.stop_looping()
+        au VimLeavePre * py clighter.ClangService.release()
     augroup END
 endf
 
 fun! clighter#Disable()
     au! ClighterEnable
-    py clighter.ClangService.stop_looping()
+    py clighter.ClangService.release()
     let a:wnr = winnr()
     windo call s:clear_match_grp(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
     exe a:wnr."wincmd w"

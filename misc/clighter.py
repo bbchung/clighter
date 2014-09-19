@@ -45,65 +45,64 @@ class ClangService:
     __thread = None
     __is_running = False
     unsaved = set()
-    objects = {}
+    buf_ctxs = {}
     clang_idx = None
     invalid = True
 
     @staticmethod
     def init():
-        if ClangService.clang_idx is not None:
-            return
+        if ClangService.clang_idx is None:
+            try:
+                ClangService.clang_idx = cindex.Index.create()
+            except:
+                return
 
-        ClangService.clang_idx = cindex.Index.create()
+        if ClangService.__thread is None:
+            ClangService.__is_running = True
+            ClangService.__thread = Thread(target=ClangService.__parsing_worker, args=[vim.vars['clighter_clang_options']])
+            ClangService.__thread.start()
+
         vim.command("let s:clang_initialized=1")
 
-
     @staticmethod
-    def start_looping():
+    def release():
         if ClangService.__thread is not None:
-            return
+            ClangService.__is_running = False
+            ClangService.__thread.join()
+            ClangService.__thread = None
 
-        ClangService.__is_running = True
-        ClangService.__thread = Thread(
-            target=ClangService.__parsing_worker, args=[vim.vars['clighter_clang_options']])
-        ClangService.__thread.start()
-
-    @staticmethod
-    def stop_looping():
-        if ClangService.__thread is None:
-            return
-
-        ClangService.__is_running = False
-        ClangService.__thread.join()
-        ClangService.__thread = None
+        if ClangService.clang_idx is None:
+            ClangService.clang_idx = None
+    
+        vim.command("silent! unlet s:clang_initialized")
 
     @staticmethod
     def __parsing_worker(args):
         while ClangService.__is_running:
             try:
                 if ClangService.invalid:
-                    for pobj in ClangService.objects.values():
-                        pobj.parse(args, ClangService.unsaved)
+                    for buf_ctx in ClangService.buf_ctxs.values():
+                        buf_ctx.parse(args, ClangService.unsaved)
 
                     ClangService.invalid = False
             finally:
                 time.sleep(0.5)
 
     @staticmethod
-    def join_all():
+    def add_all_bufs():
         for buf in vim.buffers:
-            if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.number not in ClangService.objects.keys():
-                ClangService.objects[buf.number] = BufferCtx(
+            if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.number not in ClangService.buf_ctxs.keys():
+                ClangService.buf_ctxs[buf.number] = BufferCtx(
                     ClangService.clang_idx, buf.name)
         
         ClangService.invalid = True
 
     @staticmethod
-    def join():
-        if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"] or vim.current.buffer.number in ClangService.objects.keys():
+    def add_this_buf():
+        if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"] or vim.current.buffer.number in ClangService.buf_ctxs.keys():
             return
 
-        ClangService.objects[vim.current.buffer.number] = BufferCtx(
+        ClangService.buf_ctxs[vim.current.buffer.number] = BufferCtx(
             ClangService.clang_idx, vim.current.buffer.name)
 
         ClangService.invalid = True
@@ -137,11 +136,11 @@ class ClangService:
 
 
 def highlight_window():
-    pobj = ClangService.objects.get(vim.current.buffer.number)
-    if pobj is None:
+    buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.number)
+    if buf_ctx is None:
         return
 
-    tu_ctx = pobj.tu_ctx
+    tu_ctx = buf_ctx.tu_ctx
     if tu_ctx is None:
         return
 
@@ -156,7 +155,7 @@ def highlight_window():
 
     def_cursor = None
     if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
-        vim_cursor = pobj.get_vim_cursor()
+        vim_cursor = buf_ctx.get_vim_cursor()
         def_cursor = __get_definition(vim_cursor)
 
         if not hasattr(highlight_window, 'last_dc'):
@@ -218,13 +217,13 @@ def refactor_rename():
     if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"]:
         return
 
-    pobj = ClangService.objects.get(vim.current.buffer.number)
-    if pobj is None:
+    buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.number)
+    if buf_ctx is None:
         return
 
-    pobj.parse(vim.vars['clighter_clang_options'], ClangService.unsaved)
+    buf_ctx.parse(vim.vars['clighter_clang_options'], ClangService.unsaved)
 
-    vim_cursor = pobj.get_vim_cursor()
+    vim_cursor = buf_ctx.get_vim_cursor()
     def_cursor = __get_definition(vim_cursor)
     if def_cursor is None:
         return
@@ -242,7 +241,7 @@ def refactor_rename():
     locs = set()
     locs.add((def_cursor.location.line, def_cursor.location.column,
               def_cursor.location.file.name))
-    __search_ref_cursors(pobj.tu_ctx.tu.cursor, def_cursor, locs)
+    __search_ref_cursors(buf_ctx.tu_ctx.tu.cursor, def_cursor, locs)
     __vim_multi_replace(locs, old_name, new_name)
 
     if __is_symbol_cursor(def_cursor) and vim.vars['clighter_enable_cross_rename'] == 1:
@@ -285,11 +284,11 @@ def __cross_buffer_rename(usr, new_name):
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
         if vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
-            pobj = ClangService.objects.get(vim.current.buffer.number)
-            if pobj is not None:
-                pobj.parse(
+            buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.number)
+            if buf_ctx is not None:
+                buf_ctx.parse(
                     vim.vars['clighter_clang_options'], ClangService.unsaved)
-                __search_usr_and_rename_refs(pobj.tu_ctx.tu, usr, new_name)
+                __search_usr_and_rename_refs(buf_ctx.tu_ctx.tu, usr, new_name)
 
         vim.command("bn!")
 
