@@ -20,14 +20,13 @@ class TranslationUnitCtx:
 
 class BufferCtx:
 
-    def __init__(self, idx, bufname):
-        self.__clang_idx = idx
+    def __init__(self, bufname):
         self.__bufname = bufname
         self.tu_ctx = None
 
     def parse(self, args, unsaved):
         try:
-            tu = self.__clang_idx.parse(
+            tu = ClangService.clang_idx.parse(
                 self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
             self.tu_ctx = TranslationUnitCtx(tu, self.__bufname)
         except:
@@ -59,7 +58,8 @@ class ClangService:
 
         if ClangService.__thread is None:
             ClangService.__is_running = True
-            ClangService.__thread = Thread(target=ClangService.__parsing_worker, args=[vim.vars['clighter_clang_options']])
+            ClangService.__thread = Thread(
+                target=ClangService.__parsing_worker, args=[vim.vars['clighter_clang_options']])
             ClangService.__thread.start()
 
         vim.command("let s:clang_initialized=1")
@@ -73,7 +73,7 @@ class ClangService:
 
         if ClangService.clang_idx is None:
             ClangService.clang_idx = None
-    
+
         vim.command("silent! unlet s:clang_initialized")
 
     @staticmethod
@@ -92,9 +92,8 @@ class ClangService:
     def add_all_bufs():
         for buf in vim.buffers:
             if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.number not in ClangService.buf_ctxs.keys():
-                ClangService.buf_ctxs[buf.number] = BufferCtx(
-                    ClangService.clang_idx, buf.name)
-        
+                ClangService.buf_ctxs[buf.number] = BufferCtx(buf.name)
+
         ClangService.invalid = True
 
     @staticmethod
@@ -103,7 +102,7 @@ class ClangService:
             return
 
         ClangService.buf_ctxs[vim.current.buffer.number] = BufferCtx(
-            ClangService.clang_idx, vim.current.buffer.name)
+            vim.current.buffer.name)
 
         ClangService.invalid = True
 

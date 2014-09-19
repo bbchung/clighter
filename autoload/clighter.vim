@@ -39,6 +39,8 @@ endf
 
 
 fun! clighter#Enable()
+    py clighter.ClangService.add_all_bufs()
+
     if !exists("s:clang_initialized")
         py clighter.ClangService.init()
         if !exists("s:clang_initialized")
@@ -48,8 +50,6 @@ fun! clighter#Enable()
             return
         endif
     endif
-
-    py clighter.ClangService.add_all_bufs()
 
     augroup ClighterEnable
         au!
