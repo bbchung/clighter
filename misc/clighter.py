@@ -10,25 +10,33 @@ if vim.vars['clighter_libclang_file']:
     cindex.Config.set_library_file(vim.vars['clighter_libclang_file'])
 
 
+class TranslationUnitCache:
+
+    def __init__(self, tu, bufname):
+        self.tu = tu
+        self.file = tu.get_file(bufname)
+        self.used = False
+
+
 class ParsingObject:
 
     def __init__(self, idx, bufname):
         self.__clang_idx = idx
         self.__bufname = bufname
-        self.tu = None  # [tu, file, used]
+        self.tu_cache = None  # [tu, file, used]
 
     def parse(self, args, unsaved):
         try:
             tu = self.__clang_idx.parse(
                 self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-            self.tu = [tu, tu.get_file(self.__bufname), False]
+            self.tu_cache = TranslationUnitCache(tu, self.__bufname)
         except:
             pass
 
     def get_vim_cursor(self):
         (row, col) = vim.current.window.cursor
-        cursor = cindex.Cursor.from_location(self.tu[0], cindex.SourceLocation.from_position(
-            self.tu[0], self.tu[1], row, col + 1))  # cursor under vim
+        cursor = cindex.Cursor.from_location(self.tu_cache.tu, cindex.SourceLocation.from_position(
+            self.tu_cache.tu, self.tu_cache.file, row, col + 1))  # cursor under vim
 
         return cursor if cursor.location.column <= col + 1 < cursor.location.column + len(get_spelling_or_displayname(cursor)) else None
 
@@ -121,8 +129,8 @@ def highlight_window():
     if pobj is None:
         return
 
-    tu = pobj.tu
-    if tu is None:
+    tu_cache = pobj.tu_cache
+    if tu_cache is None:
         return
 
     vim_win_top = vim.bindeval("line('w0')")
@@ -161,14 +169,14 @@ def highlight_window():
     target_window = [1, buflinenr] if window_size < 0 else [
         max(vim_win_top - window_size, 1), min(vim_win_bottom + window_size, buflinenr)]
 
-    if not in_window or not tu[2]:
+    if not in_window or not tu_cache.used:
         vim.current.window.vars["clighter_window"] = target_window
         vim.command("call s:clear_match_pri({0})".format(TOKEN_PRI))
     elif not redraw_def_ref:
         return
 
-    tokens = tu[0].get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
-        tu[0], pobj.tu[1], target_window[0], 1), cindex.SourceLocation.from_position(tu[0], pobj.tu[1], target_window[1], 1)))
+    tokens = tu_cache.tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
+        tu_cache.tu, tu_cache.file, target_window[0], 1), cindex.SourceLocation.from_position(tu_cache.tu, tu_cache.file, target_window[1], 1)))
 
     for t in tokens:
         """ Do semantic highlighting'
@@ -177,9 +185,9 @@ def highlight_window():
             continue
 
         t_cursor = t.cursor
-        t_cursor._tu = tu[0]
+        t_cursor._tu = tu_cache.tu
 
-        if not in_window or not tu[2]:
+        if not in_window or not tu_cache.used:
             __draw_token(t.location.line, t.location.column, len(
                 t.spelling), t_cursor.kind, t_cursor.type.kind)
 
@@ -193,7 +201,7 @@ def highlight_window():
             __vim_matchaddpos(
                 'CursorDefRef', t.location.line, t.location.column, len(t.spelling), DEF_REF_PRI)
 
-    tu[2] = True
+    tu_cache.used = True
 
 
 def refactor_rename():
@@ -224,7 +232,7 @@ def refactor_rename():
     locs = set()
     locs.add((def_cursor.location.line, def_cursor.location.column,
               def_cursor.location.file.name))
-    __search_ref_cursors(pobj.tu[0].cursor, def_cursor, locs)
+    __search_ref_cursors(pobj.tu_cache.tu.cursor, def_cursor, locs)
     __vim_multi_replace(locs, old_name, new_name)
 
     if __is_symbol_cursor(def_cursor) and vim.vars['clighter_enable_cross_rename'] == 1:
@@ -271,7 +279,7 @@ def __cross_buffer_rename(usr, new_name):
             if pobj is not None:
                 pobj.parse(
                     vim.vars['clighter_clang_options'], ParsingService.unsaved)
-                __search_usr_and_rename_refs(pobj.tu[0], usr, new_name)
+                __search_usr_and_rename_refs(pobj.tu_cache.tu, usr, new_name)
 
         vim.command("bn!")
 
