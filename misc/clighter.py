@@ -133,16 +133,16 @@ def highlight_window():
     if tu_cache is None:
         return
 
-    vim_win_top = vim.bindeval("line('w0')")
-    vim_win_bottom = vim.bindeval("line('w$')")
+    syntaxed_window = vim.current.window.vars.get("syntaxed_window")
+    target_window = [vim.bindeval("line('w0')"), vim.bindeval("line('w$')")]
 
-    clighter_window = vim.current.window.vars.get("clighter_window")
-    in_window = clighter_window is not None and vim_win_top >= clighter_window[
-        0] and vim_win_bottom <= clighter_window[1]
+    syntaxed = syntaxed_window is not None and target_window[0] >= syntaxed_window[
+        0] and target_window[1] <= syntaxed_window[1]
+
+    draw_def_ref = False
+    draw_syntax = False
 
     def_cursor = None
-    redraw_def_ref = False
-
     if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
         vim_cursor = pobj.get_vim_cursor()
         def_cursor = __get_definition(vim_cursor)
@@ -154,8 +154,8 @@ def highlight_window():
             vim.command("call s:clear_match_pri({0})".format(DEF_REF_PRI))
             highlight_window.last_dc = None
 
-        if def_cursor is not None and (highlight_window.last_dc is None or def_cursor != highlight_window.last_dc):
-            redraw_def_ref = True
+        if def_cursor is not None and (highlight_window.last_dc is None or highlight_window.last_dc != def_cursor):
+            draw_def_ref = True
 
             # special case for preprocessor
             if def_cursor.kind.is_preprocessing() and def_cursor.location.file.name == vim.current.buffer.name:
@@ -164,15 +164,17 @@ def highlight_window():
 
             highlight_window.last_dc = def_cursor
 
-    window_size = vim.vars['clighter_window_size'] * 100
-    buflinenr = len(vim.current.buffer)
-    target_window = [1, buflinenr] if window_size < 0 else [
-        max(vim_win_top - window_size, 1), min(vim_win_bottom + window_size, buflinenr)]
+    if not syntaxed or not tu_cache.used:
+        draw_syntax = True
+        window_size = vim.vars['clighter_window_size'] * 100
+        buflinenr = len(vim.current.buffer)
+        target_window = [1, buflinenr] if window_size < 0 else [
+            max(target_window[0] - window_size, 1), min(target_window[1] + window_size, buflinenr)]
 
-    if not in_window or not tu_cache.used:
-        vim.current.window.vars["clighter_window"] = target_window
+        vim.current.window.vars["syntaxed_window"] = target_window
         vim.command("call s:clear_match_pri({0})".format(TOKEN_PRI))
-    elif not redraw_def_ref:
+        tu_cache.used = True
+    elif not draw_def_ref:
         return
 
     tokens = tu_cache.tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
@@ -187,21 +189,17 @@ def highlight_window():
         t_cursor = t.cursor
         t_cursor._tu = tu_cache.tu
 
-        if not in_window or not tu_cache.used:
+        if draw_syntax:
             __draw_token(t.location.line, t.location.column, len(
                 t.spelling), t_cursor.kind, t_cursor.type.kind)
 
         """ Do definition/reference highlighting'
         """
-        if not redraw_def_ref:
-            continue
-
-        t_def_cursor = __get_definition(t_cursor)
-        if t_def_cursor is not None and t_def_cursor == def_cursor:
-            __vim_matchaddpos(
-                'CursorDefRef', t.location.line, t.location.column, len(t.spelling), DEF_REF_PRI)
-
-    tu_cache.used = True
+        if draw_def_ref:
+            t_def_cursor = __get_definition(t_cursor)
+            if t_def_cursor is not None and t_def_cursor == def_cursor:
+                __vim_matchaddpos(
+                    'CursorDefRef', t.location.line, t.location.column, len(t.spelling), DEF_REF_PRI)
 
 
 def refactor_rename():
