@@ -66,8 +66,9 @@ fun! clighter#Enable()
         au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au WinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au BufWinEnter *.[ch],*.[ch]pp,*.m py clighter.ClangService.invalid = True
-        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_this_buf()
         au BufWinEnter * call s:clear_match_grp(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
+        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_this_buf()
+        au BufNewFile *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_this_buf()
         au VimLeavePre * py clighter.ClangService.release()
     augroup END
 endf
