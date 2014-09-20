@@ -37,7 +37,7 @@ class BufferCtx:
         cursor = cindex.Cursor.from_location(self.tu_ctx.tu, cindex.SourceLocation.from_position(
             self.tu_ctx.tu, self.tu_ctx.file, row, col + 1))  # cursor under vim
 
-        return cursor if cursor.location.column <= col + 1 < cursor.location.column + len(get_spelling_or_displayname(cursor)) else None
+        return cursor if cursor.location.line == row and cursor.location.column <= col + 1 < cursor.location.column + len(get_spelling_or_displayname(cursor)) else None
 
 
 class ClangService:
