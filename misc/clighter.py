@@ -91,14 +91,14 @@ class ClangService:
     @staticmethod
     def add_all_bufs():
         for buf in vim.buffers:
-            if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.number not in ClangService.buf_ctxs.keys():
+            if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.name not in ClangService.buf_ctxs.keys():
                 ClangService.buf_ctxs[buf.name] = BufferCtx(buf.name)
 
         ClangService.invalid = True
 
     @staticmethod
     def add_this_buf():
-        if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"] or vim.current.buffer.number in ClangService.buf_ctxs.keys():
+        if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"] or vim.current.buffer.name in ClangService.buf_ctxs.keys():
             return
 
         ClangService.buf_ctxs[vim.current.buffer.name] = BufferCtx(
