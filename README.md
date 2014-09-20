@@ -61,7 +61,8 @@ let g:clighter_clang_options = ['-std=c++', '-DLinux']
 
 ### g:clighter_libclang_file
 
-The path of libclang.
+Clighter try to find libclang-3.5 in your system automatically, if clighter doesn't find the libclang
+or other version of libclang is used, you need set this path.
 
 Default: `''`
 ```vim

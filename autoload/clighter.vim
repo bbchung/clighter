@@ -45,7 +45,7 @@ fun! clighter#Enable()
         py clighter.ClangService.init()
         if !exists("s:clang_initialized")
             echohl WarningMsg |
-                        \ echomsg "Clighter unavailable: set libclang path might solve the problem" |
+                        \ echomsg "Clighter unavailable: cannot enable clighter, try set g:clighter_libclang_file" |
                         \ echohl None
             return
         endif
