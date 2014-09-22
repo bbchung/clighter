@@ -125,8 +125,7 @@ Clighter provides these commands and functions
 	* It's a experimental function, and maybe not reliable.
 	* It's not project based(only processes the files that have been opened in
 	  vim's buffer list already).
-	* Stronglly recommend that backing up all files before using this function
-	  is recommanded.
+	* Stronglly recommend that backing up all files before using this function.
 
 	`clighter#Rename()`
     

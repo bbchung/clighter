@@ -156,7 +156,7 @@ Rename-refactor the variable/function name under vim cursor~
 	* It's not project based(only processes the files that have been
 	  opened in vim's buffer list already)
 	* Stronglly recommend that backing up all files before using this
-	  function is recommanded.
+	  function.
 >
 	clighter#Rename()
 <
