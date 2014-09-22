@@ -142,12 +142,12 @@ libclang.
 
 * ClighterMacroInstantiation
 	```vim
-	hi link ClighterMacroInstantiation Macro
+	hi link ClighterMacroInstantiation Constant
 	```
 
 * ClighterTypeRef
 	```vim
-	hi link ClighterTypeRef Type
+	hi link ClighterTypeRef Identifier
 	```
 
 * ClighterStructDecl

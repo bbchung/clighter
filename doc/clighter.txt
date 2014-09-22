@@ -175,12 +175,12 @@ Clang.
 
 ClighterMacroInstantiation~
 >
-	hi link ClighterMacroInstantiation Macro
+	hi link ClighterMacroInstantiation Constant
 >
 
 ClighterTypeRef~
 >
-	hi link ClighterTypeRef Type
+	hi link ClighterTypeRef Identifier
 >
 
 ClighterStructDecl~
