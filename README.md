@@ -140,45 +140,50 @@ Clighter provides these commands and functions
 Clighter defines the following syntax group corresponding to CursorKind of
 libclang.
 
-* ClighterMacroInstantiation
+* clighterMacroInstantiation
 	```vim
-	hi link ClighterMacroInstantiation Constant
+	hi link clighterMacroInstantiation Constant
 	```
 
-* ClighterTypeRef
+* clighterTypeRef
 	```vim
-	hi link ClighterTypeRef Identifier
+	hi link clighterTypeRef Identifier
 	```
 
-* ClighterStructDecl
+* clighterStructDecl
 	```vim
-	hi link ClighterStructDecl Type
+	hi link clighterStructDecl Type
 	```
 
-* ClighterClassDecl
+* clighterClassDecl
 	```vim
-	hi link ClighterClassDecl Type
+	hi link clighterClassDecl Type
 	```
 
-* ClighterEnumDecl
+* clighterEnumDecl
 	```vim
-	hi link ClighterEnumDecl Type
+	hi link clighterEnumDecl Type
 	```
 
-* ClighterEnumConstantDecl
+* clighterEnumConstantDecl
 	```vim
-	hi link ClighterEnumConstantDecl Identifier
+	hi link clighterEnumConstantDecl Identifier
 	```
 
-* ClighterEnumDefRefExpr
+* clighterDeclRefExprEnum
 	```vim
-	hi link ClighterEnumDefRefExpr Identifier
+	hi link clighterDeclRefExprEnum Identifier
+	```
+
+* clighterCursorDefRef
+	```vim
+	hi link clighterCursorDefRef Search
 	```
 
 You can customize these colors in your colorscheme, for example:
 ```vim
-	hi ClighterTypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
-	hi ClighterClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
+	hi clighterTypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
+	hi clighterClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
 ```
 
 

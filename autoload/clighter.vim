@@ -10,7 +10,7 @@ let s:cursor_decl_ref_hl_on = 1
 fun! clighter#ToggleCursorHL()
     if s:cursor_decl_ref_hl_on==1
         let s:cursor_decl_ref_hl_on=0
-        call s:clear_match_grp(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
+        call s:clear_match_grp(['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum', 'clighterCursorDefRef'])
     else
         let s:cursor_decl_ref_hl_on=1
         "augroup CursorHighlight
@@ -66,7 +66,7 @@ fun! clighter#Enable()
         au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au WinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au BufWinEnter *.[ch],*.[ch]pp,*.m py clighter.ClangService.invalid = True
-        au BufWinEnter * call s:clear_match_grp(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
+        au BufWinEnter * call s:clear_match_grp(['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum', 'clighterCursorDefRef'])
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_this_buf()
         au BufNewFile *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_this_buf()
         au VimLeavePre * py clighter.ClangService.release()
@@ -77,7 +77,7 @@ fun! clighter#Disable()
     au! ClighterEnable
     py clighter.ClangService.release()
     let a:wnr = winnr()
-    windo call s:clear_match_grp(['ClighterMacroInstantiation', 'ClighterStructDecl', 'ClighterClassDecl', 'ClighterEnumDecl', 'ClighterEnumConstantDecl', 'ClighterTypeRef', 'ClighterDeclRefExprEnum', 'CursorDefRef'])
+    windo call s:clear_match_grp(['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum', 'clighterCursorDefRef'])
     exe a:wnr."wincmd w"
 endf
 

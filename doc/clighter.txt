@@ -173,45 +173,50 @@ Rename-refactor the variable/function name under vim cursor~
 Clighter defines the following syntax group corresponding to CursorKing of
 Clang.
 
-ClighterMacroInstantiation~
+clighterMacroInstantiation~
 >
-	hi link ClighterMacroInstantiation Constant
->
-
-ClighterTypeRef~
->
-	hi link ClighterTypeRef Identifier
+	hi link clighterMacroInstantiation Constant
 >
 
-ClighterStructDecl~
+clighterTypeRef~
 >
-	hi link ClighterStructDecl Type
->
-
-ClighterClassDecl~
->
-	hi link ClighterClassDecl Type
+	hi link clighterTypeRef Identifier
 >
 
-ClighterEnumDecl~
+clighterStructDecl~
 >
-	hi link ClighterEnumDecl Type
->
-
-ClighterEnumConstantDecl~
->
-	hi link ClighterEnumConstantDecl Identifier
+	hi link clighterStructDecl Type
 >
 
-ClighterEnumDefRefExpr~
+clighterClassDecl~
 >
-	hi link ClighterEnumDefRefExpr Identifier
+	hi link clighterClassDecl Type
+>
+
+clighterEnumDecl~
+>
+	hi link clighterEnumDecl Type
+>
+
+clighterEnumConstantDecl~
+>
+	hi link clighterEnumConstantDecl Identifier
+>
+
+clighterDeclRefExprEnum~
+>
+	hi link clighterDeclRefExprEnum Identifier
+
+clighterCursorDefRef~
+>
+	hi link clighterCursorDefRef Search
+
 >
 
 You can customize these colors in your colorscheme, for example:
 >
-	hi ClighterTypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
-	hi ClighterClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
+	hi clighterTypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
+	hi clighterClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
 <
 
 ==============================================================================
