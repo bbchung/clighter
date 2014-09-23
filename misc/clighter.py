@@ -118,6 +118,21 @@ class ClangService:
 
         ClangService.invalid = True
 
+    @staticmethod
+    def reset_buf_tu_ctx():
+        vim.command("call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, TOKEN_PRI))
+
+        buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)
+        if buf_ctx is None:
+            return
+
+        tu_ctx = buf_ctx.tu_ctx
+        
+        if tu_ctx is None:
+            return
+
+        tu_ctx.drawn = False
+
 
 # def bfs(c, top, bottom, queue):
     # if c.location.line >= top and c.location.line <= bottom:
@@ -161,7 +176,7 @@ def highlight_window():
             highlight_window.last_dc = None
 
         if highlight_window.last_dc is not None and (def_cursor is None or highlight_window.last_dc != def_cursor):
-            vim.command("call s:clear_match_pri({0})".format(DEF_REF_PRI))
+            vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
             highlight_window.last_dc = None
 
         if def_cursor is not None and (highlight_window.last_dc is None or highlight_window.last_dc != def_cursor):
@@ -182,7 +197,7 @@ def highlight_window():
             max(target_window[0] - window_size, 1), min(target_window[1] + window_size, buflinenr)]
 
         vim.current.window.vars["syntaxed_window"] = target_window
-        vim.command("call s:clear_match_pri({0})".format(TOKEN_PRI))
+        vim.command("call s:clear_match_pri([{0}])".format(TOKEN_PRI))
         tu_ctx.drawn = True
     elif not draw_def_ref:
         return
