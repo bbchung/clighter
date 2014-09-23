@@ -19,7 +19,7 @@ features(for c-family):
 Clighter requires the following:
 
 * Vim version 7.4+ with python2.x enabled
-* libclang(3.5 is recommanded) 
+* libclang(3.5 is recommended) 
 * Clighter has been tested in linux platform only.
 
 ## Options
