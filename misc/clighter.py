@@ -12,10 +12,10 @@ if vim.vars['clighter_libclang_file']:
 
 class TranslationUnitCtx:
 
-    def __init__(self, tu, bufname):
+    def __init__(self, tu, file):
         self.tu = tu
-        self.file = tu.get_file(bufname)
-        self.drawn = False
+        self.file = file
+        self.rendered = False
 
 
 class BufferCtx:
@@ -28,12 +28,15 @@ class BufferCtx:
         try:
             tu = ClangService.clang_idx.parse(
                 self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-            self.tu_ctx = TranslationUnitCtx(tu, self.__bufname)
+            self.tu_ctx = TranslationUnitCtx(tu, tu.get_file(self.__bufname))
         except:
             pass
 
-    def get_vim_cursor(self):
-        (row, col) = vim.current.window.cursor
+    def get_vim_cursor(self, location):
+        if self.tu_ctx is None:
+            return None
+
+        (row, col) = location
         cursor = cindex.Cursor.from_location(self.tu_ctx.tu, cindex.SourceLocation.from_position(
             self.tu_ctx.tu, self.tu_ctx.file, row, col + 1))  # cursor under vim
 
@@ -120,18 +123,16 @@ class ClangService:
 
     @staticmethod
     def reset_buf_tu_ctx():
-        vim.command("call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, TOKEN_PRI))
-
         buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)
         if buf_ctx is None:
             return
 
         tu_ctx = buf_ctx.tu_ctx
-        
+
         if tu_ctx is None:
             return
 
-        tu_ctx.drawn = False
+        tu_ctx.rendered = False
 
 
 # def bfs(c, top, bottom, queue):
@@ -148,6 +149,11 @@ class ClangService:
 
     # queue.put(cur.get_children())
 
+def unhighlight_window():
+    vim.command(
+        "call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, TOKEN_PRI))
+
+    ClangService.reset_buf_tu_ctx()
 
 def highlight_window():
     buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)
@@ -169,7 +175,7 @@ def highlight_window():
 
     def_cursor = None
     if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
-        vim_cursor = buf_ctx.get_vim_cursor()
+        vim_cursor = buf_ctx.get_vim_cursor(vim.current.window.cursor)
         def_cursor = __get_definition(vim_cursor)
 
         if not hasattr(highlight_window, 'last_dc'):
@@ -189,7 +195,7 @@ def highlight_window():
 
             highlight_window.last_dc = def_cursor
 
-    if not syntaxed or not tu_ctx.drawn:
+    if not syntaxed or not tu_ctx.rendered:
         draw_syntax = True
         window_size = vim.vars['clighter_window_size'] * 100
         buflinenr = len(vim.current.buffer)
@@ -198,7 +204,7 @@ def highlight_window():
 
         vim.current.window.vars["syntaxed_window"] = target_window
         vim.command("call s:clear_match_pri([{0}])".format(TOKEN_PRI))
-        tu_ctx.drawn = True
+        tu_ctx.rendered = True
     elif not draw_def_ref:
         return
 
@@ -237,7 +243,7 @@ def refactor_rename():
 
     buf_ctx.parse(vim.vars['clighter_clang_options'], ClangService.unsaved)
 
-    vim_cursor = buf_ctx.get_vim_cursor()
+    vim_cursor = buf_ctx.get_vim_cursor(vim.current.window.cursor)
     def_cursor = __get_definition(vim_cursor)
     if def_cursor is None:
         return

@@ -37,6 +37,10 @@ fun! s:clear_match_pri(pri)
     endfor
 endf
 
+fun! s:on_buf_win_leave()
+    call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, TOKEN_PRI))
+endf
+
 
 fun! clighter#Enable()
     py clighter.ClangService.add_all_bufs()
@@ -65,7 +69,7 @@ fun! clighter#Enable()
         au CursorHold *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au BufWinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
-        au BufWinLeave * py clighter.ClangService.reset_buf_tu_ctx()
+        au BufWinLeave * py clighter.unhighlight_window()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_this_buf()
         au BufNewFile *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_this_buf()
         au VimLeavePre * py clighter.ClangService.release()
