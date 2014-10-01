@@ -62,6 +62,11 @@ class ClangService:
             except:
                 return
 
+        for buf in vim.buffers:
+            if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.name not in ClangService.buf_ctxs.keys():
+                ClangService.buf_ctxs[buf.name] = BufferCtx(
+                    buf.name, ClangService.clang_idx)
+
         if ClangService.__thread is None:
             ClangService.__is_running = True
             ClangService.__thread = Thread(
@@ -93,15 +98,6 @@ class ClangService:
                     ClangService.__invalid = False
             finally:
                 time.sleep(0.1)
-
-    @staticmethod
-    def add_all_vim_buffers():
-        for buf in vim.buffers:
-            if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.name not in ClangService.buf_ctxs.keys():
-                ClangService.buf_ctxs[buf.name] = BufferCtx(
-                    buf.name, ClangService.clang_idx)
-
-        ClangService.__invalid = True
 
     @staticmethod
     def add_vim_buffer():
