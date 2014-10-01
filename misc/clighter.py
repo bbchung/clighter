@@ -17,16 +17,20 @@ class TranslationUnitCtx:
         self.file = file
         self.rendered = False
 
+    def get_cursor(self, row, col):
+        return cindex.Cursor.from_location(self.tu, cindex.SourceLocation.from_position(self.tu, self.file, row, col))
+
 
 class BufferCtx:
 
-    def __init__(self, bufname):
+    def __init__(self, bufname, idx):
         self.__bufname = bufname
+        self.__clang_idx = idx
         self.tu_ctx = None
 
     def parse(self, args, unsaved):
         try:
-            tu = ClangService.clang_idx.parse(
+            tu = self.__clang_idx.parse(
                 self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
             self.tu_ctx = TranslationUnitCtx(tu, tu.get_file(self.__bufname))
         except:
@@ -37,8 +41,7 @@ class BufferCtx:
             return None
 
         (row, col) = location
-        cursor = cindex.Cursor.from_location(self.tu_ctx.tu, cindex.SourceLocation.from_position(
-            self.tu_ctx.tu, self.tu_ctx.file, row, col + 1))  # cursor under vim
+        cursor = self.tu_ctx.get_cursor(row, col + 1)
 
         return cursor if cursor.location.line == row and cursor.location.column <= col + 1 < cursor.location.column + len(get_spelling_or_displayname(cursor)) else None
 
@@ -46,10 +49,10 @@ class BufferCtx:
 class ClangService:
     __thread = None
     __is_running = False
+    __invalid = True
     unsaved = set()
     buf_ctxs = {}
     clang_idx = None
-    invalid = True
 
     @staticmethod
     def init():
@@ -83,31 +86,32 @@ class ClangService:
     def __parsing_worker(args):
         while ClangService.__is_running:
             try:
-                if ClangService.invalid:
+                if ClangService.__invalid:
                     for buf_ctx in ClangService.buf_ctxs.values():
                         buf_ctx.parse(args, ClangService.unsaved)
 
-                    ClangService.invalid = False
+                    ClangService.__invalid = False
             finally:
-                time.sleep(0.5)
+                time.sleep(0.1)
 
     @staticmethod
-    def add_all_bufs():
+    def add_all_vim_buffers():
         for buf in vim.buffers:
             if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.name not in ClangService.buf_ctxs.keys():
-                ClangService.buf_ctxs[buf.name] = BufferCtx(buf.name)
+                ClangService.buf_ctxs[buf.name] = BufferCtx(
+                    buf.name, ClangService.clang_idx)
 
-        ClangService.invalid = True
+        ClangService.__invalid = True
 
     @staticmethod
-    def add_this_buf():
+    def add_vim_buffer():
         if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"] or vim.current.buffer.name in ClangService.buf_ctxs.keys():
             return
 
         ClangService.buf_ctxs[vim.current.buffer.name] = BufferCtx(
-            vim.current.buffer.name)
+            vim.current.buffer.name, ClangService.clang_idx)
 
-        ClangService.invalid = True
+        ClangService.__invalid = True
 
     @staticmethod
     def update_unsaved():
@@ -119,7 +123,7 @@ class ClangService:
         ClangService.unsaved.add(
             (vim.current.buffer.name, '\n'.join(vim.current.buffer)))
 
-        ClangService.invalid = True
+        ClangService.__invalid = True
 
     @staticmethod
     def reset_buf_tu_ctx():
@@ -154,6 +158,7 @@ def unhighlight_window():
         "call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, TOKEN_PRI))
 
     ClangService.reset_buf_tu_ctx()
+
 
 def highlight_window():
     buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)

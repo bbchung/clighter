@@ -43,7 +43,6 @@ endf
 
 
 fun! clighter#Enable()
-    py clighter.ClangService.add_all_bufs()
 
     if !exists("s:clang_initialized")
         py clighter.ClangService.init()
@@ -54,6 +53,8 @@ fun! clighter#Enable()
             return
         endif
     endif
+
+    py clighter.ClangService.add_all_vim_buffers()
 
     augroup ClighterEnable
         au!
@@ -70,8 +71,8 @@ fun! clighter#Enable()
         au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au BufWinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au BufWinLeave * py clighter.unhighlight_window()
-        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_this_buf()
-        au BufNewFile *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_this_buf()
+        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_vim_buffer()
+        au BufNewFile *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_vim_buffer()
         au VimLeavePre * py clighter.ClangService.release()
     augroup END
 endf
