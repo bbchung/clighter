@@ -11,7 +11,7 @@ features(for c-family):
 * Options to customize the colors.
 * Experimental function to do rename-refactoring.
 
-![clighter demo](http://goo.gl/U1aaea "Clighter Demo")
+![clighter demo](http://goo.gl/xMJAne "Clighter Demo")
 
 ## Requirements
 
