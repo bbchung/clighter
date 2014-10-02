@@ -86,11 +86,15 @@ class ClangService:
     def __parsing_worker(args):
         while ClangService.__is_running:
             try:
-                if ClangService.__invalid:
-                    for buf_ctx in ClangService.buf_ctxs.values():
-                        buf_ctx.parse(args, ClangService.unsaved)
+                if not ClangService.__invalid:
+                    continue
 
-                    ClangService.__invalid = False
+                unsaved = ClangService.unsaved
+
+                for buf_ctx in ClangService.buf_ctxs.values():
+                    buf_ctx.parse(args, unsaved)
+
+                ClangService.__invalid = False
             finally:
                 time.sleep(0.1)
 
