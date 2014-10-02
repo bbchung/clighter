@@ -27,6 +27,7 @@ Clighter requires the following:
 Bundle 'bbchung/clighter'
 ```
 * Manuall Install
+
 Untar the clighter.tar.gz to your vim path.
 
 
