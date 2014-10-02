@@ -11,7 +11,7 @@ features(for c-family):
 * Options to customize the colors.
 * Experimental function to do rename-refactoring.
 
-![Clighter GIF demo](https://1g52sg.tuk.livefilestore.com/y2p3kD9OEWlpQXotSCLSG0lbX2cVVnqVdOegZPm9YYUG1EdkfHFaZZjsy6tp7ZckhZ_AFXEMylgG_vwLC0o7U1xfidTs1uiziTq_FyneSlOoao/clighter.gif?psid=1)
+![Clighter GIF demo](http://goo.gl/C7FYg8)
 
 ## Requirements
 
