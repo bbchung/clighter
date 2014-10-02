@@ -54,8 +54,6 @@ fun! clighter#Enable()
         endif
     endif
 
-    py clighter.ClangService.add_all_vim_buffers()
-
     augroup ClighterEnable
         au!
         if g:clighter_realtime == 1
