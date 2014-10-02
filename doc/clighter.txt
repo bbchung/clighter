@@ -9,22 +9,23 @@ CONTENTS                                                  *clighter-contents*
 1. Intro 			|clighter-intro|
 2. Clighter on the internet	|clighter-internet|
 3. Requirements			|clighter-requirements|
-4. Options 			|clighter-options|
-5. Commands 			|clighter-commands|
-6. Customize Colors 		|clighter-colors|
-7. FAQ				|clighter-faq|
+4. Installation			|clighter-installation|
+5. Options 			|clighter-options|
+6. Commands 			|clighter-commands|
+7. Customize Colors 		|clighter-colors|
+8. FAQ				|clighter-faq|
 
 ==============================================================================
 						*clighter-intro*
 1. Intro~
-Clighter(C Lighter) is a vim plugin that integrates the libclang improve
-c-family development environment, and it currently provides the following
-features(for c-family):
+Clighter(C Lighter) is a vim plugin that integrates libclang to improve
+development environment for c-family programming. Clighter provides following
+features currently:
 
-* Automatically do semantic highlighting
-* Automatically highlight all words with the same definition
-* Options to customize the colors
-* Experimental function to do rename-refactoring
+* Syntax(semantic) highlighting
+* Cursor word highlighting
+* Customizable color of highlighting
+* Experimental function for rename-refactoring
 
 ==============================================================================
 						*clighter-internet*
@@ -45,8 +46,19 @@ Clighter requires the following:
 * Clighter has been tested in linux platform only
 
 ==============================================================================
+						*clighter-installation*
+4. Installation~
+
+Vundle Install~
+>
+	Bundle 'bbchung/clighter'
+<
+Manuall Install~
+Untar the clighter.tar.gz to your vim path.
+
+==============================================================================
 						*clighter-options*
-4. Options~
+5. Options~
 
 |'g:clighter_autostart'|		Enable the Clighter when vim start
 |'g:clighter_window_size'|		Window size for highlighting
@@ -134,6 +146,7 @@ Default: `1`
 
 ==============================================================================
 						*clighter-commands*
+6. Commands~
 Clighter provides command to control it
 
 Enable Clighter's syntax highlight engine~
@@ -168,7 +181,7 @@ Rename-refactor the variable/function name under vim cursor~
 
 ==============================================================================
 						*clighter-colors*
-6. Customize Colors~
+7. Customize Colors~
 
 Clighter defines the following syntax group corresponding to CursorKing of
 Clang.
@@ -221,7 +234,7 @@ You can customize these colors in your colorscheme, for example:
 
 ==============================================================================
 						*clighter-faq*
-7. FAQ
+8. FAQ
 
 Q. The clighter plugin doesn't work.
 A. Vim version 7.4+ with python2.x is required, and make sure libclang(3.5 is

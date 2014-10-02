@@ -3,13 +3,13 @@
 ## Intro
 
 Clighter(C Lighter) is a vim plugin that integrates libclang to improve
-c-family development environment, and it currently provides the following
-features(for c-family):
+development environment for c-family programming. Clighter provides following
+features currently:
 
-* Automatically do syntax(semantic) highlighting.
-* Automatically highlight all words with the same definition.
-* Options to customize the colors.
-* Experimental function to do rename-refactoring.
+* Syntax(semantic) highlighting
+* Cursor word highlighting
+* Customizable color of highlighting
+* Experimental function to for rename-refactoring
 
 ![Clighter GIF demo](http://goo.gl/C7FYg8)
 
@@ -20,6 +20,15 @@ Clighter requires the following:
 * Vim version 7.4+ with python2.x enabled
 * libclang(3.5 is recommended) 
 * Clighter has been tested in linux platform only.
+
+## Installation
+* Vundle Install:
+```vim
+Bundle 'bbchung/clighter'
+```
+* Manuall Install
+Untar the clighter.tar.gz to your vim path.
+
 
 ## Options
 
