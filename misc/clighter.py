@@ -98,6 +98,8 @@ class ClangService:
                     buf_ctx.parse(args, ClangService.unsaved)
 
                 ClangService.__invalid = False
+            except:
+                pass
             finally:
                 time.sleep(0.1)
 
