@@ -94,10 +94,8 @@ class ClangService:
                 if not ClangService.__invalid:
                     continue
 
-                unsaved = ClangService.unsaved
-
                 for buf_ctx in ClangService.buf_ctxs.values():
-                    buf_ctx.parse(args, unsaved)
+                    buf_ctx.parse(args, ClangService.unsaved)
 
                 ClangService.__invalid = False
             finally:
