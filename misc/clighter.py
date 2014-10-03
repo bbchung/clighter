@@ -114,6 +114,19 @@ class ClangService:
         ClangService.__invalid = True
 
     @staticmethod
+    def update_unsaved_all(invalid):
+        ClangService.unsaved = set()
+
+        for buf in vim.buffers: 
+            if buf.options['filetype'] not in ["c", "cpp", "objc"]:
+                continue
+
+            ClangService.unsaved.add(
+                (buf.name, '\n'.join(buf)))
+
+        ClangService.__invalid = invalid
+
+    @staticmethod
     def update_unsaved():
         for file in ClangService.unsaved:
             if file[0] == vim.current.buffer.name:
@@ -246,6 +259,8 @@ def refactor_rename():
     if buf_ctx is None:
         return
 
+    ClangService.update_unsaved_all(False)
+
     buf_ctx.parse(vim.vars['clighter_clang_options'], ClangService.unsaved)
 
     vim_cursor = buf_ctx.get_vim_cursor(vim.current.window.cursor)
@@ -276,6 +291,7 @@ def refactor_rename():
 
     vim.current.window.cursor = pos
 
+    ClangService.update_unsaved_all(True)
 
 
 def get_spelling_or_displayname(cursor):
@@ -351,8 +367,6 @@ def __search_usr_and_rename_refs(tu, usr, new_name):
         __search_ref_cursors(tu.cursor, sym, locs)
 
     __vim_multi_replace(locs, old_name, new_name)
-    # work around for vim not trigger Textchanged
-    ClangService.update_unsaved()
 
 # def dfs(cursor):
 #    print cursor.location, cursor.spelling
