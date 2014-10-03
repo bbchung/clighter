@@ -263,6 +263,8 @@ def refactor_rename():
     if not new_name or old_name == new_name:
         return
 
+    pos = vim.current.window.cursor
+
     locs = set()
     locs.add((def_cursor.location.line, def_cursor.location.column,
               def_cursor.location.file.name))
@@ -271,6 +273,9 @@ def refactor_rename():
 
     if __is_symbol_cursor(def_cursor) and vim.vars['clighter_enable_cross_rename'] == 1:
         __cross_buffer_rename(def_cursor.get_usr(), new_name)
+
+    vim.current.window.cursor = pos
+
 
 
 def get_spelling_or_displayname(cursor):
