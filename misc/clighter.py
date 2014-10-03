@@ -1,6 +1,6 @@
 import vim
 from clang import cindex
-from threading import Thread
+import threading
 import time
 
 DEF_REF_PRI = -11
@@ -27,14 +27,16 @@ class BufferCtx:
         self.__bufname = bufname
         self.__clang_idx = idx
         self.tu_ctx = None
+        self.__lock = threading.Lock()
 
     def parse(self, args, unsaved):
-        try:
-            tu = self.__clang_idx.parse(
-                self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-            self.tu_ctx = TranslationUnitCtx(tu, tu.get_file(self.__bufname))
-        except:
-            pass
+        with self.__lock:
+            try:
+                tu = self.__clang_idx.parse(
+                    self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                self.tu_ctx = TranslationUnitCtx(tu, tu.get_file(self.__bufname))
+            except:
+                pass
 
     def get_vim_cursor(self, location):
         if self.tu_ctx is None:
@@ -69,7 +71,7 @@ class ClangService:
 
         if ClangService.__thread is None:
             ClangService.__is_running = True
-            ClangService.__thread = Thread(
+            ClangService.__thread = threading.Thread(
                 target=ClangService.__parsing_worker, args=[vim.vars['clighter_clang_options']])
             ClangService.__thread.start()
 
@@ -102,6 +104,8 @@ class ClangService:
                 pass
             finally:
                 time.sleep(0.2)
+
+        vim.command("let g:ffffff=1")
 
     @staticmethod
     def add_vim_buffer():
