@@ -30,13 +30,14 @@ class BufferCtx:
         self.__lock = threading.Lock()
 
     def parse(self, args, unsaved):
-        with self.__lock:
-            try:
+        try:
+            with self.__lock:
                 tu = self.__clang_idx.parse(
                     self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-                self.tu_ctx = TranslationUnitCtx(tu, tu.get_file(self.__bufname))
-            except:
-                pass
+
+            self.tu_ctx = TranslationUnitCtx(tu, tu.get_file(self.__bufname))
+        except:
+            pass
 
     def get_vim_cursor(self, location):
         if self.tu_ctx is None:
