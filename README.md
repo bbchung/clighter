@@ -116,7 +116,7 @@ let g:clighter_enable_cross_rename = 1
 
 ## Commands and Functions
 
-Clighter provides these commands and functions
+Clighter provides these commands and functions.
 
 * Enable Clighter
 
@@ -130,15 +130,15 @@ Clighter provides these commands and functions
 
 	`ClighterToggleCursorHL`
 
-* Rename-refactor the variable/function name under vim cursor
-	* It's a experimental function, and maybe not reliable.
-	* It's not project based(only processes the files that have been opened in
-	  vim's buffer list already).
-	* Stronglly recommend that backing up all files before using this function.
+* Rename-refactor
+	* It's a experimental function, and it's maybe not reliable.
+	* It's not project scoped(the scope is opend vim buffer list).
+	* Strongly recommend that backing up all files before calling this
+	  function.
 
 	`clighter#Rename()`
     
-    For convenience, you can add this key map in you vimrc:
+    For convenience, you can add key mapping in your vimrc:
 	```vim
     nmap <silent> <Leader>r :call clighter#Rename()<CR>
 	```
@@ -146,8 +146,7 @@ Clighter provides these commands and functions
 
 ## Customize Colors
 
-Clighter defines the following syntax group corresponding to CursorKind of
-libclang.
+Clighter defines these syntax groups corresponding to CursorKind of libclang.
 
 * clighterMacroInstantiation
 	```vim

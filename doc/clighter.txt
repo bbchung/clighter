@@ -148,15 +148,14 @@ Default: `1`
 ==============================================================================
 						*clighter-commands*
 6. Commands~
-Clighter provides command to control it
+Clighter provides these commands and functions.
 
-Enable Clighter's syntax highlight engine~
+Enable Clighter~
 >
 	ClighterEnable
 <
 
-Disable Clighter's syntax highlight engine~
-Notice that is will not disable the cursor highlighting.
+Disable Clighter~
 >
 	ClighterDisable
 <
@@ -165,16 +164,15 @@ Toggle cursor highlighting~
 >
 	ClighterToggleCursorHL
 <
-Rename-refactor the variable/function name under vim cursor~
-	* It's a experimental function and maybe not reliable
-	* It's not project based(only processes the files that have been
-	  opened in vim's buffer list already)
-	* Stronglly recommend that backing up all files before using this
+Rename-refactor~
+	* It's a experimental function, and it's maybe not reliable.
+	* It's not project scoped(the scope is opend vim buffer list).
+	* Strongly recommend that backing up all files before calling this
 	  function.
 >
 	clighter#Rename()
 <
-    	For convenience, you can add this key map:
+    	For convenience, you can add key mapping in your vimrc:
 >
     	nmap <silent> <Leader>r :call clighter#Rename()<CR>
 >
@@ -184,8 +182,7 @@ Rename-refactor the variable/function name under vim cursor~
 						*clighter-colors*
 7. Customize Colors~
 
-Clighter defines the following syntax group corresponding to CursorKing of
-Clang.
+Clighter defines these syntax groups corresponding to CursorKind of libclang.
 
 clighterMacroInstantiation~
 >
