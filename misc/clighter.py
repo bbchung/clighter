@@ -42,7 +42,11 @@ class ClangService:
     buf_ctxs = {}
     __thread = None
     __is_running = False
-    __invalid = True
+
+    # for internal use, to sync the parsing worker
+    __pid = 1 # producer id
+    __cid = 0 # consumer id
+
     __lock = threading.Lock()
     __unsaved = set()
     __clang_idx = None
@@ -83,14 +87,16 @@ class ClangService:
     def __parsing_worker(args):
         while ClangService.__is_running:
             try:
-                if not ClangService.__invalid:
+                if ClangService.__cid == ClangService.__pid:
                     continue
+
+                curr = ClangService.__pid
 
                 for buf_ctx in ClangService.buf_ctxs.values():
                     if not ClangService.parse(buf_ctx, args):
                         continue
 
-                ClangService.__invalid = False
+                ClangService.__cid = curr
             except:
                 pass
             finally:
@@ -104,7 +110,7 @@ class ClangService:
         ClangService.buf_ctxs[vim.current.buffer.name] = BufferCtx(
             vim.current.buffer.name)
 
-        ClangService.__invalid = True
+        ClangService.__pid += 1
 
     @staticmethod
     def update_unsaved_all(invalid):
@@ -117,7 +123,8 @@ class ClangService:
             ClangService.__unsaved.add(
                 (buf.name, '\n'.join(buf)))
 
-        ClangService.__invalid = invalid
+        if invalid:
+            ClangService.__pid += 1
 
     @staticmethod
     def update_unsaved():
@@ -129,7 +136,7 @@ class ClangService:
         ClangService.__unsaved.add(
             (vim.current.buffer.name, '\n'.join(vim.current.buffer)))
 
-        ClangService.__invalid = True
+        ClangService.__pid += 1
 
     @staticmethod
     def parse(bufctx, args):
