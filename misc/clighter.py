@@ -42,7 +42,7 @@ class ClangService:
     buf_ctxs = {}
     __thread = None
     __is_running = False
-    __to_parse = 1
+    __invalid = True
     __lock = threading.Lock()
     __unsaved = set()
     __clang_idx = None
@@ -83,12 +83,14 @@ class ClangService:
     def __parsing_worker(args):
         while ClangService.__is_running:
             try:
-                if ClangService.__to_parse > 0:
-                    for buf_ctx in ClangService.buf_ctxs.values():
-                        if not ClangService.parse(buf_ctx, args):
-                            continue
+                if not ClangService.__invalid:
+                    continue
 
-                    ClangService.__to_parse -= 1
+                for buf_ctx in ClangService.buf_ctxs.values():
+                    if not ClangService.parse(buf_ctx, args):
+                        continue
+
+                ClangService.__invalid = False
             except:
                 pass
             finally:
@@ -102,7 +104,7 @@ class ClangService:
         ClangService.buf_ctxs[vim.current.buffer.name] = BufferCtx(
             vim.current.buffer.name)
 
-        ClangService.__to_parse += 1
+        ClangService.__invalid = True
 
     @staticmethod
     def update_unsaved_all(invalid):
@@ -115,8 +117,7 @@ class ClangService:
             ClangService.__unsaved.add(
                 (buf.name, '\n'.join(buf)))
 
-        if invalid:
-            ClangService.__to_parse += 1
+        ClangService.__invalid = invalid
 
     @staticmethod
     def update_unsaved():
@@ -128,7 +129,7 @@ class ClangService:
         ClangService.__unsaved.add(
             (vim.current.buffer.name, '\n'.join(vim.current.buffer)))
 
-        ClangService.__to_parse += 1
+        ClangService.__invalid = True
 
     @staticmethod
     def parse(bufctx, args):
