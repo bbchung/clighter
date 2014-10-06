@@ -23,52 +23,41 @@ class TranslationUnitCtx:
 
 class BufferCtx:
 
-    def __init__(self, bufname, idx):
-        self.__bufname = bufname
-        self.__clang_idx = idx
+    def __init__(self, bufname):
+        self.bufname = bufname
         self.tu_ctx = None
-        self.__lock = threading.Lock()
 
-    def parse(self, args, unsaved):
-        try:
-            with self.__lock:
-                tu = self.__clang_idx.parse(
-                    self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-
-            self.tu_ctx = TranslationUnitCtx(tu, tu.get_file(self.__bufname))
-        except:
-            pass
-
-    def get_vim_cursor(self, location):
+    @property
+    def vim_cursor(self):
         if self.tu_ctx is None:
             return None
 
-        (row, col) = location
+        (row, col) = vim.current.window.cursor
         cursor = self.tu_ctx.get_cursor(row, col + 1)
 
         return cursor if cursor.location.line == row and cursor.location.column <= col + 1 < cursor.location.column + len(get_spelling_or_displayname(cursor)) else None
 
 
 class ClangService:
+    buf_ctxs = {}
     __thread = None
     __is_running = False
     __invalid = True
-    unsaved = set()
-    buf_ctxs = {}
-    clang_idx = None
+    __lock = threading.Lock()
+    __unsaved = set()
+    __clang_idx = None
 
     @staticmethod
     def init():
-        if ClangService.clang_idx is None:
+        if ClangService.__clang_idx is None:
             try:
-                ClangService.clang_idx = cindex.Index.create()
+                ClangService.__clang_idx = cindex.Index.create()
             except:
                 return
 
         for buf in vim.buffers:
             if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.name not in ClangService.buf_ctxs.keys():
-                ClangService.buf_ctxs[buf.name] = BufferCtx(
-                    buf.name, ClangService.clang_idx)
+                ClangService.buf_ctxs[buf.name] = BufferCtx(buf.name)
 
         if ClangService.__thread is None:
             ClangService.__is_running = True
@@ -85,8 +74,8 @@ class ClangService:
             ClangService.__thread.join()
             ClangService.__thread = None
 
-        if ClangService.clang_idx is None:
-            ClangService.clang_idx = None
+        if ClangService.__clang_idx is None:
+            ClangService.__clang_idx = None
 
         vim.command("silent! unlet s:clang_initialized")
 
@@ -98,7 +87,7 @@ class ClangService:
                     continue
 
                 for buf_ctx in ClangService.buf_ctxs.values():
-                    buf_ctx.parse(args, ClangService.unsaved)
+                    ClangService.parse(buf_ctx, args)
 
                 ClangService.__invalid = False
             except:
@@ -106,42 +95,51 @@ class ClangService:
             finally:
                 time.sleep(0.2)
 
-        vim.command("let g:ffffff=1")
-
     @staticmethod
     def add_vim_buffer():
         if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"] or vim.current.buffer.name in ClangService.buf_ctxs.keys():
             return
 
         ClangService.buf_ctxs[vim.current.buffer.name] = BufferCtx(
-            vim.current.buffer.name, ClangService.clang_idx)
+            vim.current.buffer.name)
 
         ClangService.__invalid = True
 
     @staticmethod
     def update_unsaved_all(invalid):
-        ClangService.unsaved = set()
+        ClangService.__unsaved = set()
 
-        for buf in vim.buffers: 
+        for buf in vim.buffers:
             if buf.options['filetype'] not in ["c", "cpp", "objc"]:
                 continue
 
-            ClangService.unsaved.add(
+            ClangService.__unsaved.add(
                 (buf.name, '\n'.join(buf)))
 
         ClangService.__invalid = invalid
 
     @staticmethod
     def update_unsaved():
-        for file in ClangService.unsaved:
+        for file in ClangService.__unsaved:
             if file[0] == vim.current.buffer.name:
-                ClangService.unsaved.discard(file)
+                ClangService.__unsaved.discard(file)
                 break
 
-        ClangService.unsaved.add(
+        ClangService.__unsaved.add(
             (vim.current.buffer.name, '\n'.join(vim.current.buffer)))
 
         ClangService.__invalid = True
+
+    @staticmethod
+    def parse(bufctx, args):
+        try:
+            with ClangService.__lock:
+                tu = ClangService.__clang_idx.parse(
+                    bufctx.bufname, args, ClangService.__unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+
+            bufctx.tu_ctx = TranslationUnitCtx(tu, tu.get_file(bufctx.bufname))
+        except:
+            pass
 
     @staticmethod
     def reset_buf_tu_ctx():
@@ -198,7 +196,7 @@ def highlight_window():
 
     def_cursor = None
     if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
-        vim_cursor = buf_ctx.get_vim_cursor(vim.current.window.cursor)
+        vim_cursor = buf_ctx.vim_cursor
         def_cursor = __get_definition(vim_cursor)
 
         if not hasattr(highlight_window, 'last_dc'):
@@ -265,10 +263,9 @@ def refactor_rename():
         return
 
     ClangService.update_unsaved_all(False)
+    ClangService.parse(buf_ctx, vim.vars['clighter_clang_options'])
 
-    buf_ctx.parse(vim.vars['clighter_clang_options'], ClangService.unsaved)
-
-    vim_cursor = buf_ctx.get_vim_cursor(vim.current.window.cursor)
+    vim_cursor = buf_ctx.vim_cursor
     def_cursor = __get_definition(vim_cursor)
     if def_cursor is None:
         return
@@ -337,8 +334,7 @@ def __cross_buffer_rename(usr, new_name):
         if vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
             buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)
             if buf_ctx is not None:
-                buf_ctx.parse(
-                    vim.vars['clighter_clang_options'], ClangService.unsaved)
+                ClangService.parse(buf_ctx, vim.vars['clighter_clang_options'])
                 __search_usr_and_rename_refs(buf_ctx.tu_ctx.tu, usr, new_name)
 
         vim.command("bn!")
