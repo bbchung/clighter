@@ -136,8 +136,9 @@ class ClangService:
             with ClangService.__lock:
                 tu = ClangService.__clang_idx.parse(
                     bufctx.bufname, args, ClangService.__unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                file = tu.get_file(bufctx.bufname)
 
-                bufctx.tu_ctx = TranslationUnitCtx(tu, tu.get_file(bufctx.bufname))
+                bufctx.tu_ctx = TranslationUnitCtx(tu, file)
         except:
             pass
 
