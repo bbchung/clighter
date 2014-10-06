@@ -87,7 +87,8 @@ class ClangService:
                     continue
 
                 for buf_ctx in ClangService.buf_ctxs.values():
-                    ClangService.parse(buf_ctx, args)
+                    if not ClangService.parse(buf_ctx, args):
+                        continue
 
                 ClangService.__invalid = False
             except:
@@ -136,11 +137,12 @@ class ClangService:
             with ClangService.__lock:
                 tu = ClangService.__clang_idx.parse(
                     bufctx.bufname, args, ClangService.__unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-                file = tu.get_file(bufctx.bufname)
 
-                bufctx.tu_ctx = TranslationUnitCtx(tu, file)
+                bufctx.tu_ctx = TranslationUnitCtx(tu, tu.get_file(bufctx.bufname))
         except:
-            pass
+            return False
+
+        return True
 
     @staticmethod
     def reset_buf_tu_ctx():
