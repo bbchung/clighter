@@ -44,18 +44,18 @@ class ClangService:
     __is_running = False
 
     # for internal use, to sync the parsing worker
-    __pid = 1 # producer id
-    __cid = 0 # consumer id
+    __pid = 1  # producer id
+    __cid = 0  # consumer id
 
     __lock = threading.Lock()
     __unsaved = set()
-    __clang_idx = None
+    __idx = None
 
     @staticmethod
     def init():
-        if ClangService.__clang_idx is None:
+        if ClangService.__idx is None:
             try:
-                ClangService.__clang_idx = cindex.Index.create()
+                ClangService.__idx = cindex.Index.create()
             except:
                 return
 
@@ -78,8 +78,8 @@ class ClangService:
             ClangService.__thread.join()
             ClangService.__thread = None
 
-        if ClangService.__clang_idx is None:
-            ClangService.__clang_idx = None
+        if ClangService.__idx is None:
+            ClangService.__idx = None
 
         vim.command("silent! unlet s:clang_initialized")
 
@@ -87,16 +87,17 @@ class ClangService:
     def __parsing_worker(args):
         while ClangService.__is_running:
             try:
+                # has parse all unsaved files
                 if ClangService.__cid == ClangService.__pid:
                     continue
 
-                curr = ClangService.__pid
+                last_pid = ClangService.__pid
 
                 for buf_ctx in ClangService.buf_ctxs.values():
                     if not ClangService.parse(buf_ctx, args):
                         continue
 
-                ClangService.__cid = curr
+                ClangService.__cid = last_pid
             except:
                 pass
             finally:
@@ -139,13 +140,14 @@ class ClangService:
         ClangService.__pid += 1
 
     @staticmethod
-    def parse(bufctx, args):
+    def parse(buf_ctx, args):
         try:
             with ClangService.__lock:
-                tu = ClangService.__clang_idx.parse(
-                    bufctx.bufname, args, ClangService.__unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+                tu = ClangService.__idx.parse(
+                    buf_ctx.bufname, args, ClangService.__unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
-                bufctx.tu_ctx = TranslationUnitCtx(tu, tu.get_file(bufctx.bufname))
+                buf_ctx.tu_ctx = TranslationUnitCtx(
+                    tu, tu.get_file(buf_ctx.bufname))
         except:
             return False
 
@@ -183,7 +185,17 @@ def unhighlight_window():
     vim.command(
         "call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, TOKEN_PRI))
 
-    ClangService.reset_buf_tu_ctx()
+    buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)
+
+    if buf_ctx is None:
+        return
+
+    tu_ctx = buf_ctx.tu_ctx
+
+    if tu_ctx is None:
+        return
+
+    tu_ctx.rendered = False
 
 
 def highlight_window():
