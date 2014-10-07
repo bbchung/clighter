@@ -10,7 +10,7 @@ let s:cursor_decl_ref_hl_on = 1
 fun! clighter#ToggleCursorHL()
     if s:cursor_decl_ref_hl_on==1
         let s:cursor_decl_ref_hl_on=0
-        call s:clear_match_grp(['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum', 'clighterCursorDefRef'])
+        py clighter.unhighlight_def_ref()
     else
         let s:cursor_decl_ref_hl_on=1
         "augroup CursorHighlight
@@ -37,11 +37,6 @@ fun! s:clear_match_pri(pri)
     endfor
 endf
 
-fun! s:on_buf_win_leave()
-    call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, TOKEN_PRI))
-endf
-
-
 fun! clighter#Enable()
 
     if !exists("s:clang_initialized")
@@ -67,6 +62,8 @@ fun! clighter#Enable()
         endif
         au CursorHold *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
+        " workaround to rehighlight while split window
+        au WinEnter * py clighter.unhighlight_window()
         au BufWinEnter * py clighter.unhighlight_window()
         au BufWinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_vim_buffer()
@@ -79,7 +76,7 @@ fun! clighter#Disable()
     au! ClighterEnable
     py clighter.ClangService.release()
     let a:wnr = winnr()
-    windo call s:clear_match_grp(['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum', 'clighterCursorDefRef'])
+    windo py clighter.unhighlight_window()
     exe a:wnr."wincmd w"
 endf
 
