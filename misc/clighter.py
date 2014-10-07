@@ -16,13 +16,11 @@ class BufferCtx:
         self.bufname = bufname
         self.tu = None
 
-    @property
-    def vim_cursor(self):
+    def get_cursor(self, location):
         if self.tu is None:
             return None
 
-        (row, col) = vim.current.window.cursor
-
+        (row, col) = location
         cursor = cindex.Cursor.from_location(self.tu, cindex.SourceLocation.from_position(
             self.tu, self.tu.get_file(self.bufname), row, col + 1))
 
@@ -57,7 +55,7 @@ class ClangService:
         if ClangService.__thread is None:
             ClangService.__is_running = True
             ClangService.__thread = threading.Thread(
-                target=ClangService.__parsing_worker, args=[vim.vars['clighter_clang_options']])
+                target=ClangService.__parsing_worker, args=[list(vim.vars['clighter_clang_options'])])
             ClangService.__thread.start()
 
         vim.command("let s:clang_initialized=1")
@@ -152,6 +150,7 @@ class ClangService:
 
     # queue.put(cur.get_children())
 
+
 def unhighlight_window():
     vim.command(
         "call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, SYNTAX_PRI))
@@ -181,7 +180,7 @@ def highlight_window():
 
     def_cursor = None
     if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
-        vim_cursor = buf_ctx.vim_cursor
+        vim_cursor = buf_ctx.get_cursor(vim.current.window.cursor)
         def_cursor = __get_definition(vim_cursor)
 
         if highlight_window.last_dc is not None and (def_cursor is None or highlight_window.last_dc != def_cursor):
@@ -254,7 +253,7 @@ def refactor_rename():
     except:
         return
 
-    vim_cursor = buf_ctx.vim_cursor
+    vim_cursor = buf_ctx.get_cursor(vim.current.window.cursor)
     def_cursor = __get_definition(vim_cursor)
     if def_cursor is None:
         return
@@ -325,7 +324,8 @@ def __cross_buffer_rename(usr, new_name):
             buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)
             if buf_ctx is not None:
                 try:
-                    ClangService.parse(buf_ctx, vim.vars['clighter_clang_options'])
+                    ClangService.parse(
+                        buf_ctx, vim.vars['clighter_clang_options'])
                     __search_usr_and_rename_refs(buf_ctx.tu, usr, new_name)
                 except:
                     pass
