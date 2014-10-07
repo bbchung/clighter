@@ -85,8 +85,7 @@ class ClangService:
                 last_pid = ClangService.__pid
 
                 for buf_ctx in ClangService.buf_ctxs.values():
-                    if not ClangService.parse(buf_ctx, args):
-                        continue
+                    ClangService.parse(buf_ctx, args)
 
                 ClangService.__cid = last_pid
             except:
@@ -132,15 +131,9 @@ class ClangService:
 
     @staticmethod
     def parse(buf_ctx, args):
-        try:
-            with ClangService.__lock:
-                buf_ctx.tu = ClangService.__idx.parse(
-                    buf_ctx.bufname, args, ClangService.__unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-        except:
-            return False
-
-        return True
-
+        with ClangService.__lock:
+            buf_ctx.tu = ClangService.__idx.parse(
+                buf_ctx.bufname, args, ClangService.__unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
 # def bfs(c, top, bottom, queue):
     # if c.location.line >= top and c.location.line <= bottom:
@@ -253,7 +246,10 @@ def refactor_rename():
         return
 
     ClangService.update_unsaved_all(False)
-    ClangService.parse(buf_ctx, vim.vars['clighter_clang_options'])
+    try:
+        ClangService.parse(buf_ctx, vim.vars['clighter_clang_options'])
+    except:
+        return
 
     vim_cursor = buf_ctx.vim_cursor
     def_cursor = __get_definition(vim_cursor)
@@ -325,8 +321,11 @@ def __cross_buffer_rename(usr, new_name):
         if vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
             buf_ctx = ClangService.buf_ctxs.get(vim.current.buffer.name)
             if buf_ctx is not None:
-                ClangService.parse(buf_ctx, vim.vars['clighter_clang_options'])
-                __search_usr_and_rename_refs(buf_ctx.tu, usr, new_name)
+                try:
+                    ClangService.parse(buf_ctx, vim.vars['clighter_clang_options'])
+                    __search_usr_and_rename_refs(buf_ctx.tu, usr, new_name)
+                except:
+                    pass
 
         vim.command("bn!")
 

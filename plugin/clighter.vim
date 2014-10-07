@@ -40,7 +40,7 @@ hi link clighterCursorDefRef Search
 
 if g:clighter_autostart == 1
     augroup ClighterAutoStart
-        au VimEnter * call clighter#Enable()
+        au VimEnter *.[ch],*.[ch]pp,*.m call clighter#Enable()
     augroup END
 endif
 
