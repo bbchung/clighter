@@ -111,6 +111,9 @@ class ClangService:
             if buf.options['filetype'] not in ["c", "cpp", "objc"]:
                 continue
 
+            if len(buf) == 1 and buf[0] == "":
+                continue
+
             ClangService.__unsaved.add(
                 (buf.name, '\n'.join(buf)))
 
