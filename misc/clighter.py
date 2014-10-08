@@ -196,20 +196,21 @@ def highlight_window():
 
             highlight_window.last_dc = def_cursor
 
-    if draw_syntax:
-        window_size = vim.vars['clighter_window_size'] * 100
-        buflinenr = len(vim.current.buffer)
-        target_window = [vim.current.window.number, 1, buflinenr] if window_size < 0 else [
-            vim.current.window.number, max(top - window_size, 1), min(bottom + window_size, buflinenr)]
+    if not draw_syntax and not draw_def_ref:
+        return
 
+    window_size = vim.vars['clighter_window_size'] * 100
+    buflinenr = len(vim.current.buffer)
+    target_window = [vim.current.window.number, 1, buflinenr] if window_size < 0 else [
+        vim.current.window.number, max(top - window_size, 1), min(bottom + window_size, buflinenr)]
+
+    if draw_syntax:
         highlight_window.syntaxed_window = target_window
         vim.command("call s:clear_match_pri([{0}])".format(SYNTAX_PRI))
-    elif not draw_def_ref:
-        return
 
     file = tu.get_file(buf_ctx.bufname)
     tokens = tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
-        tu, file, highlight_window.syntaxed_window[1], 1), cindex.SourceLocation.from_position(tu, file, highlight_window.syntaxed_window[2], 1)))
+        tu, file, target_window[1], 1), cindex.SourceLocation.from_position(tu, file, target_window[2], 1)))
 
     for t in tokens:
         """ Do semantic highlighting'
