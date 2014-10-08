@@ -209,7 +209,7 @@ def highlight_window():
 
     file = tu.get_file(buf_ctx.bufname)
     tokens = tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
-        tu, file, top, 1), cindex.SourceLocation.from_position(tu, file, bottom, 1)))
+        tu, file, highlight_window.syntaxed_window[1], 1), cindex.SourceLocation.from_position(tu, file, highlight_window.syntaxed_window[2], 1)))
 
     for t in tokens:
         """ Do semantic highlighting'
