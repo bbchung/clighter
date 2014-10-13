@@ -40,7 +40,7 @@ class BufferCtx:
 
 
 class ClighterService:
-    buf_ctxs = {}
+    __buf_ctxs = {}
     __thread = None
     __is_running = False
 
@@ -48,7 +48,8 @@ class ClighterService:
     __change_tick = 1
     __parse_tick = 0
 
-    __lock = threading.Lock()
+    __cond = threading.Condition()
+    __parse_lock = threading.Lock()
     __unsaved = set()
     __idx = None
 
@@ -61,8 +62,8 @@ class ClighterService:
                 return
 
         for buf in vim.buffers:
-            if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.name not in ClighterService.buf_ctxs.keys():
-                ClighterService.buf_ctxs[buf.name] = BufferCtx(buf.name)
+            if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.name not in ClighterService.__buf_ctxs.keys():
+                ClighterService.__buf_ctxs[buf.name] = BufferCtx(buf.name)
 
         if ClighterService.__thread is None:
             ClighterService.__is_running = True
@@ -72,46 +73,29 @@ class ClighterService:
 
         vim.command("let s:clang_initialized=1")
 
+        with ClighterService.__cond:
+            ClighterService.__cond.notify()
+
     @staticmethod
     def release():
         if ClighterService.__thread is not None:
             ClighterService.__is_running = False
+            with ClighterService.__cond:
+                ClighterService.__cond.notify()
             ClighterService.__thread.join()
             ClighterService.__thread = None
-
-        if ClighterService.__idx is None:
-            ClighterService.__idx = None
 
         vim.command("silent! unlet s:clang_initialized")
 
     @staticmethod
-    def __parsing_worker(args):
-        while ClighterService.__is_running:
-            try:
-                # has parse all unsaved files
-                if ClighterService.__parse_tick == ClighterService.__change_tick:
-                    continue
-
-                last_change_tick = ClighterService.__change_tick
-
-                for buf_ctx in ClighterService.buf_ctxs.values():
-                    ClighterService.parse(buf_ctx, args)
-
-                ClighterService.__parse_tick = last_change_tick
-            except:
-                pass
-            finally:
-                time.sleep(0.2)
-
-    @staticmethod
     def add_vim_buffer():
-        if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"] or vim.current.buffer.name in ClighterService.buf_ctxs.keys():
+        if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"] or vim.current.buffer.name in ClighterService.__buf_ctxs.keys():
             return
 
-        ClighterService.buf_ctxs[vim.current.buffer.name] = BufferCtx(
+        ClighterService.__buf_ctxs[vim.current.buffer.name] = BufferCtx(
             vim.current.buffer.name)
 
-        ClighterService.__change_tick += 1
+        ClighterService.__increase_tick()
 
     @staticmethod
     def update_unsaved_all(increase_tick=True):
@@ -128,7 +112,7 @@ class ClighterService:
                 (buf.name, '\n'.join(buf)))
 
         if increase_tick:
-            ClighterService.__change_tick += 1
+            ClighterService.__increase_tick()
 
     @staticmethod
     def update_unsaved(increase_tick=True):
@@ -141,14 +125,44 @@ class ClighterService:
             (vim.current.buffer.name, '\n'.join(vim.current.buffer)))
 
         if increase_tick:
-            ClighterService.__change_tick += 1
+            ClighterService.__increase_tick()
 
     @staticmethod
     def parse(buf_ctx, args):
-        with ClighterService.__lock:
+        with ClighterService.__parse_lock:
             buf_ctx.parse(
                 ClighterService.__idx, args, ClighterService.__unsaved)
 
+    @staticmethod
+    def get_buf_ctx(name):
+        return ClighterService.__buf_ctxs.get(name)
+
+    @staticmethod
+    def __parsing_worker(args):
+        while ClighterService.__is_running:
+            try:
+                # has parse all unsaved files
+                if ClighterService.__parse_tick == ClighterService.__change_tick:
+                    with ClighterService.__cond:
+                        ClighterService.__cond.wait()
+
+                    if ClighterService.__parse_tick == ClighterService.__change_tick:
+                        continue
+
+                last_change_tick = ClighterService.__change_tick
+
+                for buf_ctx in ClighterService.__buf_ctxs.values():
+                    ClighterService.parse(buf_ctx, args)
+
+                ClighterService.__parse_tick = last_change_tick
+            except:
+                pass
+
+    @staticmethod
+    def __increase_tick():
+        with ClighterService.__cond:
+            ClighterService.__change_tick += 1
+            ClighterService.__cond.notify()
 # def bfs(c, top, bottom, queue):
     # if c.location.line >= top and c.location.line <= bottom:
     #__draw_token(c)
@@ -177,7 +191,7 @@ def unhighlight_def_ref():
 
 
 def highlight_window():
-    buf_ctx = ClighterService.buf_ctxs.get(vim.current.buffer.name)
+    buf_ctx = ClighterService.get_buf_ctx(vim.current.buffer.name)
     if buf_ctx is None:
         return
 
@@ -257,7 +271,7 @@ def refactor_rename():
     if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"]:
         return
 
-    buf_ctx = ClighterService.buf_ctxs.get(vim.current.buffer.name)
+    buf_ctx = ClighterService.get_buf_ctx(vim.current.buffer.name)
     if buf_ctx is None:
         return
 
@@ -335,7 +349,7 @@ def __cross_buffer_rename(usr, new_name):
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
         if vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
-            buf_ctx = ClighterService.buf_ctxs.get(vim.current.buffer.name)
+            buf_ctx = ClighterService.get_buf_ctx(vim.current.buffer.name)
             if buf_ctx is not None:
                 try:
                     ClighterService.parse(
