@@ -10,7 +10,7 @@ if vim.vars['clighter_libclang_file']:
     cindex.Config.set_library_file(vim.vars['clighter_libclang_file'])
 
 
-class BufferCtx:
+class TranslationUnitCtx:
 
     def __init__(self, bufname):
         self.__bufname = bufname
@@ -40,7 +40,7 @@ class BufferCtx:
 
 
 class ClighterService:
-    __buf_ctxs = {}
+    __translation_ctx = {}
     __thread = None
     __is_running = False
 
@@ -54,27 +54,22 @@ class ClighterService:
     __idx = None
 
     @staticmethod
-    def init():
+    def init(compile_opt):
         if ClighterService.__idx is None:
             try:
                 ClighterService.__idx = cindex.Index.create()
             except:
-                return
+                return False
 
-        for buf in vim.buffers:
-            if buf.options['filetype'] in ["c", "cpp", "objc"] and buf.name not in ClighterService.__buf_ctxs.keys():
-                ClighterService.__buf_ctxs[buf.name] = BufferCtx(buf.name)
+        if ClighterService.__thread is not None:
+            return True
 
-        if ClighterService.__thread is None:
-            ClighterService.__is_running = True
-            ClighterService.__thread = threading.Thread(
-                target=ClighterService.__parsing_worker, args=[list(vim.vars['clighter_clang_options'])])
-            ClighterService.__thread.start()
+        ClighterService.__is_running = True
+        ClighterService.__thread = threading.Thread(
+            target=ClighterService.__parsing_worker, args=[list(compile_opt)])
+        ClighterService.__thread.start()
 
-        vim.command("let s:clang_initialized=1")
-
-        with ClighterService.__cond:
-            ClighterService.__cond.notify()
+        return True
 
     @staticmethod
     def release():
@@ -85,57 +80,50 @@ class ClighterService:
             ClighterService.__thread.join()
             ClighterService.__thread = None
 
-        vim.command("silent! unlet s:clang_initialized")
-
     @staticmethod
-    def add_vim_buffer():
-        if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"] or vim.current.buffer.name in ClighterService.__buf_ctxs.keys():
-            return
+    def create_tu(list):
+        for name in list:
+            if name in ClighterService.__translation_ctx.keys():
+                return
 
-        ClighterService.__buf_ctxs[vim.current.buffer.name] = BufferCtx(
-            vim.current.buffer.name)
+            ClighterService.__translation_ctx[name] = TranslationUnitCtx(name)
 
         ClighterService.__increase_tick()
 
     @staticmethod
-    def update_unsaved_all(increase_tick=True):
-        ClighterService.__unsaved = set()
+    def update_unsaved_dict(dict, increase_tick=True):
+        for name, buffer in dict.items():
+            for file in ClighterService.__unsaved:
+                if file[0] == name:
+                    ClighterService.__unsaved.discard(file)
+                    break
 
-        for buf in vim.buffers:
-            if buf.options['filetype'] not in ["c", "cpp", "objc"]:
-                continue
-
-            if len(buf) == 1 and buf[0] == "":
-                continue
-
-            ClighterService.__unsaved.add(
-                (buf.name, '\n'.join(buf)))
+            ClighterService.__unsaved.add((name, buffer))
 
         if increase_tick:
             ClighterService.__increase_tick()
 
     @staticmethod
-    def update_unsaved(increase_tick=True):
+    def update_unsaved(name, buffer, increase_tick=True):
         for file in ClighterService.__unsaved:
-            if file[0] == vim.current.buffer.name:
+            if file[0] == name:
                 ClighterService.__unsaved.discard(file)
                 break
 
-        ClighterService.__unsaved.add(
-            (vim.current.buffer.name, '\n'.join(vim.current.buffer)))
+        ClighterService.__unsaved.add((name, buffer))
 
         if increase_tick:
             ClighterService.__increase_tick()
 
     @staticmethod
-    def parse(buf_ctx, args):
+    def parse(tu_ctx, args):
         with ClighterService.__parse_lock:
-            buf_ctx.parse(
+            tu_ctx.parse(
                 ClighterService.__idx, args, ClighterService.__unsaved)
 
     @staticmethod
-    def get_buf_ctx(name):
-        return ClighterService.__buf_ctxs.get(name)
+    def get_tu_ctx(name):
+        return ClighterService.__translation_ctx.get(name)
 
     @staticmethod
     def __parsing_worker(args):
@@ -151,8 +139,8 @@ class ClighterService:
 
                 last_change_tick = ClighterService.__change_tick
 
-                for buf_ctx in ClighterService.__buf_ctxs.values():
-                    ClighterService.parse(buf_ctx, args)
+                for tu_ctx in ClighterService.__translation_ctx.values():
+                    ClighterService.parse(tu_ctx, args)
 
                 ClighterService.__parse_tick = last_change_tick
             except:
@@ -178,6 +166,15 @@ class ClighterService:
     # queue.put(cur.get_children())
 
 
+def create_all_tu():
+    list = []
+    for buf in vim.buffers:
+        if buf.options['filetype'] in ["c", "cpp", "objc"]:
+            list.append(buf.name)
+
+    ClighterService.create_tu(list)
+
+
 def unhighlight_window():
     vim.command(
         "call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, SYNTAX_PRI))
@@ -191,11 +188,11 @@ def unhighlight_def_ref():
 
 
 def highlight_window():
-    buf_ctx = ClighterService.get_buf_ctx(vim.current.buffer.name)
-    if buf_ctx is None:
+    tu_ctx = ClighterService.get_tu_ctx(vim.current.buffer.name)
+    if tu_ctx is None:
         return
 
-    tu = buf_ctx.translation_unit
+    tu = tu_ctx.translation_unit
     if tu is None:
         return
 
@@ -207,7 +204,7 @@ def highlight_window():
 
     def_cursor = None
     if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
-        vim_cursor = buf_ctx.get_cursor(vim.current.window.cursor)
+        vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
         def_cursor = __get_definition(vim_cursor)
 
         if highlight_window.last_dc is not None and (def_cursor is None or highlight_window.last_dc != def_cursor):
@@ -235,7 +232,7 @@ def highlight_window():
         highlight_window.syntaxed_window = target_window
         vim.command("call s:clear_match_pri([{0}])".format(SYNTAX_PRI))
 
-    file = tu.get_file(buf_ctx.bufname)
+    file = tu.get_file(tu_ctx.bufname)
     tokens = tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
         tu, file, target_window[1], 1), cindex.SourceLocation.from_position(tu, file, target_window[2], 1)))
 
@@ -271,17 +268,17 @@ def refactor_rename():
     if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"]:
         return
 
-    buf_ctx = ClighterService.get_buf_ctx(vim.current.buffer.name)
-    if buf_ctx is None:
+    tu_ctx = ClighterService.get_tu_ctx(vim.current.buffer.name)
+    if tu_ctx is None:
         return
 
-    ClighterService.update_unsaved_all(False)
+    ClighterService.update_unsaved_dict(__get_buffer_dict(), False)
     try:
-        ClighterService.parse(buf_ctx, vim.vars['clighter_clang_options'])
+        ClighterService.parse(tu_ctx, vim.vars['clighter_clang_options'])
     except:
         return
 
-    vim_cursor = buf_ctx.get_cursor(vim.current.window.cursor)
+    vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
     def_cursor = __get_definition(vim_cursor)
     if def_cursor is None:
         return
@@ -301,7 +298,7 @@ def refactor_rename():
     locs = set()
     locs.add((def_cursor.location.line, def_cursor.location.column,
               def_cursor.location.file.name))
-    __search_ref_cursors(buf_ctx.translation_unit.cursor, def_cursor, locs)
+    __search_ref_cursors(tu_ctx.translation_unit.cursor, def_cursor, locs)
     __vim_multi_replace(locs, old_name, new_name)
 
     if __is_symbol_cursor(def_cursor) and vim.vars['clighter_enable_cross_rename'] == 1:
@@ -309,7 +306,7 @@ def refactor_rename():
 
     vim.current.window.cursor = pos
 
-    ClighterService.update_unsaved_all()
+    ClighterService.update_unsaved_dict(__get_buffer_dict())
 
 
 def get_spelling_or_displayname(cursor):
@@ -356,13 +353,13 @@ def __cross_buffer_rename(usr, new_name):
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
         if vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
-            buf_ctx = ClighterService.get_buf_ctx(vim.current.buffer.name)
-            if buf_ctx is not None:
+            tu_ctx = ClighterService.get_tu_ctx(vim.current.buffer.name)
+            if tu_ctx is not None:
                 try:
                     ClighterService.parse(
-                        buf_ctx, vim.vars['clighter_clang_options'])
+                        tu_ctx, vim.vars['clighter_clang_options'])
                     __search_usr_and_rename_refs(
-                        buf_ctx.translation_unit, usr, new_name)
+                        tu_ctx.translation_unit, usr, new_name)
                 except:
                     pass
 
@@ -460,3 +457,18 @@ def __vim_matchaddpos(group, line, col, len, priority):
     # vim.command("call add(w:semantic_list, matchadd('{0}',
     # '\%{1}l\%>{2}c.\%<{3}c', -1))".format(group, t.location.line,
     # t.location.column-1, t.location.column+len(t.spelling) + 1));
+
+
+def __get_buffer_dict():
+    dict = {}
+
+    for buf in vim.buffers:
+        if buf.options['filetype'] not in ["c", "cpp", "objc"]:
+            continue
+
+        if len(buf) == 1 and buf[0] == "":
+            continue
+
+        dict[buf.name] = '\n'.join(buf)
+
+    return dict
