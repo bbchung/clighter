@@ -320,7 +320,14 @@ def __get_definition(cursor):
     if cursor is None:
         return None
 
-    return cursor if cursor.kind == cindex.CursorKind.MACRO_DEFINITION else cursor.referenced
+    if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
+        return cursor
+
+    def_cur = cursor.get_definition()
+    if def_cur is None:
+        def_cur = cursor.referenced
+
+    return def_cur
 
 
 def __draw_token(line, col, len, kind, type):
