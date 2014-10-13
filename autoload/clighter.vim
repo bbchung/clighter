@@ -3,6 +3,7 @@ py import sys
 py import vim
 exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
 py import clighter
+py import clang_service
 
 augroup ClighterEnable
 let s:cursor_decl_ref_hl_on = 1
@@ -40,7 +41,7 @@ endf
 fun! clighter#Enable()
     if !exists("s:clang_initialized")
 python << endpython
-if clighter.ClighterService.init(vim.vars['clighter_clang_options']): 
+if clang_service.ClangService.init(vim.vars['clighter_clang_options']): 
     clighter.create_all_tu()
     vim.command("let s:clang_initialized=1")
 endpython
@@ -57,11 +58,11 @@ endpython
         if g:clighter_realtime == 1
             au CursorMoved *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
             au CursorMovedI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
-            au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ClighterService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
-            au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ClighterService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
+            au TextChanged *.[ch],*.[ch]pp,*.m py clang_service.ClangService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
+            au TextChangedI *.[ch],*.[ch]pp,*.m py clang_service.ClangService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
         else
-            au CursorHold *.[ch],*.[ch]pp,*.m py clighter.ClighterService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
-            au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.ClighterService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
+            au CursorHold *.[ch],*.[ch]pp,*.m py clang_service.ClangService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
+            au CursorHoldI *.[ch],*.[ch]pp,*.m py clang_service.ClangService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
         endif
         au CursorHold *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
@@ -69,15 +70,15 @@ endpython
         au WinEnter * py clighter.unhighlight_window()
         au BufWinEnter * py clighter.unhighlight_window()
         au BufWinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
-        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClighterService.create_tu([vim.current.buffer.name])
-        au BufNewFile *.[ch],*.[ch]pp,*.m py clighter.ClighterService.create_tu([vim.current.buffer.name])
-        au VimLeavePre * py clighter.ClighterService.release()
+        au BufRead *.[ch],*.[ch]pp,*.m py clang_service.ClangService.create_tu([vim.current.buffer.name])
+        au BufNewFile *.[ch],*.[ch]pp,*.m py clang_service.ClangService.create_tu([vim.current.buffer.name])
+        au VimLeavePre * py clang_service.ClangService.release()
     augroup END
 endf
 
 fun! clighter#Disable()
     au! ClighterEnable
-    py clighter.ClighterService.release()
+    py clang_service.ClangService.release()
     silent! unlet s:clang_initialized
     let a:wnr = winnr()
     windo py clighter.unhighlight_window()
