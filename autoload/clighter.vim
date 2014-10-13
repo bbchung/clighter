@@ -40,7 +40,7 @@ endf
 fun! clighter#Enable()
 
     if !exists("s:clang_initialized")
-        py clighter.ClangService.init()
+        py clighter.ClighterService.init()
         if !exists("s:clang_initialized")
             echohl WarningMsg |
                         \ echomsg "Clighter unavailable: cannot enable clighter, try set g:clighter_libclang_file" |
@@ -54,11 +54,11 @@ fun! clighter#Enable()
         if g:clighter_realtime == 1
             au CursorMoved *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
             au CursorMovedI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
-            au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ClangService.update_unsaved()
-            au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ClangService.update_unsaved()
+            au TextChanged *.[ch],*.[ch]pp,*.m py clighter.ClighterService.update_unsaved()
+            au TextChangedI *.[ch],*.[ch]pp,*.m py clighter.ClighterService.update_unsaved()
         else
-            au CursorHold *.[ch],*.[ch]pp,*.m py clighter.ClangService.update_unsaved()
-            au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.ClangService.update_unsaved()
+            au CursorHold *.[ch],*.[ch]pp,*.m py clighter.ClighterService.update_unsaved()
+            au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.ClighterService.update_unsaved()
         endif
         au CursorHold *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
         au CursorHoldI *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
@@ -66,15 +66,15 @@ fun! clighter#Enable()
         au WinEnter * py clighter.unhighlight_window()
         au BufWinEnter * py clighter.unhighlight_window()
         au BufWinEnter *.[ch],*.[ch]pp,*.m py clighter.highlight_window()
-        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_vim_buffer()
-        au BufNewFile *.[ch],*.[ch]pp,*.m py clighter.ClangService.add_vim_buffer()
-        au VimLeavePre * py clighter.ClangService.release()
+        au BufRead *.[ch],*.[ch]pp,*.m py clighter.ClighterService.add_vim_buffer()
+        au BufNewFile *.[ch],*.[ch]pp,*.m py clighter.ClighterService.add_vim_buffer()
+        au VimLeavePre * py clighter.ClighterService.release()
     augroup END
 endf
 
 fun! clighter#Disable()
     au! ClighterEnable
-    py clighter.ClangService.release()
+    py clighter.ClighterService.release()
     let a:wnr = winnr()
     windo py clighter.unhighlight_window()
     exe a:wnr."wincmd w"
