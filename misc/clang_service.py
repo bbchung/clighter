@@ -36,6 +36,7 @@ class ClangService:
     __translation_ctx = {}
     __thread = None
     __is_running = False
+    __compile_arg = []
 
     # for internal use, to sync the parsing worker
     __change_tick = 1
@@ -47,7 +48,7 @@ class ClangService:
     __idx = None
 
     @staticmethod
-    def init(compile_opt):
+    def init(arg):
         if ClangService.__idx is None:
             try:
                 ClangService.__idx = cindex.Index.create()
@@ -57,12 +58,18 @@ class ClangService:
         if ClangService.__thread is not None:
             return True
 
+        __compile_arg = list(arg)
+
         ClangService.__is_running = True
         ClangService.__thread = threading.Thread(
-            target=ClangService.__parsing_worker, args=[list(compile_opt)])
+            target=ClangService.__parsing_worker)
         ClangService.__thread.start()
 
         return True
+
+    @staticmethod
+    def set_compile_arg(arg):
+        __compile_arg = arg
 
     @staticmethod
     def release():
@@ -119,7 +126,7 @@ class ClangService:
         return ClangService.__translation_ctx.get(name)
 
     @staticmethod
-    def __parsing_worker(args):
+    def __parsing_worker():
         while ClangService.__is_running:
             try:
                 # has parse all unsaved files
@@ -133,7 +140,7 @@ class ClangService:
                 last_change_tick = ClangService.__change_tick
 
                 for tu_ctx in ClangService.__translation_ctx.values():
-                    ClangService.parse(tu_ctx, args)
+                    ClangService.parse(tu_ctx, ClangService.__compile_arg)
 
                 ClangService.__parse_tick = last_change_tick
             except:
