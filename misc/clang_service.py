@@ -84,7 +84,7 @@ class ClangService:
     def create_tu(list):
         for name in list:
             if name in ClangService.__translation_ctx.keys():
-                return
+                continue
 
             ClangService.__translation_ctx[name] = TranslationUnitCtx(name)
 
