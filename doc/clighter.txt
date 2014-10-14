@@ -176,7 +176,10 @@ Rename-refactor~
 >
     	nmap <silent> <Leader>r :call clighter#Rename()<CR>
 >
-
+Set clang compile options in runtime~
+>
+    	call clighter#SetClangOptions()
+>
 
 ==============================================================================
 						*clighter-colors*

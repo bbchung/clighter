@@ -143,6 +143,9 @@ Clighter provides these commands and functions.
     nmap <silent> <Leader>r :call clighter#Rename()<CR>
 	```
 
+* Set clang compile options in runtime
+	`call clighter#SetClangOptions()`
+
 
 ## Customize Colors
 
