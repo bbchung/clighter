@@ -35,8 +35,11 @@ hi default link clighterClassDecl Type
 hi default link clighterEnumDecl Type
 hi default link clighterEnumConstantDecl Identifier
 hi default link clighterDeclRefExprEnum Identifier
-
-hi link clighterCursorDefRef Search
+hi default link clighterCursorDefRef IncSearch
+hi default link clighterFunctionDecl None
+hi default link clighterCallExpr None
+hi default link clighterMemberRefExpr None
+hi default link clighterNamespace None
 
 if g:clighter_autostart == 1
     augroup ClighterAutoStart

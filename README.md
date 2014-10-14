@@ -144,6 +144,7 @@ Clighter provides these commands and functions.
 	```
 
 * Set clang compile options in runtime
+
 	`call clighter#SetClangOptions()`
 
 
@@ -188,7 +189,27 @@ Clighter defines these syntax groups corresponding to CursorKind of libclang.
 
 * clighterCursorDefRef
 	```vim
-	hi link clighterCursorDefRef Search
+	hi link clighterCursorDefRef IncSearch
+	```
+
+* clighterFunctionDecl
+	```vim
+	hi link clighterFunctionDecl None
+	```
+
+* clighterCallExpr
+	```vim
+	hi link clighterCallExpr None
+	```
+
+* clighterMemberRefExpr
+	```vim
+	hi link clighterMemberRefExpr None
+	```
+
+* clighterNamespace
+	```vim
+	hi link clighterNamespace None
 	```
 
 You can customize these colors in your colorscheme, for example:

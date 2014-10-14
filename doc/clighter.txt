@@ -223,10 +223,25 @@ clighterDeclRefExprEnum~
 
 clighterCursorDefRef~
 >
-	hi link clighterCursorDefRef Search
+	hi link clighterCursorDefRef IncSearch
+
+clighterFunctionDecl~
+>
+	hi link clighterFunctionDecl None
+
+clighterCallExpr~
+>
+	hi link clighterCallExpr None
+
+clighterMemberRefExpr~
+>
+	hi link clighterMemberRefExpr None
+
+clighterNamespace~
+>
+	hi link clighterNamespace None
 
 >
-
 You can customize these colors in your colorscheme, for example:
 >
 	hi clighterTypeRef term=NONE cterm=NONE ctermbg=232 ctermfg=255 gui=NONE
