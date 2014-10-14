@@ -28,13 +28,13 @@ command! ClighterEnable call clighter#Enable()
 command! ClighterDisable call clighter#Disable()
 command! ClighterToggleCursorHL call clighter#ToggleCursorHL()
 
-hi link clighterMacroInstantiation Constant
-hi link clighterTypeRef Identifier
-hi link clighterStructDecl Type
-hi link clighterClassDecl Type
-hi link clighterEnumDecl Type
-hi link clighterEnumConstantDecl Identifier
-hi link clighterDeclRefExprEnum Identifier
+hi default link clighterMacroInstantiation Constant
+hi default link clighterTypeRef Identifier
+hi default link clighterStructDecl Type
+hi default link clighterClassDecl Type
+hi default link clighterEnumDecl Type
+hi default link clighterEnumConstantDecl Identifier
+hi default link clighterDeclRefExprEnum Identifier
 
 hi link clighterCursorDefRef Search
 
