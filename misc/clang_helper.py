@@ -1,5 +1,6 @@
 from clang import cindex
 
+
 def is_symbol_cursor(cursor):
     return cursor.kind.is_preprocessing() or cursor.semantic_parent.kind != cindex.CursorKind.FUNCTION_DECL
 
@@ -39,4 +40,3 @@ def search_ref_cursors(cursor, def_cursor, locs):
 
     for c in cursor.get_children():
         search_ref_cursors(c, def_cursor, locs)
-

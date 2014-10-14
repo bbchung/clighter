@@ -2,6 +2,7 @@ import threading
 import clang_helper
 from clang import cindex
 
+
 class TranslationUnitCtx:
 
     def __init__(self, bufname):

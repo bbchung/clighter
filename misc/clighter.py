@@ -1,6 +1,6 @@
 import vim
 from clang import cindex
-import clang_service
+from clang_service import ClangService
 import clang_helper
 
 DEF_REF_PRI = -11
@@ -35,7 +35,7 @@ def create_all_tu():
         if buf.options['filetype'] in ["c", "cpp", "objc"]:
             list.append(buf.name)
 
-    clang_service.ClangService.create_tu(list)
+    ClangService.create_tu(list)
 
 
 def unhighlight_window():
@@ -51,7 +51,7 @@ def unhighlight_def_ref():
 
 
 def highlight_window():
-    tu_ctx = clang_service.ClangService.get_tu_ctx(vim.current.buffer.name)
+    tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
     if tu_ctx is None:
         return
 
@@ -131,13 +131,13 @@ def refactor_rename():
     if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"]:
         return
 
-    tu_ctx = clang_service.ClangService.get_tu_ctx(vim.current.buffer.name)
+    tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
     if tu_ctx is None:
         return
 
-    clang_service.ClangService.update_unsaved_dict(__get_buffer_dict(), False)
+    ClangService.update_unsaved_dict(__get_buffer_dict(), False)
     try:
-        clang_service.ClangService.parse(tu_ctx, vim.vars['clighter_clang_options'])
+        ClangService.parse(tu_ctx, vim.vars['clighter_clang_options'])
     except:
         return
 
@@ -161,7 +161,8 @@ def refactor_rename():
     locs = set()
     locs.add((def_cursor.location.line, def_cursor.location.column,
               def_cursor.location.file.name))
-    clang_helper.search_ref_cursors(tu_ctx.translation_unit.cursor, def_cursor, locs)
+    clang_helper.search_ref_cursors(
+        tu_ctx.translation_unit.cursor, def_cursor, locs)
     __vim_multi_replace(locs, old_name, new_name)
 
     if clang_helper.is_symbol_cursor(def_cursor) and vim.vars['clighter_enable_cross_rename'] == 1:
@@ -169,11 +170,12 @@ def refactor_rename():
 
     vim.current.window.cursor = pos
 
-    clang_service.ClangService.update_unsaved_dict(__get_buffer_dict())
+    ClangService.update_unsaved_dict(__get_buffer_dict())
 
 
 def __draw_token(line, col, len, kind, type):
-    if kind == cindex.CursorKind.MACRO_INSTANTIATION: __vim_matchaddpos(
+    if kind == cindex.CursorKind.MACRO_INSTANTIATION:
+        __vim_matchaddpos(
             'clighterMacroInstantiation', line, col, len, SYNTAX_PRI)
     elif kind == cindex.CursorKind.STRUCT_DECL:
         __vim_matchaddpos('clighterStructDecl', line, col, len, SYNTAX_PRI)
@@ -197,10 +199,10 @@ def __cross_buffer_rename(usr, new_name):
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
         if vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
-            tu_ctx = clang_service.ClangService.get_tu_ctx(vim.current.buffer.name)
+            tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
             if tu_ctx is not None:
                 try:
-                    clang_service.ClangService.parse(
+                    ClangService.parse(
                         tu_ctx, vim.vars['clighter_clang_options'])
                     __search_usr_and_rename_refs(
                         tu_ctx.translation_unit, usr, new_name)

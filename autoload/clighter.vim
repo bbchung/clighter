@@ -39,19 +39,18 @@ fun! s:clear_match_pri(pri)
 endf
 
 fun! clighter#Enable()
-    if !exists("s:clang_initialized")
-python << endpython
-if clang_service.ClangService.init(vim.vars['clighter_clang_options']): 
-    clighter.create_all_tu()
-    vim.command("let s:clang_initialized=1")
-endpython
-        if !exists("s:clang_initialized")
-            echohl WarningMsg |
-                        \ echomsg "Clighter unavailable: cannot enable clighter, try set g:clighter_libclang_file" |
-                        \ echohl None
-            return
-        endif
+    if exists("s:clang_initialized")
+        return
     endif
+
+    if !pyeval('clang_service.ClangService.init(vim.vars["clighter_clang_options"])')
+        echohl WarningMsg |
+                    \ echomsg "Clighter unavailable: cannot enable clighter, try set g:clighter_libclang_file" |
+                    \ echohl None
+        return
+    endif
+
+    py clighter.create_all_tu()
 
     augroup ClighterEnable
         au!
@@ -74,6 +73,8 @@ endpython
         au BufNewFile *.[ch],*.[ch]pp,*.m py clang_service.ClangService.create_tu([vim.current.buffer.name])
         au VimLeavePre * py clang_service.ClangService.release()
     augroup END
+
+    let s:clang_initialized=1
 endf
 
 fun! clighter#Disable()
