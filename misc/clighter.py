@@ -188,17 +188,19 @@ def __draw_token(line, col, len, kind, type):
             'clighterEnumConstantDecl', line, col, len, SYNTAX_PRI)
     elif kind == cindex.CursorKind.TYPE_REF:
         __vim_matchaddpos('clighterTypeRef', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.DECL_REF_EXPR and type == cindex.TypeKind.ENUM:
-        __vim_matchaddpos(
-            'clighterDeclRefExprEnum', line, col, len, SYNTAX_PRI)
     elif kind == cindex.CursorKind.FUNCTION_DECL:
         __vim_matchaddpos('clighterFunctionDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.CALL_EXPR:
-        __vim_matchaddpos('clighterCallExpr', line, col, len, SYNTAX_PRI)
     elif kind == cindex.CursorKind.MEMBER_REF_EXPR:
         __vim_matchaddpos('clighterMemberRefExpr', line, col, len, SYNTAX_PRI)
     elif kind == cindex.CursorKind.NAMESPACE_REF or kind == cindex.CursorKind.NAMESPACE:
         __vim_matchaddpos('clighterNamespace', line, col, len, SYNTAX_PRI)
+    elif kind == cindex.CursorKind.DECL_REF_EXPR:
+        if type == cindex.TypeKind.ENUM:
+            __vim_matchaddpos(
+                'clighterDeclRefExprEnum', line, col, len, SYNTAX_PRI)
+        elif type == cindex.TypeKind.FUNCTIONPROTO:
+            __vim_matchaddpos(
+                'clighterDeclRefExprCall', line, col, len, SYNTAX_PRI)
 
 
 def __cross_buffer_rename(usr, new_name):

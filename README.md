@@ -197,9 +197,9 @@ Clighter defines these syntax groups corresponding to CursorKind of libclang.
 	hi link clighterFunctionDecl None
 	```
 
-* clighterCallExpr
+* clighterDeclRefExprCall
 	```vim
-	hi link clighterCallExpr None
+	hi link clighterDeclRefExprCall None
 	```
 
 * clighterMemberRefExpr

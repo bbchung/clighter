@@ -229,9 +229,9 @@ clighterFunctionDecl~
 >
 	hi link clighterFunctionDecl None
 
-clighterCallExpr~
+clighterDeclRefExprCall~
 >
-	hi link clighterCallExpr None
+	hi link clighterDeclRefExprCall None
 
 clighterMemberRefExpr~
 >
