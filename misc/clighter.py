@@ -174,31 +174,31 @@ def refactor_rename():
 
 
 def __draw_token(line, col, len, kind, type):
-    if kind == cindex.CursorKind.MACRO_INSTANTIATION:
+    if kind == cindex.CursorKind.MACRO_INSTANTIATION and 'clighterMacroInstantiation' in vim.vars['clighter_highlight_groups']:
         __vim_matchaddpos(
             'clighterMacroInstantiation', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.STRUCT_DECL:
+    elif kind == cindex.CursorKind.STRUCT_DECL and 'clighterStructDecl' in vim.vars['clighter_highlight_groups']:
         __vim_matchaddpos('clighterStructDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.CLASS_DECL:
+    elif kind == cindex.CursorKind.CLASS_DECL and 'clighterClassDecl' in vim.vars['clighter_highlight_groups']:
         __vim_matchaddpos('clighterClassDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.ENUM_DECL:
+    elif kind == cindex.CursorKind.ENUM_DECL and 'clighterEnumDecl' in vim.vars['clighter_highlight_groups']:
         __vim_matchaddpos('clighterEnumDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
+    elif kind == cindex.CursorKind.ENUM_CONSTANT_DECL and 'clighterEnumConstantDecl' in vim.vars['clighter_highlight_groups']:
         __vim_matchaddpos(
             'clighterEnumConstantDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.TYPE_REF:
+    elif kind == cindex.CursorKind.TYPE_REF and 'clighterTypeRef' in vim.vars['clighter_highlight_groups']:
         __vim_matchaddpos('clighterTypeRef', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.FUNCTION_DECL:
+    elif kind == cindex.CursorKind.FUNCTION_DECL and 'clighterFunctionDecl' in vim.vars['clighter_highlight_groups']:
         __vim_matchaddpos('clighterFunctionDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.MEMBER_REF_EXPR:
+    elif kind == cindex.CursorKind.MEMBER_REF_EXPR and 'clighterMemberRefExpr' in vim.vars['clighter_highlight_groups']:
         __vim_matchaddpos('clighterMemberRefExpr', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.NAMESPACE_REF or kind == cindex.CursorKind.NAMESPACE:
+    elif kind == (cindex.CursorKind.NAMESPACE_REF or kind == cindex.CursorKind.NAMESPACE) and 'clighterNamespace' in vim.vars['clighter_highlight_groups']:
         __vim_matchaddpos('clighterNamespace', line, col, len, SYNTAX_PRI)
     elif kind == cindex.CursorKind.DECL_REF_EXPR:
-        if type == cindex.TypeKind.ENUM:
+        if type == cindex.TypeKind.ENUM and 'clighterDeclRefExprEnum' in vim.vars['clighter_highlight_groups']:
             __vim_matchaddpos(
                 'clighterDeclRefExprEnum', line, col, len, SYNTAX_PRI)
-        elif type == cindex.TypeKind.FUNCTIONPROTO:
+        elif type == cindex.TypeKind.FUNCTIONPROTO and 'clighterDeclRefExprCall' in vim.vars['clighter_highlight_groups']:
             __vim_matchaddpos(
                 'clighterDeclRefExprCall', line, col, len, SYNTAX_PRI)
 
