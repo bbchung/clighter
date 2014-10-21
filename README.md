@@ -114,7 +114,7 @@ let g:clighter_enable_cross_rename = 1
 ```
 
 ### g:clighter_highlight_groups
-Define the token type to highlight, the, see *clighter-colors*
+Define the token type to highlight.
 
 Default:
 ```vim
