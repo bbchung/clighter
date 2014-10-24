@@ -41,13 +41,14 @@ def create_all_tu():
 def unhighlight_window():
     vim.command(
         "call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, SYNTAX_PRI))
+    highlight_window.highlighted_tu = None
     highlight_window.syntaxed_window = None
-    highlight_window.last_dc = None
+    highlight_window.highlighted_define_cur = None
 
 
 def unhighlight_def_ref():
     vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
-    highlight_window.last_dc = None
+    highlight_window.highlighted_define_cur = None
 
 
 def highlight_window():
@@ -61,7 +62,7 @@ def highlight_window():
 
     (top, bottom) = (vim.bindeval("line('w0')"), vim.bindeval("line('w$')"))
 
-    draw_syntax = highlight_window.last_tu is None or highlight_window.last_tu != tu or highlight_window.syntaxed_window is None or highlight_window.syntaxed_window[
+    draw_syntax = highlight_window.highlighted_tu is None or highlight_window.last_tu != tu or highlight_window.syntaxed_window is None or highlight_window.syntaxed_window[
         0] != vim.current.window.number or top < highlight_window.syntaxed_window[1] or bottom > highlight_window.syntaxed_window[2]
     draw_def_ref = False
 
@@ -70,10 +71,10 @@ def highlight_window():
         vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
         def_cursor = clang_helper.get_definition(vim_cursor)
 
-        if highlight_window.last_dc is not None and (def_cursor is None or highlight_window.last_dc != def_cursor):
+        if highlight_window.highlighted_define_cur is not None and (def_cursor is None or highlight_window.highlighted_define_cur != def_cursor):
             unhighlight_def_ref()
 
-        if def_cursor is not None and (highlight_window.last_dc is None or highlight_window.last_dc != def_cursor):
+        if def_cursor is not None and (highlight_window.highlighted_define_cur is None or highlight_window.highlighted_define_cur != def_cursor):
             draw_def_ref = True
 
             # special case for preprocessor
@@ -81,7 +82,7 @@ def highlight_window():
                 __vim_matchaddpos('clighterCursorDefRef', def_cursor.location.line, def_cursor.location.column, len(
                     clang_helper.get_spelling_or_displayname(def_cursor)), DEF_REF_PRI)
 
-            highlight_window.last_dc = def_cursor
+            highlight_window.highlighted_define_cur = def_cursor
 
     if not draw_syntax and not draw_def_ref:
         return
@@ -94,6 +95,7 @@ def highlight_window():
     if draw_syntax:
         highlight_window.syntaxed_window = target_window
         vim.command("call s:clear_match_pri([{0}])".format(SYNTAX_PRI))
+        highlight_window.highlighted_tu = tu
 
     file = tu.get_file(tu_ctx.bufname)
     tokens = tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
@@ -111,7 +113,6 @@ def highlight_window():
         if draw_syntax:
             __draw_token(t.location.line, t.location.column, len(
                 t.spelling), t_cursor.kind, t_cursor.type.kind)
-            highlight_window.last_tu = tu
 
         """ Do definition/reference highlighting'
         """
@@ -122,8 +123,8 @@ def highlight_window():
                     'clighterCursorDefRef', t.location.line, t.location.column, len(t.spelling), DEF_REF_PRI)
 
 
-highlight_window.last_dc = None
-highlight_window.last_tu = None
+highlight_window.highlighted_define_cur = None
+highlight_window.highlighted_tu = None
 highlight_window.syntaxed_window = None
 
 
