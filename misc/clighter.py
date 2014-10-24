@@ -62,7 +62,7 @@ def highlight_window():
 
     (top, bottom) = (vim.bindeval("line('w0')"), vim.bindeval("line('w$')"))
 
-    draw_syntax = highlight_window.highlighted_tu is None or highlight_window.last_tu != tu or highlight_window.syntaxed_window is None or highlight_window.syntaxed_window[
+    draw_syntax = highlight_window.highlighted_tu is None or highlight_window.highlighted_tu != tu or highlight_window.syntaxed_window is None or highlight_window.syntaxed_window[
         0] != vim.current.window.number or top < highlight_window.syntaxed_window[1] or bottom > highlight_window.syntaxed_window[2]
     draw_def_ref = False
 
