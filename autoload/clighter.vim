@@ -5,7 +5,6 @@ exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
 py import clighter
 py from clang_service import ClangService
 
-augroup ClighterEnable
 let s:cursor_decl_ref_hl_on = 1
 
 fun! clighter#ToggleCursorHL()
