@@ -78,7 +78,7 @@ fun! clighter#Enable()
 endf
 
 fun! clighter#Disable()
-    au! ClighterEnable
+    silent! au! ClighterEnable
     py ClangService.release()
     silent! unlet s:clang_initialized
     let a:wnr = winnr()
