@@ -98,11 +98,12 @@ Default: `1`
 						*'clighter_clang_options'*
 g:clighter_clang_options~
 The compiler options for Clang. Clighter will pass these options to libclang
-to parse the code.
+to parse the code. Notice that bad options will cause clighter not working
+even crashing.
 
-Default: `[-Iinclude]`
+Default: ['-Iinclude', '-x', 'c++']
 >
-	let g:clighter_clang_options = ['-std=c++', '-DLinux']
+	let g:clighter_clang_options = ['-x', 'c++', '-std=c++', '-DLinux']
 <
 						*'clighter_libclang_file'*
 g:clighter_libclang_file~

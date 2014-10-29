@@ -62,11 +62,12 @@ let g:clighter_window_size = 0 " highlight current screen of window
 ### g:clighter_clang_options
 
 The compiler options for Clang. Clighter will pass these options to libclang
-to parse the code.
+to parse the code. Notice that bad options will cause clighter not working
+even crashing.
 
-Default: `[-Iinclude]`
+Default: `['-Iinclude', '-x', 'c++']`
 ```vim
-let g:clighter_clang_options = ['-std=c++', '-DLinux']
+let g:clighter_clang_options = ['-x', 'c++', '-std=c++', '-DLinux']
 ```
 
 ### g:clighter_libclang_file
