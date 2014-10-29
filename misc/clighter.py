@@ -314,6 +314,9 @@ def on_TextChanged():
 def on_FileType():
     if __is_buffer_allowed(vim.current.buffer):
         ClangService.create_tu([vim.current.buffer.name])
+    else:
+        ClangService.remove_tu([vim.current.buffer.name])
+        unhighlight_window()
 
 def __is_buffer_allowed(buf):
     return buf.options['filetype'] in ["c", "cpp", "objc"]

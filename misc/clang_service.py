@@ -80,6 +80,14 @@ class ClangService:
             ClangService.__thread.join()
             ClangService.__thread = None
 
+        ClangService.__translation_ctx.clear()
+
+    @staticmethod
+    def remove_tu(list):
+        for name in list:
+            if name in ClangService.__translation_ctx.keys():
+                del ClangService.__translation_ctx[name]
+
     @staticmethod
     def create_tu(list):
         for name in list:
