@@ -69,8 +69,7 @@ fun! clighter#Enable()
         au WinEnter * py clighter.unhighlight_window()
         au BufWinEnter * py clighter.unhighlight_window()
         au BufWinEnter * py clighter.highlight_window()
-        au BufRead * py clighter.on_NewFile()
-        au BufNewFile * py clighter.on_NewFile()
+        au FileType c,cpp,objc py clighter.on_FileType()
         au VimLeavePre * py clighter.clang_release_service()
     augroup END
 

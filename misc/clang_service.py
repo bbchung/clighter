@@ -58,7 +58,7 @@ class ClangService:
         if ClangService.__thread is not None:
             return True
 
-        __compile_arg = list(arg)
+        ClangService.__compile_arg = list(arg)
 
         ClangService.__is_running = True
         ClangService.__thread = threading.Thread(

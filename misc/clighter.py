@@ -121,9 +121,6 @@ highlight_window.syntaxed_window = None
 
 
 def refactor_rename():
-    if not __is_buffer_allowed(vim.current.buffer):
-        return
-
     tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
     if tu_ctx is None:
         return
@@ -201,16 +198,15 @@ def __cross_buffer_rename(usr, new_name):
 
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
-        if __is_buffer_allowed(vim.current.buffer):
-            tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
-            if tu_ctx is not None:
-                try:
-                    ClangService.parse(
-                        tu_ctx, vim.vars['clighter_clang_options'])
-                    __search_usr_and_rename_refs(
-                        tu_ctx.translation_unit, usr, new_name)
-                except:
-                    pass
+        tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
+        if tu_ctx is not None:
+            try:
+                ClangService.parse(
+                    tu_ctx, vim.vars['clighter_clang_options'])
+                __search_usr_and_rename_refs(
+                    tu_ctx.translation_unit, usr, new_name)
+            except:
+                pass
 
         vim.command("bn!")
 
@@ -315,7 +311,7 @@ def on_TextChanged():
     if __is_buffer_allowed(vim.current.buffer):
         ClangService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
 
-def on_NewFile():
+def on_FileType():
     if __is_buffer_allowed(vim.current.buffer):
         ClangService.create_tu([vim.current.buffer.name])
 
