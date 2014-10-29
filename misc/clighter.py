@@ -29,14 +29,6 @@ if vim.vars['clighter_libclang_file']:
 #    for c in cursor.get_children():
 #        dfs(c)
 
-def create_all_tu():
-    list = []
-    for buf in vim.buffers:
-        if buf.options['filetype'] in ["c", "cpp", "objc"]:
-            list.append(buf.name)
-
-    ClangService.create_tu(list)
-
 
 def unhighlight_window():
     vim.command(
@@ -129,7 +121,7 @@ highlight_window.syntaxed_window = None
 
 
 def refactor_rename():
-    if vim.current.buffer.options['filetype'] not in ["c", "cpp", "objc"]:
+    if not __is_buffer_allowed(vim.current.buffer):
         return
 
     tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
@@ -209,7 +201,7 @@ def __cross_buffer_rename(usr, new_name):
 
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
-        if vim.current.buffer.options['filetype'] in ["c", "cpp", "objc"]:
+        if __is_buffer_allowed(vim.current.buffer):
             tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
             if tu_ctx is not None:
                 try:
@@ -292,7 +284,7 @@ def __get_buffer_dict():
     dict = {}
 
     for buf in vim.buffers:
-        if buf.options['filetype'] not in ["c", "cpp", "objc"]:
+        if not __is_buffer_allowed(buf):
             continue
 
         if len(buf) == 1 and buf[0] == "":
@@ -301,3 +293,31 @@ def __get_buffer_dict():
         dict[buf.name] = '\n'.join(buf)
 
     return dict
+
+def clang_init_service():
+    return ClangService.init(vim.vars["clighter_clang_options"])
+
+def clang_release_service():
+    return ClangService.release()
+
+def clang_set_compile_arg(arg):
+    ClangService.set_compile_arg(arg)
+
+def clang_create_all_tu():
+    list = []
+    for buf in vim.buffers:
+        if __is_buffer_allowed(buf):
+            list.append(buf.name)
+
+    ClangService.create_tu(list)
+
+def on_TextChanged():
+    if __is_buffer_allowed(vim.current.buffer):
+        ClangService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
+
+def on_NewFile():
+    if __is_buffer_allowed(vim.current.buffer):
+        ClangService.create_tu([vim.current.buffer.name])
+
+def __is_buffer_allowed(buf):
+    return buf.options['filetype'] in ["c", "cpp", "objc"]

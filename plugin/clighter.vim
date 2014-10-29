@@ -44,7 +44,7 @@ hi default link clighterNamespace None
 
 if g:clighter_autostart == 1
     augroup ClighterAutoStart
-        au VimEnter *.[ch],*.[ch]pp,*.m call clighter#Enable()
+        au FileType c,cpp,objc call clighter#Enable()
     augroup END
 endif
 
