@@ -68,7 +68,6 @@ fun! clighter#Enable()
         " workaround to rehighlight while split window
         au WinEnter * py clighter.unhighlight_window()
         au BufWinEnter * py clighter.unhighlight_window()
-        au BufWinEnter * py clighter.highlight_window()
         au FileType c,cpp,objc py clighter.on_FileType()
         au VimLeavePre * py clighter.clang_release_service()
     augroup END
