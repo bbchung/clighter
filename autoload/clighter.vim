@@ -37,6 +37,8 @@ fun! s:clear_match_pri(pri)
 endf
 
 fun! clighter#Enable()
+    silent! au! ClighterAutoStart
+
     if exists("s:clang_initialized")
         return
     endif
