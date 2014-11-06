@@ -61,7 +61,7 @@ def highlight_window(prepost=50):
     def_cursor = None
     if vim.bindeval("s:cursor_decl_ref_hl_on") == 1:
         vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
-        def_cursor = clang_helper.get_definition(vim_cursor)
+        def_cursor = clang_helper.get_semantic_definition(vim_cursor)
 
         if highlight_window.highlighted_define_cur is not None and (def_cursor is None or highlight_window.highlighted_define_cur != def_cursor):
             unhighlight_def_ref()
@@ -108,7 +108,7 @@ def highlight_window(prepost=50):
         """ Do definition/reference highlighting'
         """
         if draw_def_ref:
-            t_def_cursor = clang_helper.get_definition(t_cursor)
+            t_def_cursor = clang_helper.get_semantic_definition(t_cursor)
             if t_def_cursor is not None and t_def_cursor == def_cursor:
                 __vim_matchaddpos(
                     'clighterCursorDefRef', t.location.line, t.location.column, len(t.spelling), DEF_REF_PRI)
@@ -131,12 +131,9 @@ def refactor_rename():
         return
 
     vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
-    def_cursor = clang_helper.get_definition(vim_cursor)
+    def_cursor = clang_helper.get_semantic_definition(vim_cursor)
     if def_cursor is None:
         return
-
-    if def_cursor.kind == cindex.CursorKind.CONSTRUCTOR or def_cursor.kind == cindex.CursorKind.DESTRUCTOR:
-        def_cursor = def_cursor.semantic_parent
 
     old_name = clang_helper.get_spelling_or_displayname(def_cursor)
     new_name = vim.bindeval(
@@ -144,6 +141,8 @@ def refactor_rename():
 
     if not new_name or old_name == new_name:
         return
+
+    print ' '
 
     pos = vim.current.window.cursor
 

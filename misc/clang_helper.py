@@ -13,7 +13,7 @@ def find_cursors_by_usr(cursor, usr, result):
         find_cursors_by_usr(c, usr, result)
 
 
-def get_definition(cursor):
+def get_semantic_definition(cursor):
     if cursor is None:
         return None
 
@@ -24,6 +24,12 @@ def get_definition(cursor):
     if def_cur is None:
         def_cur = cursor.referenced
 
+    if def_cur is None:
+        return None
+
+    if def_cur.kind == cindex.CursorKind.CONSTRUCTOR or def_cur.kind == cindex.CursorKind.DESTRUCTOR:
+        def_cur = def_cur.semantic_parent
+
     return def_cur
 
 
@@ -32,9 +38,9 @@ def get_spelling_or_displayname(cursor):
 
 
 def search_ref_cursors(cursor, def_cursor, locs):
-    cursor_def = get_definition(cursor)
+    cursor_def = get_semantic_definition(cursor)
 
-    if (cursor_def is not None and cursor_def == def_cursor) or ((cursor.kind == cindex.CursorKind.CONSTRUCTOR or cursor.kind == cindex.CursorKind.DESTRUCTOR) and cursor.semantic_parent == def_cursor):
+    if (cursor_def is not None and cursor_def == def_cursor):
         locs.add(
             (cursor.location.line, cursor.location.column, cursor.location.file.name))
 
