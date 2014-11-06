@@ -41,24 +41,6 @@ Default: `1`
 let g:clighter_autostart = 0
 ```
 
-### g:clighter_window_size
-
-Clighter uses vim's regular expression(RE) engine to do syntax highlighting,
-but the RE engine performs not well while there are too many RE rules. To get
-the better performance, Clighter can highlights a given region(window) instead
-of whole buffer.
-	
-`<0`: highlight whole buffer.
-
-`>=0`: highlight from top line number reduce 100 * clighter_window_size to
-bottom line number plug 100 * clighter_window_size of screen.
-
-Default: `1`
-```vim
-let g:clighter_window_size = -1 " whole buffer
-let g:clighter_window_size = 0 " highlight current screen of window
-```
-
 ### g:clighter_clang_options
 
 The compiler options for Clang. Clighter will pass these options to libclang
