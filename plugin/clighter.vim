@@ -18,7 +18,6 @@ endif
 
 let g:clighter_autostart = get(g:, 'clighter_autostart', 1)
 let g:clighter_clang_options = get(g:, 'clighter_clang_options', ['-Iinclude', '-x', 'c++'])
-let g:clighter_window_size = get(g:, 'clighter_window_size', 1)
 let g:clighter_libclang_file = get(g:, 'clighter_libclang_file', '')
 let g:clighter_realtime = get(g:, 'clighter_realtime', 1)
 let g:clighter_rename_prompt_level = get(g:, 'clighter_rename_prompt_level', 1)

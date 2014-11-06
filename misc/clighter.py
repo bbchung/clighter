@@ -43,7 +43,7 @@ def unhighlight_def_ref():
     highlight_window.highlighted_define_cur = None
 
 
-def highlight_window():
+def highlight_window(prepost=50):
     tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
     if tu_ctx is None:
         return
@@ -79,10 +79,9 @@ def highlight_window():
     if not draw_syntax and not draw_def_ref:
         return
 
-    window_size = vim.vars['clighter_window_size'] * 100
     buflinenr = len(vim.current.buffer)
-    target_window = [vim.current.window.number, 1, buflinenr] if window_size < 0 else [
-        vim.current.window.number, max(top - window_size, 1), min(bottom + window_size, buflinenr)]
+    target_window = [vim.current.window.number, max(
+        top - prepost, 1), min(bottom + prepost, buflinenr)]
 
     if draw_syntax:
         highlight_window.syntaxed_window = target_window
@@ -290,14 +289,18 @@ def __get_buffer_dict():
 
     return dict
 
+
 def clang_init_service():
     return ClangService.init(vim.vars["clighter_clang_options"])
+
 
 def clang_release_service():
     return ClangService.release()
 
+
 def clang_set_compile_arg(arg):
     ClangService.set_compile_arg(arg)
+
 
 def clang_create_all_tu():
     list = []
@@ -307,9 +310,12 @@ def clang_create_all_tu():
 
     ClangService.create_tu(list)
 
+
 def on_TextChanged():
     if __is_buffer_allowed(vim.current.buffer):
-        ClangService.update_unsaved(vim.current.buffer.name, '\n'.join(vim.current.buffer))
+        ClangService.update_unsaved(
+            vim.current.buffer.name, '\n'.join(vim.current.buffer))
+
 
 def on_FileType():
     if __is_buffer_allowed(vim.current.buffer):
@@ -317,6 +323,7 @@ def on_FileType():
     else:
         ClangService.remove_tu([vim.current.buffer.name])
         unhighlight_window()
+
 
 def __is_buffer_allowed(buf):
     return buf.options['filetype'] in ["c", "cpp", "objc"]
