@@ -67,6 +67,8 @@ Untar the clighter.tar.gz to your vim path.
 |'g:clighter_realtime'|			Update highlighting in realtime	
 |'g:clighter_rename_prompt_level'|	Set prompt level of rename-refactoring
 |'g:clighter_enable_cross_rename'|	Enable cross buffer rename-refactoring
+|'g:clighter_highlight_groups'|		Enabled syntax highlight group
+|'g:clighter_cursor_hl_default'|	Enable cursor highlight by default
 
 						*'clighter_autostart'*
 g:clighter_autostart~
@@ -127,12 +129,20 @@ Default: `1`
 <
 
 g:clighter_highlight_groups~
-Define the token type to highlight.
+Define the token type of syntax to highlight.
 
 
 Default:
 >
 	['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum']
+<
+
+g:clighter_cursor_hl_default~
+Enable cursor highlight by default
+
+Default: `1`
+>
+	let g:clighter_cursor_hl_default = 0
 <
 
 ==============================================================================

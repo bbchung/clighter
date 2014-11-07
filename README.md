@@ -97,12 +97,21 @@ let g:clighter_enable_cross_rename = 1
 ```
 
 ### g:clighter_highlight_groups
-Define the token type to highlight.
+Define the token type of syntax to highlight.
 
 Default:
 ```vim
 ['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum']
 ```
+
+### g:clighter_cursor_hl_default
+Enable cursor highlight by default
+
+Default: `1`
+```vim
+let g:clighter_cursor_hl_default = 0
+```
+
 
 
 ## Commands and Functions
