@@ -23,6 +23,7 @@ let g:clighter_realtime = get(g:, 'clighter_realtime', 1)
 let g:clighter_rename_prompt_level = get(g:, 'clighter_rename_prompt_level', 1)
 let g:clighter_enable_cross_rename = get(g:, 'clighter_enable_cross_rename', 1)
 let g:clighter_highlight_groups = get(g:, 'clighter_highlight_groups', ['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum'])
+let g:clighter_cursor_hl_default = get(g:, 'clighter_cursor_hl_default', 1)
 
 command! ClighterEnable call clighter#Enable()
 command! ClighterDisable call clighter#Disable()

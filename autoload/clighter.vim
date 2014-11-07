@@ -4,20 +4,14 @@ py import vim
 exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
 py import clighter
 
-let s:cursor_decl_ref_hl_on = 1
+let s:cursor_hl = g:clighter_cursor_hl_default
 
 fun! clighter#ToggleCursorHL()
-    if s:cursor_decl_ref_hl_on==1
-        let s:cursor_decl_ref_hl_on=0
+    if s:cursor_hl==1
         py clighter.unhighlight_def_ref()
-    else
-        let s:cursor_decl_ref_hl_on=1
-        "augroup CursorHighlight
-            "au CursorHold * exe printf('match IncSearch /\V\<%s\>/', escape(expand('<cword>'), '/\'))
-            "au CursorMoved * match none
-            ""au CursorHold * let @/ = '\V\<'.escape(expand('<cword>'), '\').'\>'
-        "augroup END
     endif
+
+    let s:cursor_hl = !s:cursor_hl
 endf
 
 fun! s:clear_match_grp(groups)
