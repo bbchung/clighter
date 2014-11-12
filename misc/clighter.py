@@ -57,7 +57,6 @@ def highlight_window(extend=50):
     if highlight_window.highlighted_tu is None or highlight_window.highlighted_tu != tu or highlight_window.syntactic_range is None or top < highlight_window.syntactic_range[0] or bottom > highlight_window.syntactic_range[1]:
         draw_syntax = True
         vim.command("call s:clear_match_pri([{0}])".format(SYNTAX_PRI))
-        highlight_window.syntactic_range = target_range
         highlight_window.highlighted_tu = tu
 
     if vim.bindeval("s:cursor_hl") == 1:
@@ -86,6 +85,9 @@ def highlight_window(extend=50):
     file = tu.get_file(tu_ctx.bufname)
     tokens = tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
         tu, file, target_range[0], 1), cindex.SourceLocation.from_position(tu, file, target_range[1], 1)))
+
+    if draw_syntax:
+        highlight_window.syntactic_range = target_range
 
     for t in tokens:
         """ Do semantic highlighting'
