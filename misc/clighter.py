@@ -30,41 +30,42 @@ if vim.vars['clighter_libclang_file']:
 #        dfs(c)
 
 
-def unhighlight_window():
+def clear_highlight():
     vim.command(
         "call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, SYNTAX_PRI))
     highlight_window.highlighted_tu = None
-    highlight_window.syntaxed_window = None
+    highlight_window.syntactic_range = None
     highlight_window.highlighted_define_cur = None
 
 
-def unhighlight_def_ref():
+def clear_def_ref():
     vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
     highlight_window.highlighted_define_cur = None
 
 
-def highlight_window(prepost=50):
+def highlight_window(extend=50):
     tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
     if tu_ctx is None:
+        clear_highlight()
         return
 
     tu = tu_ctx.translation_unit
     if tu is None:
+        clear_highlight()
         return
 
     (top, bottom) = (vim.bindeval("line('w0')"), vim.bindeval("line('w$')"))
 
-    draw_syntax = highlight_window.highlighted_tu is None or highlight_window.highlighted_tu != tu or highlight_window.syntaxed_window is None or highlight_window.syntaxed_window[
-        0] != vim.current.window.number or top < highlight_window.syntaxed_window[1] or bottom > highlight_window.syntaxed_window[2]
+    draw_syntax = highlight_window.highlighted_tu is None or highlight_window.highlighted_tu != tu or highlight_window.syntactic_range is None or top < highlight_window.syntactic_range[
+        0] or bottom > highlight_window.syntactic_range[1]
     draw_def_ref = False
 
-    def_cursor = None
     if vim.bindeval("s:cursor_hl") == 1:
         vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
         def_cursor = clang_helper.get_semantic_definition(vim_cursor)
 
         if highlight_window.highlighted_define_cur is not None and (def_cursor is None or highlight_window.highlighted_define_cur != def_cursor):
-            unhighlight_def_ref()
+            clear_def_ref()
 
         if def_cursor is not None and (highlight_window.highlighted_define_cur is None or highlight_window.highlighted_define_cur != def_cursor):
             draw_def_ref = True
@@ -74,23 +75,22 @@ def highlight_window(prepost=50):
                 __vim_matchaddpos('clighterCursorDefRef', def_cursor.location.line, def_cursor.location.column, len(
                     clang_helper.get_spelling_or_displayname(def_cursor)), DEF_REF_PRI)
 
-            highlight_window.highlighted_define_cur = def_cursor
+        highlight_window.highlighted_define_cur = def_cursor
 
     if not draw_syntax and not draw_def_ref:
         return
 
     buflinenr = len(vim.current.buffer)
-    target_window = [vim.current.window.number, max(
-        top - prepost, 1), min(bottom + prepost, buflinenr)]
+    target_range = [max(top - extend, 1), min(bottom + extend, buflinenr)]
 
     if draw_syntax:
-        highlight_window.syntaxed_window = target_window
         vim.command("call s:clear_match_pri([{0}])".format(SYNTAX_PRI))
+        highlight_window.syntactic_range = target_range
         highlight_window.highlighted_tu = tu
 
     file = tu.get_file(tu_ctx.bufname)
     tokens = tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
-        tu, file, target_window[1], 1), cindex.SourceLocation.from_position(tu, file, target_window[2], 1)))
+        tu, file, target_range[0], 1), cindex.SourceLocation.from_position(tu, file, target_range[1], 1)))
 
     for t in tokens:
         """ Do semantic highlighting'
@@ -109,14 +109,14 @@ def highlight_window(prepost=50):
         """
         if draw_def_ref:
             t_def_cursor = clang_helper.get_semantic_definition(t_cursor)
-            if t_def_cursor is not None and t_def_cursor == def_cursor:
+            if t_def_cursor is not None and t_def_cursor == highlight_window.highlighted_define_cur:
                 __vim_matchaddpos(
                     'clighterCursorDefRef', t.location.line, t.location.column, len(t.spelling), DEF_REF_PRI)
 
 
 highlight_window.highlighted_define_cur = None
 highlight_window.highlighted_tu = None
-highlight_window.syntaxed_window = None
+highlight_window.syntactic_range = None
 
 
 def refactor_rename():
@@ -321,7 +321,7 @@ def on_FileType():
         ClangService.create_tu([vim.current.buffer.name])
     else:
         ClangService.remove_tu([vim.current.buffer.name])
-        unhighlight_window()
+        clear_highlight()
 
 
 def __is_buffer_allowed(buf):

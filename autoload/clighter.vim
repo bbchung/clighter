@@ -8,7 +8,7 @@ let s:cursor_hl = g:clighter_cursor_hl_default
 
 fun! clighter#ToggleCursorHL()
     if s:cursor_hl==1
-        py clighter.unhighlight_def_ref()
+        py clighter.clear_def_ref()
     endif
 
     let s:cursor_hl = !s:cursor_hl
@@ -60,8 +60,8 @@ fun! clighter#Enable()
         au CursorHold * py clighter.highlight_window()
         au CursorHoldI * py clighter.highlight_window()
         " workaround to rehighlight while split window
-        au WinEnter * py clighter.unhighlight_window()
-        au BufWinEnter * py clighter.unhighlight_window()
+        au WinEnter * py clighter.clear_highlight()
+        au BufWinEnter * py clighter.clear_highlight()
         au FileType * py clighter.on_FileType()
         au VimLeavePre * py clighter.clang_release_service()
     augroup END
@@ -74,7 +74,7 @@ fun! clighter#Disable()
     py clighter.clang_release_service()
     silent! unlet s:clang_initialized
     let a:wnr = winnr()
-    windo py clighter.unhighlight_window()
+    windo py clighter.clear_highlight()
     exe a:wnr."wincmd w"
 endf
 
