@@ -38,11 +38,6 @@ def clear_highlight():
     highlight_window.highlighted_define_cur = None
 
 
-def clear_def_ref():
-    vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
-    highlight_window.highlighted_define_cur = None
-
-
 def highlight_window(extend=50):
     tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
     if tu_ctx is None:
@@ -56,16 +51,21 @@ def highlight_window(extend=50):
 
     (top, bottom) = (vim.bindeval("line('w0')"), vim.bindeval("line('w$')"))
 
-    draw_syntax = highlight_window.highlighted_tu is None or highlight_window.highlighted_tu != tu or highlight_window.syntactic_range is None or top < highlight_window.syntactic_range[
-        0] or bottom > highlight_window.syntactic_range[1]
+    draw_syntax = False
     draw_def_ref = False
+
+    if highlight_window.highlighted_tu is None or highlight_window.highlighted_tu != tu or highlight_window.syntactic_range is None or top < highlight_window.syntactic_range[0] or bottom > highlight_window.syntactic_range[1]:
+        draw_syntax = True
+        vim.command("call s:clear_match_pri([{0}])".format(SYNTAX_PRI))
+        highlight_window.syntactic_range = target_range
+        highlight_window.highlighted_tu = tu
 
     if vim.bindeval("s:cursor_hl") == 1:
         vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
         def_cursor = clang_helper.get_semantic_definition(vim_cursor)
 
         if highlight_window.highlighted_define_cur is not None and (def_cursor is None or highlight_window.highlighted_define_cur != def_cursor):
-            clear_def_ref()
+            vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
 
         if def_cursor is not None and (highlight_window.highlighted_define_cur is None or highlight_window.highlighted_define_cur != def_cursor):
             draw_def_ref = True
@@ -82,11 +82,6 @@ def highlight_window(extend=50):
 
     buflinenr = len(vim.current.buffer)
     target_range = [max(top - extend, 1), min(bottom + extend, buflinenr)]
-
-    if draw_syntax:
-        vim.command("call s:clear_match_pri([{0}])".format(SYNTAX_PRI))
-        highlight_window.syntactic_range = target_range
-        highlight_window.highlighted_tu = tu
 
     file = tu.get_file(tu_ctx.bufname)
     tokens = tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
