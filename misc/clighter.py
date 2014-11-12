@@ -29,6 +29,9 @@ if vim.vars['clighter_libclang_file']:
 #    for c in cursor.get_children():
 #        dfs(c)
 
+def clear_def_ref():
+    vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
+    highlight_window.highlighted_define_cur = None
 
 def clear_highlight():
     vim.command(
