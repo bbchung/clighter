@@ -85,15 +85,16 @@ def highlight_window(extend=50):
     if not draw_syntax and not draw_def_ref:
         return
 
-    buflinenr = len(vim.current.buffer)
-    target_range = [max(top - extend, 1), min(bottom + extend, buflinenr)]
+    target_range = [top, bottom]
+
+    if draw_syntax:
+        buflinenr = len(vim.current.buffer)
+        target_range = [max(top - extend, 1), min(bottom + extend, buflinenr)]
+        highlight_window.syntactic_range = target_range
 
     file = tu.get_file(tu_ctx.bufname)
     tokens = tu.get_tokens(extent=cindex.SourceRange.from_locations(cindex.SourceLocation.from_position(
-        tu, file, target_range[0], 1), cindex.SourceLocation.from_position(tu, file, target_range[1], 1)))
-
-    if draw_syntax:
-        highlight_window.syntactic_range = target_range
+        tu, file, target_range[0], 1), cindex.SourceLocation.from_position(tu, file, target_range[1] + 1, 1)))
 
     for t in tokens:
         """ Do semantic highlighting'
