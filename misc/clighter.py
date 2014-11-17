@@ -202,8 +202,7 @@ def __cross_buffer_rename(usr, new_name):
         tu_ctx = __clang_service.get_tu_ctx(vim.current.buffer.name)
         if tu_ctx is not None:
             try:
-                __clang_service.parse(
-                    tu_ctx, vim.vars['clighter_clang_options'])
+                __clang_service.parse(tu_ctx)
                 __search_usr_and_rename_refs(
                     tu_ctx.translation_unit, usr, new_name)
             except:
@@ -293,15 +292,15 @@ def __get_buffer_dict():
 
 
 def clang_start_service():
-    return __clang_service.start(vim.vars["clighter_clang_options"])
+    return __clang_service.start(eval(vim.vars["ClighterCompileArgs"]))
 
 
 def clang_stop_service():
     return __clang_service.stop()
 
 
-def clang_set_compile_arg(arg):
-    __clang_service.set_compile_arg(arg)
+def clang_set_compile_args(args):
+    __clang_service.set_compile_args(args)
 
 
 def clang_create_all_tu():

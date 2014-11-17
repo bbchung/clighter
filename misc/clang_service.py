@@ -47,7 +47,7 @@ class ClangService:
         self.__translation_ctx = {}
         self.__thread = None
         self.__is_running = False
-        self.__compile_arg = []
+        self.__compile_args = []
 
         # for internal use, to sync the parsing worker
         self.__change_tick = 1
@@ -58,8 +58,8 @@ class ClangService:
         self.__unsaved = set()
         self.__idx = None
 
-    def set_compile_arg(self, arg):
-        self.__compile_arg = arg
+    def set_compile_args(self, args):
+        self.__compile_args = args
 
     def start(self, arg):
         if self.__idx is None:
@@ -71,7 +71,7 @@ class ClangService:
         if self.__thread is not None:
             return True
 
-        self.__compile_arg = list(arg)
+        self.__compile_args = list(arg)
 
         self.__is_running = True
         self.__thread = threading.Thread(target=self.__parsing_worker)
@@ -129,7 +129,7 @@ class ClangService:
     def parse(self, tu_ctx):
         with self.__parse_lock:
             tu_ctx.parse(
-                self.__idx, self.__compile_arg, self.__unsaved)
+                self.__idx, self.__compile_args, self.__unsaved)
 
     def get_tu_ctx(self, name):
         return self.__translation_ctx.get(name)
