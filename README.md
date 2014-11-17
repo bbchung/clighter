@@ -41,15 +41,15 @@ Default: `1`
 let g:clighter_autostart = 0
 ```
 
-### g:clighter_clang_options
+### g:ClighterCompileArgs
 
-The compiler options for Clang. Clighter will pass these options to libclang
-to parse the code. Notice that bad options will cause clighter not working
-even crashing.
+The compiler options for Clang. Clighter will pass these options to libclang to
+parse the code. Notice that bad options will cause clighter not working even
+crashing. For convenience, you can use vim session to remember this option.
 
-Default: `['-Iinclude', '-x', 'c++']`
+Default: `'["-Iinclude", "-x", "c++"]'`
 ```vim
-let g:clighter_clang_options = ['-x', 'c++', '-std=c++', '-DLinux']
+let g:ClighterCompileArgs = '["-x", "c++", "-std=c++", "-DLinux"]'
 ```
 
 ### g:clighter_libclang_file
@@ -143,9 +143,9 @@ Clighter provides these commands and functions.
     nmap <silent> <Leader>r :call clighter#Rename()<CR>
 	```
 
-* Set clang compile options in runtime
+* Set clang compile args in runtime
 
-	`call clighter#SetClangOptions()`
+	`call clighter#SetCompileArgs()`
 
 
 ## Customize Colors

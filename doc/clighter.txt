@@ -62,7 +62,7 @@ Untar the clighter.tar.gz to your vim path.
 5. Options~
 
 |'g:clighter_autostart'|		Enable the Clighter when vim start
-|'g:clighter_clang_options'|		The Compile options for Clang
+|'g:ClighterCompileArgs'|		The Compile options for Clang
 |'g:clighter_libclang_file'|		The file path of the libclang
 |'g:clighter_realtime'|			Update highlighting in realtime	
 |'g:clighter_rename_prompt_level'|	Set prompt level of rename-refactoring
@@ -78,15 +78,15 @@ Default: `1`
 >
 	let g:clighter_autostart = 0
 <
-						*'clighter_clang_options'*
-g:clighter_clang_options~
-The compiler options for Clang. Clighter will pass these options to libclang
-to parse the code. Notice that bad options will cause clighter not working
-even crashing.
+						*'ClighterCompileArgs'*
+g:ClighterCompileArgs~
+The compiler options for Clang. Clighter will pass these options to libclang to
+parse the code. Notice that bad options will cause clighter not working even
+crashing. For convenience, you can use vim session to remember this option.
 
-Default: ['-Iinclude', '-x', 'c++']
+Default: '["-Iinclude", "-x", "c++"]'
 >
-	let g:clighter_clang_options = ['-x', 'c++', '-std=c++', '-DLinux']
+	let g:ClighterCompileArgs = '["-x", "c++", "-std=c++", "-DLinux"]'
 <
 						*'clighter_libclang_file'*
 g:clighter_libclang_file~
@@ -176,9 +176,9 @@ Rename-refactor~
 >
     	nmap <silent> <Leader>r :call clighter#Rename()<CR>
 >
-Set clang compile options in runtime~
+Set clang compile args in runtime~
 >
-    	call clighter#SetClangOptions()
+    	call clighter#SetCompileArgs()
 >
 
 ==============================================================================
