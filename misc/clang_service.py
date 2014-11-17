@@ -58,7 +58,7 @@ class ClangService:
         self.__unsaved = set()
         self.__idx = None
 
-    def set_compile_arg(arg):
+    def set_compile_arg(self, arg):
         self.__compile_arg = arg
 
     def start(self, arg):
@@ -126,10 +126,10 @@ class ClangService:
         if increase_tick:
             self.__increase_tick()
 
-    def parse(self, tu_ctx, args):
+    def parse(self, tu_ctx):
         with self.__parse_lock:
             tu_ctx.parse(
-                self.__idx, args, self.__unsaved)
+                self.__idx, self.__compile_arg, self.__unsaved)
 
     def get_tu_ctx(self, name):
         return self.__translation_ctx.get(name)
@@ -148,7 +148,7 @@ class ClangService:
                 last_change_tick = self.__change_tick
 
                 for tu_ctx in self.__translation_ctx.values():
-                    self.parse(tu_ctx, self.__compile_arg)
+                    self.parse(tu_ctx)
 
                 self.__parse_tick = last_change_tick
             except:

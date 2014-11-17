@@ -129,7 +129,7 @@ def refactor_rename():
 
     __clang_service.update_unsaved_dict(__get_buffer_dict(), False)
     try:
-        __clang_service.parse(tu_ctx, vim.vars['clighter_clang_options'])
+        __clang_service.parse(tu_ctx)
     except:
         return
 
