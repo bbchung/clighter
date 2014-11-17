@@ -37,7 +37,7 @@ fun! clighter#Enable()
         return
     endif
 
-    if !pyeval('clighter.clang_init_service()')
+    if !pyeval('clighter.clang_start_service()')
         echohl WarningMsg |
                     \ echomsg "Clighter unavailable: cannot enable clighter, try set g:clighter_libclang_file" |
                     \ echohl None
@@ -63,7 +63,7 @@ fun! clighter#Enable()
         au WinEnter * py clighter.clear_highlight()
         au BufWinEnter * py clighter.clear_highlight()
         au FileType * py clighter.on_FileType()
-        au VimLeavePre * py clighter.clang_release_service()
+        au VimLeavePre * py clighter.clang_stop_service()
     augroup END
 
     let s:clang_initialized=1
@@ -71,7 +71,7 @@ endf
 
 fun! clighter#Disable()
     silent! au! ClighterEnable
-    py clighter.clang_release_service()
+    py clighter.clang_stop_service()
     silent! unlet s:clang_initialized
     let a:wnr = winnr()
     windo py clighter.clear_highlight()

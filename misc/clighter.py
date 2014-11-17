@@ -7,21 +7,23 @@ DEF_REF_PRI = -11
 SYNTAX_PRI = -12
 
 if vim.vars['clighter_libclang_file']:
-    cindex.Config.set_library_file(vim.vars['clighter_libclang_file'])
+    ClangService.set_libclang_file(vim.vars['clighter_libclang_file'])
+
+__clang_service = ClangService()
 
 # def bfs(c, top, bottom, queue):
-    # if c.location.line >= top and c.location.line <= bottom:
-    #__draw_token(c)
+# if c.location.line >= top and c.location.line <= bottom:
+#__draw_token(c)
 
-    # queue.put(c.get_children())
+# queue.put(c.get_children())
 
-    # while not queue.empty():
-    #curs = queue.get()
-    # for cur in curs:
-    # if cur.location.line >= top and cur.location.line <= bottom:
-    #__draw_token(cur)
+# while not queue.empty():
+#curs = queue.get()
+# for cur in curs:
+# if cur.location.line >= top and cur.location.line <= bottom:
+#__draw_token(cur)
 
-    # queue.put(cur.get_children())
+# queue.put(cur.get_children())
 
 
 # def dfs(cursor):
@@ -33,6 +35,7 @@ def clear_def_ref():
     vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
     highlight_window.highlighted_define_cur = None
 
+
 def clear_highlight():
     vim.command(
         "call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, SYNTAX_PRI))
@@ -42,7 +45,7 @@ def clear_highlight():
 
 
 def highlight_window(extend=50):
-    tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
+    tu_ctx = __clang_service.get_tu_ctx(vim.current.buffer.name)
     if tu_ctx is None:
         clear_highlight()
         return
@@ -120,13 +123,13 @@ highlight_window.syntactic_range = None
 
 
 def refactor_rename():
-    tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
+    tu_ctx = __clang_service.get_tu_ctx(vim.current.buffer.name)
     if tu_ctx is None:
         return
 
-    ClangService.update_unsaved_dict(__get_buffer_dict(), False)
+    __clang_service.update_unsaved_dict(__get_buffer_dict(), False)
     try:
-        ClangService.parse(tu_ctx, vim.vars['clighter_clang_options'])
+        __clang_service.parse(tu_ctx, vim.vars['clighter_clang_options'])
     except:
         return
 
@@ -158,7 +161,7 @@ def refactor_rename():
 
     vim.current.window.cursor = pos
 
-    ClangService.update_unsaved_dict(__get_buffer_dict())
+    __clang_service.update_unsaved_dict(__get_buffer_dict())
 
 
 def __draw_token(line, col, len, kind, type):
@@ -196,10 +199,10 @@ def __cross_buffer_rename(usr, new_name):
 
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
-        tu_ctx = ClangService.get_tu_ctx(vim.current.buffer.name)
+        tu_ctx = __clang_service.get_tu_ctx(vim.current.buffer.name)
         if tu_ctx is not None:
             try:
-                ClangService.parse(
+                __clang_service.parse(
                     tu_ctx, vim.vars['clighter_clang_options'])
                 __search_usr_and_rename_refs(
                     tu_ctx.translation_unit, usr, new_name)
@@ -289,16 +292,16 @@ def __get_buffer_dict():
     return dict
 
 
-def clang_init_service():
-    return ClangService.init(vim.vars["clighter_clang_options"])
+def clang_start_service():
+    return __clang_service.start(vim.vars["clighter_clang_options"])
 
 
-def clang_release_service():
-    return ClangService.release()
+def clang_stop_service():
+    return __clang_service.stop()
 
 
 def clang_set_compile_arg(arg):
-    ClangService.set_compile_arg(arg)
+    __clang_service.set_compile_arg(arg)
 
 
 def clang_create_all_tu():
@@ -307,20 +310,20 @@ def clang_create_all_tu():
         if __is_buffer_allowed(buf):
             list.append(buf.name)
 
-    ClangService.create_tu(list)
+    __clang_service.create_tu(list)
 
 
 def on_TextChanged():
     if __is_buffer_allowed(vim.current.buffer):
-        ClangService.update_unsaved(
+        __clang_service.update_unsaved(
             vim.current.buffer.name, '\n'.join(vim.current.buffer))
 
 
 def on_FileType():
     if __is_buffer_allowed(vim.current.buffer):
-        ClangService.create_tu([vim.current.buffer.name])
+        __clang_service.create_tu([vim.current.buffer.name])
     else:
-        ClangService.remove_tu([vim.current.buffer.name])
+        __clang_service.remove_tu([vim.current.buffer.name])
         clear_highlight()
 
 

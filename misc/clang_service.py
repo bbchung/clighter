@@ -33,129 +33,128 @@ class TranslationUnitCtx:
 
 
 class ClangService:
-    __translation_ctx = {}
-    __thread = None
-    __is_running = False
-    __compile_arg = []
-
-    # for internal use, to sync the parsing worker
-    __change_tick = 1
-    __parse_tick = 0
-
-    __cond = threading.Condition()
-    __parse_lock = threading.Lock()
-    __unsaved = set()
-    __idx = None
+    __has_set_libclang = False
 
     @staticmethod
-    def init(arg):
-        if ClangService.__idx is None:
+    def set_libclang_file(libclang):
+        if ClangService.__has_set_libclang:
+            return
+
+        cindex.Config.set_library_file(libclang)
+        ClangService.__has_set_libclang = True
+
+    def __init__(self):
+        self.__translation_ctx = {}
+        self.__thread = None
+        self.__is_running = False
+        self.__compile_arg = []
+
+        # for internal use, to sync the parsing worker
+        self.__change_tick = 1
+        self.__parse_tick = 0
+
+        self.__cond = threading.Condition()
+        self.__parse_lock = threading.Lock()
+        self.__unsaved = set()
+        self.__idx = None
+
+    def set_compile_arg(arg):
+        self.__compile_arg = arg
+
+    def start(self, arg):
+        if self.__idx is None:
             try:
-                ClangService.__idx = cindex.Index.create()
+                self.__idx = cindex.Index.create()
             except:
                 return False
 
-        if ClangService.__thread is not None:
+        if self.__thread is not None:
             return True
 
-        ClangService.__compile_arg = list(arg)
+        self.__compile_arg = list(arg)
 
-        ClangService.__is_running = True
-        ClangService.__thread = threading.Thread(
-            target=ClangService.__parsing_worker)
-        ClangService.__thread.start()
+        self.__is_running = True
+        self.__thread = threading.Thread(target=self.__parsing_worker)
+        self.__thread.start()
 
         return True
 
-    @staticmethod
-    def set_compile_arg(arg):
-        __compile_arg = arg
+    def stop(self):
+        if self.__thread is not None:
+            self.__is_running = False
+            with self.__cond:
+                self.__cond.notify()
+            self.__thread.join()
+            self.__thread = None
 
-    @staticmethod
-    def release():
-        if ClangService.__thread is not None:
-            ClangService.__is_running = False
-            with ClangService.__cond:
-                ClangService.__cond.notify()
-            ClangService.__thread.join()
-            ClangService.__thread = None
+        self.__translation_ctx.clear()
 
-        ClangService.__translation_ctx.clear()
-
-    @staticmethod
-    def remove_tu(list):
+    def remove_tu(self, list):
         for name in list:
-            if name in ClangService.__translation_ctx.keys():
-                del ClangService.__translation_ctx[name]
+            if name in self.__translation_ctx.keys():
+                del self.__translation_ctx[name]
 
-    @staticmethod
-    def create_tu(list):
+    def create_tu(self, list):
         for name in list:
-            if name in ClangService.__translation_ctx.keys():
+            if name in self.__translation_ctx.keys():
                 continue
 
-            ClangService.__translation_ctx[name] = TranslationUnitCtx(name)
+            self.__translation_ctx[name] = TranslationUnitCtx(name)
 
-        ClangService.__increase_tick()
+        self.__increase_tick()
 
-    @staticmethod
-    def update_unsaved_dict(dict, increase_tick=True):
+    def update_unsaved_dict(self, dict, increase_tick=True):
         for name, buffer in dict.items():
-            for file in ClangService.__unsaved:
+            for file in self.__unsaved:
                 if file[0] == name:
-                    ClangService.__unsaved.discard(file)
+                    self.__unsaved.discard(file)
                     break
 
-            ClangService.__unsaved.add((name, buffer))
+            self.__unsaved.add((name, buffer))
 
         if increase_tick:
-            ClangService.__increase_tick()
+            self.__increase_tick()
 
-    @staticmethod
-    def update_unsaved(name, buffer, increase_tick=True):
-        for file in ClangService.__unsaved:
+    def update_unsaved(self, name, buffer, increase_tick=True):
+        for file in self.__unsaved:
             if file[0] == name:
-                ClangService.__unsaved.discard(file)
+                self.__unsaved.discard(file)
                 break
 
-        ClangService.__unsaved.add((name, buffer))
+        self.__unsaved.add((name, buffer))
 
         if increase_tick:
-            ClangService.__increase_tick()
+            self.__increase_tick()
 
-    @staticmethod
-    def parse(tu_ctx, args):
-        with ClangService.__parse_lock:
+    def parse(self, tu_ctx, args):
+        with self.__parse_lock:
             tu_ctx.parse(
-                ClangService.__idx, args, ClangService.__unsaved)
+                self.__idx, args, self.__unsaved)
 
-    @staticmethod
-    def get_tu_ctx(name):
-        return ClangService.__translation_ctx.get(name)
+    def get_tu_ctx(self, name):
+        return self.__translation_ctx.get(name)
 
-    @staticmethod
-    def __parsing_worker():
-        while ClangService.__is_running:
+    def __parsing_worker(self):
+        while self.__is_running:
             try:
                 # has parse all unsaved files
-                if ClangService.__parse_tick == ClangService.__change_tick:
-                    with ClangService.__cond:
-                        ClangService.__cond.wait()
+                if self.__parse_tick == self.__change_tick:
+                    with self.__cond:
+                        self.__cond.wait()
 
-                    if ClangService.__parse_tick == ClangService.__change_tick:
+                    if self.__parse_tick == self.__change_tick:
                         continue
 
-                last_change_tick = ClangService.__change_tick
+                last_change_tick = self.__change_tick
 
-                for tu_ctx in ClangService.__translation_ctx.values():
-                    ClangService.parse(tu_ctx, ClangService.__compile_arg)
+                for tu_ctx in self.__translation_ctx.values():
+                    self.parse(tu_ctx, self.__compile_arg)
 
-                ClangService.__parse_tick = last_change_tick
+                self.__parse_tick = last_change_tick
             except:
                 pass
 
-    @staticmethod
-    def __increase_tick():
-        with ClangService.__cond:
-            ClangService.__change_tick += 1
-            ClangService.__cond.notify()
+    def __increase_tick(self):
+        with self.__cond:
+            self.__change_tick += 1
+            self.__cond.notify()
