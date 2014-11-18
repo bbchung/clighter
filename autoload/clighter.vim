@@ -4,14 +4,12 @@ py import vim
 exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
 py import clighter
 
-let s:cursor_hl = g:clighter_cursor_hl_default
-
 fun! clighter#ToggleCursorHL()
-    if s:cursor_hl==1
+    if g:ClighterCursorHL==1
         py clighter.clear_def_ref()
     endif
 
-    let s:cursor_hl = !s:cursor_hl
+    let g:ClighterCursorHL = !g:ClighterCursorHL
 endf
 
 fun! s:clear_match_grp(groups)

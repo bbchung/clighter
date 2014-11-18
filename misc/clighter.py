@@ -65,7 +65,7 @@ def highlight_window(extend=50):
         vim.command("call s:clear_match_pri([{0}])".format(SYNTAX_PRI))
         highlight_window.highlighted_tu = tu
 
-    if vim.bindeval("s:cursor_hl") == 1:
+    if vim.vars["ClighterCursorHL"] == 1:
         vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
         def_cursor = clang_helper.get_semantic_definition(vim_cursor)
 
