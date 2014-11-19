@@ -9,7 +9,7 @@ class TranslationUnitCtx:
         self.__bufname = bufname
         self.__tu = None
 
-    def get_cursor(self, location):
+    def get_cursor(self, location, cmp_word):
         if self.__tu is None:
             return None
 
@@ -17,7 +17,7 @@ class TranslationUnitCtx:
         cursor = cindex.Cursor.from_location(self.__tu, cindex.SourceLocation.from_position(
             self.__tu, self.__tu.get_file(self.__bufname), row, col + 1))
 
-        return cursor if cursor.location.line == row and cursor.location.column <= col + 1 < cursor.location.column + len(clang_helper.get_spelling_or_displayname(cursor)) else None
+        return cursor if cmp_word == cursor.spelling else None
 
     def parse(self, idx, args, unsaved):
         self.__tu = idx.parse(

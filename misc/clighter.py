@@ -66,7 +66,8 @@ def highlight_window(extend=50):
         highlight_window.highlighted_tu = tu
 
     if vim.vars["ClighterCursorHL"] == 1:
-        vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
+        vim_cursor = tu_ctx.get_cursor(
+            vim.current.window.cursor, vim.eval('expand("<cword>")'))
         def_cursor = clang_helper.get_semantic_definition(vim_cursor)
 
         if highlight_window.highlighted_define_cur is not None and (def_cursor is None or highlight_window.highlighted_define_cur != def_cursor):
@@ -134,7 +135,8 @@ def refactor_rename():
     except:
         return
 
-    vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
+    vim_cursor = tu_ctx.get_cursor(
+        vim.current.window.cursor, vim.eval('expand("<cword>")'))
     def_cursor = clang_helper.get_semantic_definition(vim_cursor)
     if def_cursor is None:
         return
