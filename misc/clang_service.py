@@ -9,15 +9,23 @@ class TranslationUnitCtx:
         self.__bufname = bufname
         self.__tu = None
 
-    def get_cursor(self, location, cmp_word):
+    def get_cursor_and_def(self, location, c):
         if self.__tu is None:
-            return None
+            return None, None
 
         (row, col) = location
         cursor = cindex.Cursor.from_location(self.__tu, cindex.SourceLocation.from_position(
             self.__tu, self.__tu.get_file(self.__bufname), row, col + 1))
 
-        return cursor
+        if cursor is None:
+            return None, None
+
+        def_cur = clang_helper.get_semantic_definition(cursor)
+
+        if def_cur is None or def_cur.spelling != c:
+            return None, None
+
+        return cursor, def_cur
 
     def parse(self, idx, args, unsaved):
         self.__tu = idx.parse(

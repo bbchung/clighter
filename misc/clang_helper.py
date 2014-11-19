@@ -37,12 +37,19 @@ def get_spelling_or_displayname(cursor):
     return cursor.spelling if cursor.spelling is not None else cursor.displayname
 
 
-def search_ref_cursors(cursor, def_cursor, locs):
-    cursor_def = get_semantic_definition(cursor)
+def search_ref_tokens(tu, def_cursor, locs):
+    print def_cursor.location
+    tokens = tu.cursor.get_tokens()
 
-    if (cursor_def is not None and cursor_def == def_cursor):
-        locs.add(
-            (cursor.location.line, cursor.location.column, cursor.location.file.name))
+    for t in tokens:
+        if t.kind.value != 2:
+            continue
 
-    for c in cursor.get_children():
-        search_ref_cursors(c, def_cursor, locs)
+        t_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(
+            tu, t.location.file, t.location.line, t.location.column))  # cursor under vim
+
+        t_cursor_def = get_semantic_definition(t_cursor)
+
+        if t_cursor_def is not None and t_cursor_def == def_cursor:
+            locs.add(
+                (t.location.line, t.location.column, t.location.file.name))

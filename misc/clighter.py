@@ -66,9 +66,8 @@ def highlight_window(extend=50):
         highlight_window.highlighted_tu = tu
 
     if vim.vars["ClighterCursorHL"] == 1:
-        vim_cursor = tu_ctx.get_cursor(
+        vim_cursor, def_cursor = tu_ctx.get_cursor_and_def(
             vim.current.window.cursor, vim.eval('expand("<cword>")'))
-        def_cursor = clang_helper.get_semantic_definition(vim_cursor)
 
         if highlight_window.highlighted_define_cur is not None and (def_cursor is None or highlight_window.highlighted_define_cur != def_cursor):
             vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
@@ -135,9 +134,9 @@ def refactor_rename():
     except:
         return
 
-    vim_cursor = tu_ctx.get_cursor(
+    vim_cursor, def_cursor = tu_ctx.get_cursor_and_def(
         vim.current.window.cursor, vim.eval('expand("<cword>")'))
-    def_cursor = clang_helper.get_semantic_definition(vim_cursor)
+
     if def_cursor is None:
         return
 
@@ -155,8 +154,7 @@ def refactor_rename():
     locs = set()
     locs.add((def_cursor.location.line, def_cursor.location.column,
               def_cursor.location.file.name))
-    clang_helper.search_ref_cursors(
-        tu_ctx.translation_unit.cursor, def_cursor, locs)
+    clang_helper.search_ref_tokens(tu_ctx.translation_unit, def_cursor, locs)
     __vim_multi_replace(locs, old_name, new_name)
 
     if clang_helper.is_symbol_cursor(def_cursor) and vim.vars['clighter_enable_cross_rename'] == 1:
@@ -239,7 +237,7 @@ def __search_usr_and_rename_refs(tu, usr, new_name):
     for sym in symbols:
         locs.add(
             (sym.location.line, sym.location.column, sym.location.file.name))
-        clang_helper.search_ref_cursors(tu.cursor, sym, locs)
+        clang_helper.search_ref_tokens(tu, sym, locs)
 
     __vim_multi_replace(locs, old_name, new_name)
 
