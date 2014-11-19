@@ -340,4 +340,10 @@ def __get_cursor_and_def(tu_ctx):
         if vim_cursor is not None:
             def_cursor = clang_helper.get_semantic_definition(vim_cursor)
 
+    if def_cursor is None:
+        return None, None
+
+    if vim.eval('expand("<cword>")') != def_cursor.spelling:
+        return None, None
+
     return vim_cursor, def_cursor
