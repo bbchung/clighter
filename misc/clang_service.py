@@ -17,7 +17,7 @@ class TranslationUnitCtx:
         cursor = cindex.Cursor.from_location(self.__tu, cindex.SourceLocation.from_position(
             self.__tu, self.__tu.get_file(self.__bufname), row, col + 1))
 
-        return cursor if cmp_word == cursor.spelling else None
+        return cursor
 
     def parse(self, idx, args, unsaved):
         self.__tu = idx.parse(
