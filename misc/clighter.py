@@ -66,8 +66,7 @@ def highlight_window(extend=50):
         highlight_window.highlighted_tu = tu
 
     if vim.vars["ClighterCursorHL"] == 1:
-        vim_cursor, def_cursor = tu_ctx.get_cursor_and_def(
-            vim.current.window.cursor, vim.eval('expand("<cword>")'))
+        vim_cursor, def_cursor = __get_cursor_and_def(tu_ctx)
 
         if highlight_window.highlighted_define_cur is not None and (def_cursor is None or highlight_window.highlighted_define_cur != def_cursor):
             vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
@@ -134,10 +133,9 @@ def refactor_rename():
     except:
         return
 
-    vim_cursor, def_cursor = tu_ctx.get_cursor_and_def(
-        vim.current.window.cursor, vim.eval('expand("<cword>")'))
+    vim_cursor, def_cursor = __get_cursor_and_def(tu_ctx)
 
-    if def_cursor is None:
+    if vim_cursor is None or def_cursor is None:
         return
 
     old_name = clang_helper.get_spelling_or_displayname(def_cursor)
@@ -329,3 +327,17 @@ def on_FileType():
 
 def __is_buffer_allowed(buf):
     return buf.options['filetype'] in ["c", "cpp", "objc"]
+
+
+def __get_cursor_and_def(tu_ctx):
+    vim_cursor = None
+    def_cursor = None
+
+    col = vim.current.window.cursor[1]
+    if len(vim.current.line) > col and vim.current.line[col].isalnum():
+        vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
+
+        if vim_cursor is not None:
+            def_cursor = clang_helper.get_semantic_definition(vim_cursor)
+
+    return vim_cursor, def_cursor
