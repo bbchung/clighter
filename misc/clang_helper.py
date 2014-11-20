@@ -38,7 +38,6 @@ def get_spelling_or_displayname(cursor):
 
 
 def search_ref_tokens(tu, def_cursor, locs):
-    print def_cursor.location
     tokens = tu.cursor.get_tokens()
 
     for t in tokens:

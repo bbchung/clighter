@@ -220,24 +220,23 @@ def __search_usr_and_rename_refs(tu, usr, new_name):
     if not symbols:
         return
 
-    if vim.vars['clighter_rename_prompt_level'] >= 1:
-        cmd = "let l:choice = confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 1)".format(
-            vim.current.buffer.name)
-        vim.command(cmd)
-
-        if vim.bindeval('l:choice') == 2:
-            return
-
     # all symbols with the same name
     old_name = clang_helper.get_spelling_or_displayname(symbols[0])
 
     locs = set()
     for sym in symbols:
-        locs.add(
-            (sym.location.line, sym.location.column, sym.location.file.name))
         clang_helper.search_ref_tokens(tu, sym, locs)
 
-    __vim_multi_replace(locs, old_name, new_name)
+    if len(locs):
+        if vim.vars['clighter_rename_prompt_level'] >= 1:
+            cmd = "let l:choice = confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 1)".format(
+                vim.current.buffer.name)
+            vim.command(cmd)
+
+            if vim.bindeval('l:choice') == 2:
+                return
+
+        __vim_multi_replace(locs, old_name, new_name)
 
 
 def __vim_multi_replace(locs, old, new):
