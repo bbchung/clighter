@@ -333,11 +333,13 @@ def __get_cursor_and_def(tu_ctx):
     def_cursor = None
 
     col = vim.current.window.cursor[1]
-    if len(vim.current.line) > col and vim.current.line[col].isalnum():
-        vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
+    if len(vim.current.line) > col: 
+        c = vim.current.line[col]
+        if c.isalnum() or c == '_' or c == '-':
+            vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
 
-        if vim_cursor is not None:
-            def_cursor = clang_helper.get_semantic_definition(vim_cursor)
+            if vim_cursor is not None:
+                def_cursor = clang_helper.get_semantic_definition(vim_cursor)
 
     if def_cursor is None:
         return None, None
