@@ -333,7 +333,7 @@ def __get_cursor_and_def(tu_ctx):
     def_cursor = None
 
     col = vim.current.window.cursor[1]
-    if len(vim.current.line) > col: 
+    if len(vim.current.line) > col:
         c = vim.current.line[col]
         if c.isalnum() or c == '_':
             vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)

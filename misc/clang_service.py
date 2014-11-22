@@ -113,8 +113,8 @@ class ClangService:
 
                 self.__unsaved.add((name, buffer))
 
-            if increase_tick:
-                self.__increase_tick()
+        if increase_tick:
+            self.__increase_tick()
 
     def update_unsaved(self, name, buffer, increase_tick=True):
         with self.__busy_lock:
@@ -125,8 +125,8 @@ class ClangService:
 
             self.__unsaved.add((name, buffer))
 
-            if increase_tick:
-                self.__increase_tick()
+        if increase_tick:
+            self.__increase_tick()
 
     def parse(self, tu_ctx):
         with self.__busy_lock:
