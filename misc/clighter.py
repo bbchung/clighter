@@ -307,6 +307,10 @@ def clang_create_all_tu():
     __clang_service.create_tu(list)
 
 
+def clang_update_curr_buf():
+    __clang_service.update_curr_bufname(vim.current.buffer.name)
+
+
 def on_TextChanged():
     if __is_buffer_allowed(vim.current.buffer):
         __clang_service.update_unsaved(

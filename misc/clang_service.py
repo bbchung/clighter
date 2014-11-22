@@ -44,6 +44,7 @@ class ClangService:
         ClangService.__has_set_libclang = True
 
     def __init__(self):
+        self.__curr_bufname = None
         self.__translation_ctx = {}
         self.__thread = None
         self.__is_running = False
@@ -136,6 +137,11 @@ class ClangService:
     def get_tu_ctx(self, name):
         return self.__translation_ctx.get(name)
 
+    def update_curr_bufname(self, bufname):
+        self.__curr_bufname = bufname
+        self.__increase_tick()
+
+
     def __parsing_worker(self):
         while self.__is_running:
             try:
@@ -149,7 +155,8 @@ class ClangService:
 
                 last_change_tick = self.__change_tick
 
-                for tu_ctx in self.__translation_ctx.values():
+                tu_ctx = self.__translation_ctx.get(self.__curr_bufname)
+                if tu_ctx is not None:
                     self.parse(tu_ctx)
 
                 self.__parse_tick = last_change_tick
