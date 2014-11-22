@@ -281,9 +281,6 @@ def __get_buffer_dict():
         if not __is_buffer_allowed(buf):
             continue
 
-        if len(buf) == 1 and buf[0] == "":
-            continue
-
         dict[buf.name] = '\n'.join(buf)
 
     return dict
