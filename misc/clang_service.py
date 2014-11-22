@@ -54,7 +54,7 @@ class ClangService:
         self.__parse_tick = 0
 
         self.__cond = threading.Condition()
-        self.__parse_lock = threading.Lock()
+        self.__busy_lock = threading.Lock()
         self.__unsaved = set()
         self.__idx = None
 
@@ -104,7 +104,20 @@ class ClangService:
         self.__increase_tick()
 
     def update_unsaved_dict(self, dict, increase_tick=True):
-        for name, buffer in dict.items():
+        with self.__busy_lock:
+            for name, buffer in dict.items():
+                for file in self.__unsaved:
+                    if file[0] == name:
+                        self.__unsaved.discard(file)
+                        break
+
+                self.__unsaved.add((name, buffer))
+
+            if increase_tick:
+                self.__increase_tick()
+
+    def update_unsaved(self, name, buffer, increase_tick=True):
+        with self.__busy_lock:
             for file in self.__unsaved:
                 if file[0] == name:
                     self.__unsaved.discard(file)
@@ -112,22 +125,11 @@ class ClangService:
 
             self.__unsaved.add((name, buffer))
 
-        if increase_tick:
-            self.__increase_tick()
-
-    def update_unsaved(self, name, buffer, increase_tick=True):
-        for file in self.__unsaved:
-            if file[0] == name:
-                self.__unsaved.discard(file)
-                break
-
-        self.__unsaved.add((name, buffer))
-
-        if increase_tick:
-            self.__increase_tick()
+            if increase_tick:
+                self.__increase_tick()
 
     def parse(self, tu_ctx):
-        with self.__parse_lock:
+        with self.__busy_lock:
             tu_ctx.parse(
                 self.__idx, self.__compile_args, self.__unsaved)
 
