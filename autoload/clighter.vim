@@ -60,6 +60,7 @@ fun! clighter#Enable()
         au CursorHoldI * py clighter.highlight_window()
         au BufWinEnter * py clighter.update_unsaved_if_allow()
         au WinEnter * py clighter.update_unsaved_if_allow()
+        au SessionLoadPost * py clighter.update_unsaved_if_allow()
         au FileType * py clighter.on_FileType()
         au VimLeavePre * py clighter.clang_stop_service()
     augroup END
