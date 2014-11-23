@@ -298,13 +298,13 @@ def clang_set_compile_args(args):
     __clang_service.set_compile_args(args)
 
 
-def clang_create_all_tu():
+def clang_create_all_tu_ctx():
     list = []
     for buf in vim.buffers:
         if __is_buffer_allowed(buf):
             list.append(buf.name)
 
-    __clang_service.create_tu(list)
+    __clang_service.create_tu_ctx(list)
 
 
 def update_unsaved_if_allow():
@@ -315,9 +315,9 @@ def update_unsaved_if_allow():
 
 def on_FileType():
     if __is_buffer_allowed(vim.current.buffer):
-        __clang_service.create_tu([vim.current.buffer.name])
+        __clang_service.create_tu_ctx([vim.current.buffer.name])
     else:
-        __clang_service.remove_tu([vim.current.buffer.name])
+        __clang_service.remove_tu_ctx([vim.current.buffer.name])
         clear_highlight()
 
 

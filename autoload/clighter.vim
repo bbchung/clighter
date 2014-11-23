@@ -42,8 +42,8 @@ fun! clighter#Enable()
         return
     endif
 
-    py clighter.clang_create_all_tu()
     py clighter.update_unsaved_if_allow()
+    py clighter.clang_create_all_tu_ctx()
 
     augroup ClighterEnable
         au!

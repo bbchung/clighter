@@ -55,7 +55,7 @@ class ClangService:
         self.__compile_args = []
 
         # for internal use, to sync the parsing worker
-        self.__change_tick = 1
+        self.__change_tick = 0
         self.__parse_tick = 0
 
         self.__cond = threading.Condition()
@@ -94,12 +94,13 @@ class ClangService:
 
         self.__translation_ctx.clear()
 
-    def remove_tu(self, list):
+    def remove_tu_ctx(self, list):
         for name in list:
             if name in self.__translation_ctx.keys():
                 del self.__translation_ctx[name]
 
-    def create_tu(self, list):
+    def create_tu_ctx(self, list):
+        print 'create tu'
         for name in list:
             if name in self.__translation_ctx.keys():
                 continue
@@ -139,10 +140,6 @@ class ClangService:
 
     def get_tu_ctx(self, name):
         return self.__translation_ctx.get(name)
-
-    def update_curr_bufname(self, bufname):
-        self.__edit_bufname = bufname
-        self.__increase_tick()
 
     def __parsing_worker(self):
         while self.__is_running:
