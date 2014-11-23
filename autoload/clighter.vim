@@ -58,7 +58,6 @@ fun! clighter#Enable()
         endif
         au CursorHold * py clighter.highlight_window()
         au CursorHoldI * py clighter.highlight_window()
-        au BufWinEnter * py clighter.update_unsaved_if_allow()
         au WinEnter * py clighter.clear_highlight()
         au BufEnter * py clighter.clang_switch_buffer()
         au SessionLoadPost * py clighter.clang_switch_buffer()
