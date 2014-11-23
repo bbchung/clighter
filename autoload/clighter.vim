@@ -43,24 +43,23 @@ fun! clighter#Enable()
     endif
 
     py clighter.clang_create_all_tu()
+    py clighter.update_unsaved_if_allow()
 
     augroup ClighterEnable
         au!
         if g:clighter_realtime == 1
             au CursorMoved * py clighter.highlight_window()
             au CursorMovedI * py clighter.highlight_window()
-            au TextChanged * py clighter.on_TextChanged()
-            au TextChangedI * py clighter.on_TextChanged()
+            au TextChanged * py clighter.update_unsaved_if_allow()
+            au TextChangedI * py clighter.update_unsaved_if_allow()
         else
-            au CursorHold * py clighter.on_TextChanged()
-            au CursorHoldI * py clighter.on_TextChanged()
+            au CursorHold * py clighter.update_unsaved_if_allow()
+            au CursorHoldI * py clighter.update_unsaved_if_allow()
         endif
         au CursorHold * py clighter.highlight_window()
         au CursorHoldI * py clighter.highlight_window()
-        " workaround to rehighlight while split window
-        au WinEnter * py clighter.clear_highlight()
-        au BufWinEnter * py clighter.clear_highlight()
-        au BufEnter * py clighter.clang_update_curr_buf()
+        au BufWinEnter * py clighter.update_unsaved_if_allow()
+        au WinEnter * py clighter.update_unsaved_if_allow()
         au FileType * py clighter.on_FileType()
         au VimLeavePre * py clighter.clang_stop_service()
     augroup END

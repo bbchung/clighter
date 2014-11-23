@@ -35,6 +35,10 @@ class TranslationUnitCtx:
 class ClangService:
     __has_set_libclang = False
 
+    @property
+    def parse_tick(self):
+        return self.__parse_tick
+
     @staticmethod
     def set_libclang_file(libclang):
         if ClangService.__has_set_libclang:
@@ -44,7 +48,7 @@ class ClangService:
         ClangService.__has_set_libclang = True
 
     def __init__(self):
-        self.__curr_bufname = None
+        self.__edit_bufname = None
         self.__translation_ctx = {}
         self.__thread = None
         self.__is_running = False
@@ -117,16 +121,15 @@ class ClangService:
         if increase_tick:
             self.__increase_tick()
 
-    def update_unsaved(self, name, buffer, increase_tick=True):
+    def update_unsaved(self, bufname, buffer):
         with self.__busy_lock:
             for file in self.__unsaved:
-                if file[0] == name:
+                if file[0] == bufname:
                     self.__unsaved.discard(file)
                     break
 
-            self.__unsaved.add((name, buffer))
-
-        if increase_tick:
+            self.__unsaved.add((bufname, buffer))
+            self.__edit_bufname = bufname
             self.__increase_tick()
 
     def parse(self, tu_ctx):
@@ -138,9 +141,8 @@ class ClangService:
         return self.__translation_ctx.get(name)
 
     def update_curr_bufname(self, bufname):
-        self.__curr_bufname = bufname
+        self.__edit_bufname = bufname
         self.__increase_tick()
-
 
     def __parsing_worker(self):
         while self.__is_running:
@@ -155,7 +157,7 @@ class ClangService:
 
                 last_change_tick = self.__change_tick
 
-                tu_ctx = self.__translation_ctx.get(self.__curr_bufname)
+                tu_ctx = self.__translation_ctx.get(self.__edit_bufname)
                 if tu_ctx is not None:
                     self.parse(tu_ctx)
 

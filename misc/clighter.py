@@ -39,7 +39,7 @@ def clear_def_ref():
 def clear_highlight():
     vim.command(
         "call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, SYNTAX_PRI))
-    highlight_window.highlighted_tu = None
+    highlight_window.hl_tick = 0
     highlight_window.syntactic_range = None
     highlight_window.highlighted_define_cur = None
 
@@ -60,10 +60,10 @@ def highlight_window(extend=50):
     draw_syntax = False
     draw_def_ref = False
 
-    if highlight_window.highlighted_tu is None or highlight_window.highlighted_tu != tu or highlight_window.syntactic_range is None or top < highlight_window.syntactic_range[0] or bottom > highlight_window.syntactic_range[1]:
+    if highlight_window.hl_tick < __clang_service.parse_tick or highlight_window.syntactic_range is None or top < highlight_window.syntactic_range[0] or bottom > highlight_window.syntactic_range[1]:
         draw_syntax = True
         vim.command("call s:clear_match_pri([{0}])".format(SYNTAX_PRI))
-        highlight_window.highlighted_tu = tu
+        highlight_window.hl_tick = __clang_service.parse_tick
 
     if vim.vars["ClighterCursorHL"] == 1:
         vim_cursor, def_cursor = __get_cursor_and_def(tu_ctx)
@@ -118,7 +118,7 @@ def highlight_window(extend=50):
 
 
 highlight_window.highlighted_define_cur = None
-highlight_window.highlighted_tu = None
+highlight_window.hl_tick = 0
 highlight_window.syntactic_range = None
 
 
@@ -307,11 +307,7 @@ def clang_create_all_tu():
     __clang_service.create_tu(list)
 
 
-def clang_update_curr_buf():
-    __clang_service.update_curr_bufname(vim.current.buffer.name)
-
-
-def on_TextChanged():
+def update_unsaved_if_allow():
     if __is_buffer_allowed(vim.current.buffer):
         __clang_service.update_unsaved(
             vim.current.buffer.name, '\n'.join(vim.current.buffer))
