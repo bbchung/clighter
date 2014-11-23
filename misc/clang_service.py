@@ -95,30 +95,28 @@ class ClangService:
         self.__translation_ctx.clear()
 
     def remove_tu_ctx(self, list):
-        for name in list:
-            if name in self.__translation_ctx.keys():
-                del self.__translation_ctx[name]
+        for bufname in list:
+            if bufname in self.__translation_ctx.keys():
+                del self.__translation_ctx[bufname]
 
     def create_tu_ctx(self, list):
-        for name in list:
-            if name in self.__translation_ctx.keys():
+        for bufname in list:
+            if bufname in self.__translation_ctx.keys():
                 continue
 
-            self.__translation_ctx[name] = TranslationUnitCtx(name)
+            self.__translation_ctx[bufname] = TranslationUnitCtx(bufname)
 
-        self.__increase_tick()
-
-    def update_unsaved_dict(self, dict, increase_tick=True):
+    def update_unsaved_dict(self, dict, incr):
         with self.__busy_lock:
-            for name, buffer in dict.items():
-                for file in self.__unsaved:
-                    if file[0] == name:
-                        self.__unsaved.discard(file)
+            for bufname, buffer in dict.items():
+                for us_buffer in self.__unsaved:
+                    if us_buffer[0] == bufname:
+                        self.__unsaved.discard(us_buffer)
                         break
 
-                self.__unsaved.add((name, buffer))
+                self.__unsaved.add((bufname, buffer))
 
-        if increase_tick:
+        if incr:
             self.__increase_tick()
 
     def update_unsaved(self, bufname, buffer):
@@ -129,13 +127,26 @@ class ClangService:
                     break
 
             self.__unsaved.add((bufname, buffer))
-            self.__edit_bufname = bufname
-            self.__increase_tick()
+
+        self.__increase_tick()
+
+    def switch_buffer(self, bufname):
+        self.__edit_bufname = bufname
+        self.__increase_tick()
 
     def parse(self, tu_ctx):
         with self.__busy_lock:
             tu_ctx.parse(
                 self.__idx, self.__compile_args, self.__unsaved)
+
+        self.__parse_tick = self.__change_tick
+
+    def parse_all(self):
+        for tu_ctx in self.__translation_ctx.values():
+            with self.__busy_lock:
+                tu_ctx.parse(self.__idx, self.__compile_args, self.__unsaved)
+
+        self.__parse_tick = self.__change_tick
 
     def get_tu_ctx(self, name):
         return self.__translation_ctx.get(name)

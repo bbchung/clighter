@@ -128,10 +128,7 @@ def refactor_rename():
         return
 
     __clang_service.update_unsaved_dict(__get_buffer_dict(), False)
-    try:
-        __clang_service.parse(tu_ctx)
-    except:
-        return
+    __clang_service.parse_all()
 
     vim_cursor, def_cursor = __get_cursor_and_def(tu_ctx)
 
@@ -160,7 +157,8 @@ def refactor_rename():
 
     vim.current.window.cursor = pos
 
-    __clang_service.update_unsaved_dict(__get_buffer_dict())
+    __clang_service.update_unsaved_dict(__get_buffer_dict(), True)
+    __clang_service.parse_all()
 
 
 def __draw_token(line, col, len, kind, type):
@@ -201,7 +199,6 @@ def __cross_buffer_rename(usr, new_name):
         tu_ctx = __clang_service.get_tu_ctx(vim.current.buffer.name)
         if tu_ctx is not None:
             try:
-                __clang_service.parse(tu_ctx)
                 __search_usr_and_rename_refs(
                     tu_ctx.translation_unit, usr, new_name)
             except:
@@ -305,6 +302,10 @@ def clang_create_all_tu_ctx():
             list.append(buf.name)
 
     __clang_service.create_tu_ctx(list)
+
+
+def clang_switch_buffer():
+    __clang_service.switch_buffer(vim.current.buffer.name)
 
 
 def update_unsaved_if_allow():

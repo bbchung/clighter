@@ -42,7 +42,7 @@ fun! clighter#Enable()
         return
     endif
 
-    py clighter.update_unsaved_if_allow()
+    py clighter.clang_switch_buffer()
     py clighter.clang_create_all_tu_ctx()
 
     augroup ClighterEnable
@@ -59,8 +59,9 @@ fun! clighter#Enable()
         au CursorHold * py clighter.highlight_window()
         au CursorHoldI * py clighter.highlight_window()
         au BufWinEnter * py clighter.update_unsaved_if_allow()
-        au WinEnter * py clighter.update_unsaved_if_allow()
-        au SessionLoadPost * py clighter.update_unsaved_if_allow()
+        au WinEnter * py clighter.clear_highlight()
+        au BufEnter * py clighter.clang_switch_buffer()
+        au SessionLoadPost * py clighter.clang_switch_buffer()
         au FileType * py clighter.on_FileType()
         au VimLeavePre * py clighter.clang_stop_service()
     augroup END
