@@ -100,7 +100,6 @@ class ClangService:
                 del self.__translation_ctx[name]
 
     def create_tu_ctx(self, list):
-        print 'create tu'
         for name in list:
             if name in self.__translation_ctx.keys():
                 continue
