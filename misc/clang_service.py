@@ -6,16 +6,19 @@ from clang import cindex
 class TranslationUnitCtx:
 
     def __init__(self, bufname):
+
         self.__bufname = bufname
         self.__tu = None
 
     def get_cursor(self, location):
+        tu = self.__tu
+
         if self.__tu is None:
             return None
 
         (row, col) = location
-        cursor = cindex.Cursor.from_location(self.__tu, cindex.SourceLocation.from_position(
-            self.__tu, self.__tu.get_file(self.__bufname), row, col + 1))
+        cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(
+            tu, tu.get_file(self.__bufname), row, col + 1))
 
         return cursor
 
