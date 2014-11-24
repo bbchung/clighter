@@ -136,8 +136,10 @@ def refactor_rename():
         return
 
     old_name = clang_helper.get_spelling_or_displayname(def_cursor)
+    vim.command("echohl WildMenu")
     new_name = vim.bindeval(
-        "input('rename \"{0}\" to: ', '{1}')".format(old_name, old_name))
+        "input(' Rename {0} : ', '{1}')".format(old_name, old_name))
+    vim.command("echohl None")
 
     if not new_name or old_name == new_name:
         return
