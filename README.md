@@ -47,7 +47,7 @@ The compiler options for Clang. Clighter will pass these options to libclang to
 parse the code. Notice that bad options will cause clighter not working even
 crashing. For convenience, you can use vim session to remember this option.
 
-Default: `'["-Iinclude", "-x", "c++"]'`
+Default: `'["-Iinclude"]'`
 ```vim
 let g:ClighterCompileArgs = '["-x", "c++", "-std=c++", "-DLinux"]'
 ```
