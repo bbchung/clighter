@@ -46,7 +46,7 @@ hi default link clighterNamespace None
 
 if g:clighter_autostart == 1
     augroup ClighterAutoStart
-        au FileType c,cpp,objc call clighter#Enable()
+        au FileType c,cpp,objc,objcpp call clighter#Enable()
     augroup END
 endif
 

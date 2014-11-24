@@ -158,7 +158,6 @@ def refactor_rename():
     vim.current.window.cursor = pos
 
     __clang_service.update_unsaved_dict(__get_buffer_dict(), True)
-    __clang_service.parse_all()
 
 
 def __draw_token(line, col, len, kind, type):
@@ -326,7 +325,7 @@ def on_FileType():
 
 
 def __is_buffer_allowed(buf):
-    return buf.options['filetype'] in ["c", "cpp", "objc"]
+    return buf.options['filetype'] in ["c", "cpp", "objc", "objcpp"]
 
 
 def __get_cursor_and_def(tu_ctx):
