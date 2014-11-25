@@ -1,5 +1,5 @@
 import threading
-import clang_helper
+import clighter_helper
 from clang import cindex
 
 
@@ -62,7 +62,7 @@ class ClangService:
         self.__parse_tick = 0
 
         self.__cond = threading.Condition()
-        self.__busy_lock = threading.Lock()
+        self.__libclang_lock = threading.Lock()
         self.__unsaved = set()
         self.__idx = None
 
@@ -110,26 +110,24 @@ class ClangService:
             self.__translation_ctx[bufname] = TranslationUnitCtx(bufname)
 
     def update_unsaved_dict(self, dict, incr):
-        with self.__busy_lock:
-            for bufname, buffer in dict.items():
-                for us_buffer in self.__unsaved:
-                    if us_buffer[0] == bufname:
-                        self.__unsaved.discard(us_buffer)
-                        break
+        for bufname, buffer in dict.items():
+            for us_buffer in self.__unsaved:
+                if us_buffer[0] == bufname:
+                    self.__unsaved.discard(us_buffer)
+                    break
 
-                self.__unsaved.add((bufname, buffer))
+            self.__unsaved.add((bufname, buffer))
 
         if incr:
             self.__increase_tick()
 
     def update_unsaved(self, bufname, buffer):
-        with self.__busy_lock:
-            for file in self.__unsaved:
-                if file[0] == bufname:
-                    self.__unsaved.discard(file)
-                    break
+        for file in self.__unsaved:
+            if file[0] == bufname:
+                self.__unsaved.discard(file)
+                break
 
-            self.__unsaved.add((bufname, buffer))
+        self.__unsaved.add((bufname, buffer))
 
         self.__increase_tick()
 
@@ -138,7 +136,7 @@ class ClangService:
         self.__increase_tick()
 
     def parse(self, tu_ctx):
-        with self.__busy_lock:
+        with self.__libclang_lock:
             tu_ctx.parse(
                 self.__idx, self.__compile_args, self.__unsaved)
 
@@ -146,7 +144,7 @@ class ClangService:
 
     def parse_all(self):
         for tu_ctx in self.__translation_ctx.values():
-            with self.__busy_lock:
+            with self.__libclang_lock:
                 tu_ctx.parse(self.__idx, self.__compile_args, self.__unsaved)
 
         self.__parse_tick = self.__change_tick

@@ -1,4 +1,31 @@
+import vim
 from clang import cindex
+
+
+def get_vim_cursor_and_def(tu_ctx):
+    vim_cursor = None
+    def_cursor = None
+
+    col = vim.current.window.cursor[1]
+    if len(vim.current.line) > col:
+        c = vim.current.line[col]
+        if c.isalnum() or c == '_':
+            vim_cursor = tu_ctx.get_cursor(vim.current.window.cursor)
+
+            if vim_cursor is not None:
+                def_cursor = get_semantic_definition(vim_cursor)
+
+    if def_cursor is None:
+        return None, None
+
+    if vim.eval('expand("<cword>")') != def_cursor.spelling:
+        return None, None
+
+    return vim_cursor, def_cursor
+
+
+def is_vim_buffer_allowed(buf):
+    return buf.options['filetype'] in ["c", "cpp", "objc", "objcpp"]
 
 
 def is_symbol_cursor(cursor):
