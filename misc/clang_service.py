@@ -63,7 +63,7 @@ class ClangService:
 
         self.__cond = threading.Condition()
         self.__libclang_lock = threading.Lock()
-        self.__unsaved = set()
+        self.__unsaved = {}
         self.__idx = None
 
     def set_compile_args(self, args):
@@ -110,25 +110,13 @@ class ClangService:
             self.__translation_ctx[bufname] = TranslationUnitCtx(bufname)
 
     def update_unsaved_dict(self, dict, incr):
-        for bufname, buffer in dict.items():
-            for us_buffer in self.__unsaved:
-                if us_buffer[0] == bufname:
-                    self.__unsaved.discard(us_buffer)
-                    break
-
-            self.__unsaved.add((bufname, buffer))
+        self.__unsaved = dict
 
         if incr:
             self.__increase_tick()
 
     def update_unsaved(self, bufname, buffer):
-        for file in self.__unsaved:
-            if file[0] == bufname:
-                self.__unsaved.discard(file)
-                break
-
-        self.__unsaved.add((bufname, buffer))
-
+        self.__unsaved[bufname] = buffer
         self.__increase_tick()
 
     def switch_buffer(self, bufname):
@@ -136,21 +124,38 @@ class ClangService:
         self.__increase_tick()
 
     def parse(self, tu_ctx):
+        try:
+            unsaved = self.__get_unsaved_list()
+        except:
+            return
+
         with self.__libclang_lock:
             tu_ctx.parse(
-                self.__idx, self.__compile_args, self.__unsaved)
+                self.__idx, self.__compile_args, unsaved)
 
         self.__parse_tick = self.__change_tick
 
     def parse_all(self):
+        try:
+            unsaved = self.__get_unsaved_list()
+        except:
+            return
+
         for tu_ctx in self.__translation_ctx.values():
             with self.__libclang_lock:
-                tu_ctx.parse(self.__idx, self.__compile_args, self.__unsaved)
+                tu_ctx.parse(self.__idx, self.__compile_args, unsaved)
 
         self.__parse_tick = self.__change_tick
 
     def get_tu_ctx(self, name):
         return self.__translation_ctx.get(name)
+
+    def __get_unsaved_list(self):
+        unsaved = []
+        for bufname, buf in self.__unsaved.items():
+            unsaved.append((bufname, buf))
+
+        return unsaved
 
     def __parsing_worker(self):
         while self.__is_running:
