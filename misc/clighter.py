@@ -29,6 +29,12 @@ __clang_service = clang_service.ClangService()
 #    for c in cursor.get_children():
 #        dfs(c)
 
+def clear_def_ref():
+    highlight.clear_def_ref()
+
+def clear_highlight():
+    highlight.clear_highlight()
+
 def highlight_window():
     highlight.highlight_window(__clang_service)
 
