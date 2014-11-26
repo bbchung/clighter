@@ -33,7 +33,7 @@ def rename(clang_service):
     locs.add((def_cursor.location.line, def_cursor.location.column,
               def_cursor.location.file.name))
     clighter_helper.search_ref_tokens(tu_ctx.translation_unit, def_cursor, locs)
-    __vim_multi_replace(locs, old_name, new_name)
+    __vim_multi_replace(locs, old_name, new_name, vim.vars['clighter_rename_prompt_level'])
 
     if clighter_helper.is_symbol_cursor(def_cursor) and vim.vars['clighter_enable_cross_rename'] == 1:
         __cross_buffer_rename(clang_service, def_cursor.get_usr(), new_name)
@@ -85,17 +85,17 @@ def __search_usr_and_rename_refs(tu, usr, new_name):
             if vim.bindeval('l:choice') == 2:
                 return
 
-        __vim_multi_replace(locs, old_name, new_name)
+        __vim_multi_replace(locs, old_name, new_name, vim.vars['clighter_rename_prompt_level'])
 
 
-def __vim_multi_replace(locs, old, new):
+def __vim_multi_replace(locs, old, new, prompt_level):
     if locs is None:
         return
 
     pattern = ""
 
-    for line, column, file in locs:
-        if file is None or file != vim.current.buffer.name:
+    for line, column, bufname in locs:
+        if bufname is None or bufname != vim.current.buffer.name:
             continue
 
         if pattern:
@@ -109,7 +109,7 @@ def __vim_multi_replace(locs, old, new):
 
     cmd = "%s/" + pattern + "/" + new + "/gI"
 
-    if vim.vars['clighter_rename_prompt_level'] >= 2:
+    if prompt_level >= 2:
         cmd = cmd + "c"
 
     vim.command(cmd)
