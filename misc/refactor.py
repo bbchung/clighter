@@ -33,7 +33,14 @@ def rename(clang_service):
     locs.add((def_cursor.location.line, def_cursor.location.column,
               def_cursor.location.file.name))
     clighter_helper.search_ref_tokens(
-        tu_ctx.translation_unit, def_cursor, locs) __vim_multi_replace(locs, old_name, new_name, vim.vars['clighter_rename_prompt_level'])
+        tu_ctx.translation_unit,
+        def_cursor,
+        locs)
+    __vim_multi_replace(
+        locs,
+        old_name,
+        new_name,
+        vim.vars['clighter_rename_prompt_level'])
 
     if clighter_helper.is_symbol_cursor(
             def_cursor) and vim.vars['clighter_enable_cross_rename'] == 1:
