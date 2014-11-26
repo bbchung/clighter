@@ -4,6 +4,7 @@ import clang_service
 import highlight
 import refactor
 
+
 if vim.vars['clighter_libclang_file']:
     ClangService.set_libclang_file(vim.vars['clighter_libclang_file'])
 
@@ -32,8 +33,10 @@ __clang_service = clang_service.ClangService()
 def clear_def_ref():
     highlight.clear_def_ref()
 
+
 def clear_highlight():
     highlight.clear_highlight()
+
 
 def highlight_window():
     highlight.highlight_window(__clang_service)

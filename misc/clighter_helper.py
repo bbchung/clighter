@@ -29,7 +29,8 @@ def is_vim_buffer_allowed(buf):
 
 
 def is_symbol_cursor(cursor):
-    return cursor.kind.is_preprocessing() or cursor.semantic_parent.kind != cindex.CursorKind.FUNCTION_DECL
+    return cursor.kind.is_preprocessing(
+    ) or cursor.semantic_parent.kind != cindex.CursorKind.FUNCTION_DECL
 
 
 def find_cursors_by_usr(cursor, usr, result):
@@ -71,8 +72,13 @@ def search_ref_tokens(tu, def_cursor, locs):
         if t.kind.value != 2:
             continue
 
-        t_cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(
-            tu, t.location.file, t.location.line, t.location.column))  # cursor under vim
+        t_cursor = cindex.Cursor.from_location(
+            tu,
+            cindex.SourceLocation.from_position(
+                tu,
+                t.location.file,
+                t.location.line,
+                t.location.column))  # cursor under vim
 
         t_cursor_def = get_semantic_definition(t_cursor)
 

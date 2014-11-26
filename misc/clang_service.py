@@ -17,14 +17,24 @@ class TranslationUnitCtx:
             return None
 
         (row, col) = location
-        cursor = cindex.Cursor.from_location(tu, cindex.SourceLocation.from_position(
-            tu, tu.get_file(self.__bufname), row, col + 1))
+        cursor = cindex.Cursor.from_location(
+            tu,
+            cindex.SourceLocation.from_position(
+                tu,
+                tu.get_file(
+                    self.__bufname),
+                row,
+                col +
+                1))
 
         return cursor
 
     def parse(self, idx, args, unsaved):
         self.__tu = idx.parse(
-            self.__bufname, args, unsaved, options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+            self.__bufname,
+            args,
+            unsaved,
+            options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
     @property
     def bufname(self):
