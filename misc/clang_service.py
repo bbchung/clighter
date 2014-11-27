@@ -137,7 +137,7 @@ class ClangService:
         try:
             unsaved = self.__get_unsaved_list()
         except:
-            return
+            return false
 
         with self.__libclang_lock:
             tu_ctx.parse(
@@ -145,17 +145,21 @@ class ClangService:
 
         self.__parse_tick = self.__change_tick
 
+        return true
+
     def parse_all(self):
         try:
             unsaved = self.__get_unsaved_list()
         except:
-            return
+            return false
 
         for tu_ctx in self.__translation_ctx.values():
             with self.__libclang_lock:
                 tu_ctx.parse(self.__idx, self.__compile_args, unsaved)
 
         self.__parse_tick = self.__change_tick
+
+        return true
 
     def get_tu_ctx(self, name):
         return self.__translation_ctx.get(name)
@@ -181,8 +185,11 @@ class ClangService:
                 last_change_tick = self.__change_tick
 
                 tu_ctx = self.__translation_ctx.get(self.__edit_bufname)
-                if tu_ctx is not None:
-                    self.parse(tu_ctx)
+                if tu_ctx is None:
+                    continue
+
+                if not self.parse(tu_ctx):
+                    continue
 
                 self.__parse_tick = last_change_tick
             except:
