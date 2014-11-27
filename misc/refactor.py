@@ -86,11 +86,9 @@ def __search_usr_and_rename_refs(tu, usr, new_name):
 
     if len(locs):
         if vim.vars['clighter_rename_prompt_level'] >= 1:
-            cmd = "let l:choice = confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 1)".format(
-                vim.current.buffer.name)
-            vim.command(cmd)
-
-            if vim.bindeval('l:choice') == 2:
+            if vim.bindeval(
+                "confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 1)".format(
+                    vim.current.buffer.name)) == 2:
                 return
 
         __vim_multi_replace(
