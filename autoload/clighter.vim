@@ -6,7 +6,9 @@ py import clighter
 
 fun! clighter#ToggleCursorHL()
     if g:ClighterCursorHL==1
-        py clighter.clear_def_ref()
+        let a:wnr = winnr()
+        windo py clighter.clear_def_ref()
+        exe a:wnr."wincmd w"
     endif
 
     let g:ClighterCursorHL = !g:ClighterCursorHL
