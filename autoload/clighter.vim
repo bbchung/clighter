@@ -10,6 +10,10 @@ fun! clighter#ToggleCursorHL()
     endif
 
     let g:ClighterCursorHL = !g:ClighterCursorHL
+
+    echohl WarningMsg |
+                \echom printf("Cursor Highlight: %s", g:ClighterCursorHL == 1 ? "Enabled" : "Disabled") |
+                \echohl None
 endf
 
 fun! s:clear_match_grp(groups)
