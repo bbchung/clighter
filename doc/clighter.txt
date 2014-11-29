@@ -64,7 +64,6 @@ Untar the clighter.tar.gz to your vim path.
 |'g:clighter_autostart'|		Enable the Clighter when vim start
 |'g:ClighterCompileArgs'|		The Compile options for Clang
 |'g:clighter_libclang_file'|		The file path of the libclang
-|'g:clighter_realtime'|			Update highlighting in realtime	
 |'g:clighter_rename_prompt_level'|	Set prompt level of rename-refactoring
 |'g:clighter_enable_cross_rename'|	Enable cross buffer rename-refactoring
 |'g:clighter_highlight_groups'|		Enabled syntax highlight group
@@ -97,15 +96,6 @@ this path.
 Default: `''`
 >
 	let g:clighter_libclang_file = '/usr/lib/libclang.so'
-<
-						*'clighter_realtime'*
-g:clighter_realtime~
-Do syntax highlighting in realtime. Turn off this option may improve the
-performance.
-
-Default: `1`
->
-	let g:clighter_realtime = 1
 <
 g:clighter_rename_prompt_level~
 The prompt level of rename refactoring.

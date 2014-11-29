@@ -53,15 +53,10 @@ fun! clighter#Enable()
 
     augroup ClighterEnable
         au!
-        if g:clighter_realtime == 1
-            au CursorMoved * py clighter.highlight_window()
-            au CursorMovedI * py clighter.highlight_window()
-            au TextChanged * py clighter.update_unsaved_if_allow()
-            au TextChangedI * py clighter.update_unsaved_if_allow()
-        else
-            au CursorHold * py clighter.update_unsaved_if_allow()
-            au CursorHoldI * py clighter.update_unsaved_if_allow()
-        endif
+        au CursorMoved * py clighter.highlight_window()
+        au CursorMovedI * py clighter.highlight_window()
+        au TextChanged * py clighter.update_unsaved_if_allow()
+        au TextChangedI * py clighter.update_unsaved_if_allow()
         au CursorHold * py clighter.highlight_window()
         au CursorHoldI * py clighter.highlight_window()
         au WinEnter * py clighter.clang_switch_buffer()

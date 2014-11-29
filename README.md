@@ -62,15 +62,6 @@ Default: `''`
 ```vim
 let g:clighter_libclang_file = '/usr/lib/libclang.so'
 ```
-### g:clighter_realtime
-
-Do syntax highlighting in realtime. Turn off this option may improve the
-performance.
-
-Default: `1`
-```vim
-let g:clighter_realtime = 1
-```
 
 ### g:clighter_rename_prompt_level
 The prompt level of rename refactoring.
