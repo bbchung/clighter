@@ -8,15 +8,14 @@ SYNTAX_PRI = -12
 
 
 def clear_highlight():
-    vim.command(
-        "call s:clear_match_pri([{0}, {1}])".format(DEF_REF_PRI, SYNTAX_PRI))
+    __vim_clear_match_pri(DEF_REF_PRI, SYNTAX_PRI)
     highlight_window.hl_tick = 0
     highlight_window.syntactic_range = None
     highlight_window.highlighted_define_cur = None
 
 
 def clear_def_ref():
-    vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
+    __vim_clear_match_pri(DEF_REF_PRI)
     highlight_window.highlighted_define_cur = None
 
 
@@ -39,7 +38,7 @@ def highlight_window(clang_service, extend=50):
     if highlight_window.hl_tick < clang_service.parse_tick or highlight_window.syntactic_range is None or top < highlight_window.syntactic_range[
             0] or bottom > highlight_window.syntactic_range[1]:
         draw_syntax = True
-        vim.command("call s:clear_match_pri([{0}])".format(SYNTAX_PRI))
+        __vim_clear_match_pri(SYNTAX_PRI)
         highlight_window.hl_tick = clang_service.parse_tick
 
     if vim.vars["ClighterCursorHL"] == 1:
@@ -48,7 +47,7 @@ def highlight_window(clang_service, extend=50):
         if highlight_window.highlighted_define_cur is not None and(
                 def_cursor is None or highlight_window.highlighted_define_cur !=
                 def_cursor):
-            vim.command("call s:clear_match_pri([{0}])".format(DEF_REF_PRI))
+            __vim_clear_match_pri(DEF_REF_PRI)
 
         if def_cursor is not None and(
                 highlight_window.
@@ -148,8 +147,10 @@ def __draw_token(line, col, len, kind, type):
 
 
 def __vim_matchaddpos(group, line, col, len, priority):
-    vim.command("call matchaddpos('{0}', [[{1}, {2}, {3}]], {4})".format(
-        group, line, col, len, priority))
-    # vim.command("call add(w:semantic_list, matchadd('{0}',
-    # '\%{1}l\%>{2}c.\%<{3}c', -1))".format(group, t.location.line,
-    # t.location.column-1, t.location.column+len(t.spelling) + 1));
+    cmd = "call matchaddpos('{0}', [[{1}, {2}, {3}]], {4})"
+    vim.command(cmd.format(group, line, col, len, priority))
+
+
+def __vim_clear_match_pri(*priorities):
+    cmd = "call s:clear_match_pri({0})"
+    vim.command(cmd.format(list(priorities)))
