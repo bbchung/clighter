@@ -6,7 +6,7 @@ import refactor
 
 
 if vim.vars['clighter_libclang_file']:
-    ClangService.set_libclang_file(vim.vars['clighter_libclang_file'])
+    clang_service.ClangService.set_libclang_file(vim.vars['clighter_libclang_file'])
 
 __clang_service = clang_service.ClangService()
 
