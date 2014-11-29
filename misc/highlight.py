@@ -116,35 +116,35 @@ highlight_window.syntactic_range = None
 
 
 def __draw_token(line, col, len, kind, type):
-    if kind == cindex.CursorKind.MACRO_INSTANTIATION and 'clighterMacroInstantiation' in vim.vars[
-            'clighter_highlight_groups']:
-        __vim_matchaddpos(
-            'clighterMacroInstantiation', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.STRUCT_DECL and 'clighterStructDecl' in vim.vars['clighter_highlight_groups']:
-        __vim_matchaddpos('clighterStructDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.CLASS_DECL and 'clighterClassDecl' in vim.vars['clighter_highlight_groups']:
-        __vim_matchaddpos('clighterClassDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.ENUM_DECL and 'clighterEnumDecl' in vim.vars['clighter_highlight_groups']:
-        __vim_matchaddpos('clighterEnumDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.ENUM_CONSTANT_DECL and 'clighterEnumConstantDecl' in vim.vars['clighter_highlight_groups']:
-        __vim_matchaddpos(
-            'clighterEnumConstantDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.TYPE_REF and 'clighterTypeRef' in vim.vars['clighter_highlight_groups']:
-        __vim_matchaddpos('clighterTypeRef', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.FUNCTION_DECL and 'clighterFunctionDecl' in vim.vars['clighter_highlight_groups']:
-        __vim_matchaddpos('clighterFunctionDecl', line, col, len, SYNTAX_PRI)
-    elif kind == cindex.CursorKind.MEMBER_REF_EXPR and 'clighterMemberRefExpr' in vim.vars['clighter_highlight_groups']:
-        __vim_matchaddpos('clighterMemberRefExpr', line, col, len, SYNTAX_PRI)
-    elif kind == (cindex.CursorKind.NAMESPACE_REF or kind == cindex.CursorKind.NAMESPACE) and 'clighterNamespace' in vim.vars['clighter_highlight_groups']:
-        __vim_matchaddpos('clighterNamespace', line, col, len, SYNTAX_PRI)
+    highlight_groups = vim.vars['clighter_highlight_groups']
+
+    def draw(group):
+        if group in highlight_groups:
+            __vim_matchaddpos(group, line, col, len, SYNTAX_PRI)
+
+    if kind == cindex.CursorKind.MACRO_INSTANTIATION:
+        draw('clighterMacroInstantiation')
+    elif kind == cindex.CursorKind.STRUCT_DECL:
+        draw('clighterStructDecl')
+    elif kind == cindex.CursorKind.CLASS_DECL:
+        draw('clighterClassDecl')
+    elif kind == cindex.CursorKind.ENUM_DECL:
+        draw('clighterEnumDecl')
+    elif kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
+        draw('clighterEnumConstantDecl')
+    elif kind == cindex.CursorKind.TYPE_REF:
+        draw('clighterTypeRef')
+    elif kind == cindex.CursorKind.FUNCTION_DECL:
+        draw('clighterFunctionDecl')
+    elif kind == cindex.CursorKind.MEMBER_REF_EXPR:
+        draw('clighterMemberRefExpr')
+    elif kind in (cindex.CursorKind.NAMESPACE_REF, cindex.CursorKind.NAMESPACE):
+        draw('clighterNamespace')
     elif kind == cindex.CursorKind.DECL_REF_EXPR:
-        if type == cindex.TypeKind.ENUM and 'clighterDeclRefExprEnum' in vim.vars[
-                'clighter_highlight_groups']:
-            __vim_matchaddpos(
-                'clighterDeclRefExprEnum', line, col, len, SYNTAX_PRI)
-        elif type == cindex.TypeKind.FUNCTIONPROTO and 'clighterDeclRefExprCall' in vim.vars['clighter_highlight_groups']:
-            __vim_matchaddpos(
-                'clighterDeclRefExprCall', line, col, len, SYNTAX_PRI)
+        if type == cindex.TypeKind.ENUM:
+            draw('clighterDeclRefExprEnum')
+        elif type == cindex.TypeKind.FUNCTIONPROTO:
+            draw('clighterDeclRefExprCall')
 
 
 def __vim_matchaddpos(group, line, col, len, priority):
