@@ -53,16 +53,11 @@ fun! clighter#Enable()
 
     augroup ClighterEnable
         au!
-        au CursorMoved * py clighter.highlight_window()
-        au CursorMovedI * py clighter.highlight_window()
-        au TextChanged * py clighter.update_unsaved_if_allow()
-        au TextChangedI * py clighter.update_unsaved_if_allow()
-        au CursorHold * py clighter.highlight_window()
-        au CursorHoldI * py clighter.highlight_window()
-        au WinEnter * py clighter.clang_switch_buffer()
-        au BufEnter * py clighter.clang_switch_buffer()
-        au SessionLoadPost * py clighter.clang_switch_buffer()
+        au CursorMoved,CursorMovedI,CursorHold,CursorHoldI * py clighter.highlight_window()
+        au TextChanged,TextChangedI * py clighter.update_unsaved_if_allow()
+        au WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_buffer()
         au FileType * py clighter.on_FileType()
+        au BufDelete,BufWipeout * py clighter.unregister_buffer(vim.eval('fnamemodify(expand("<afile>"), ":p")'))
         au VimLeavePre * py clighter.clang_stop_service()
     augroup END
 

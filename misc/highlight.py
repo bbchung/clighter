@@ -48,12 +48,12 @@ def highlight_window(clang_service, extend=50):
         vim_cursor, def_cursor = clighter_helper.get_vim_cursor_and_def(tu_ctx)
 
         if highlight_window.highlighted_define_cur is not None \
-                and (def_cursor is None \
+                and (def_cursor is None
                      or highlight_window.highlighted_define_cur != def_cursor):
             __vim_clear_match_pri(DEF_REF_PRI)
 
         if def_cursor is not None \
-                and (highlight_window.highlighted_define_cur is None \
+                and (highlight_window.highlighted_define_cur is None
                      or highlight_window.highlighted_define_cur != def_cursor):
             draw_def_ref = True
 
@@ -64,7 +64,9 @@ def highlight_window(clang_service, extend=50):
                     group='clighterCursorDefRef',
                     line=def_cursor.location.line,
                     col=def_cursor.location.column,
-                    len=len(clighter_helper.get_spelling_or_displayname(def_cursor)),
+                    len=len(
+                        clighter_helper.get_spelling_or_displayname(
+                            def_cursor)),
                     priority=DEF_REF_PRI
                 )
 

@@ -6,7 +6,8 @@ import refactor
 
 
 if vim.vars['clighter_libclang_file']:
-    clang_service.ClangService.set_libclang_file(vim.vars['clighter_libclang_file'])
+    clang_service.ClangService.set_libclang_file(
+        vim.vars['clighter_libclang_file'])
 
 __clang_service = clang_service.ClangService()
 
@@ -17,7 +18,7 @@ __clang_service = clang_service.ClangService()
 # queue.put(c.get_children())
 
 # while not queue.empty():
-#curs = queue.get()
+# curs = queue.get()
 # for cur in curs:
 # if cur.location.line >= top and cur.location.line <= bottom:
 #__draw_token(cur)
@@ -44,6 +45,23 @@ def highlight_window():
 
 def refactor_rename():
     refactor.rename(__clang_service)
+
+
+def on_FileType():
+    if clighter_helper.is_vim_buffer_allowed(vim.current.buffer):
+        register_buffer(vim.current.buffer.name)
+        __clang_service.switch_buffer(vim.current.buffer.name)
+    else:
+        unregister_buffer(vim.current.buffer.name)
+        clear_highlight()
+
+
+def register_buffer(bufname):
+    __clang_service.create_tu_ctx([bufname])
+
+
+def unregister_buffer(bufname):
+    __clang_service.remove_tu_ctx([bufname])
 
 
 def clang_start_service():
@@ -75,11 +93,3 @@ def update_unsaved_if_allow():
     if clighter_helper.is_vim_buffer_allowed(vim.current.buffer):
         __clang_service.update_unsaved(
             vim.current.buffer.name, '\n'.join(vim.current.buffer))
-
-
-def on_FileType():
-    if clighter_helper.is_vim_buffer_allowed(vim.current.buffer):
-        __clang_service.create_tu_ctx([vim.current.buffer.name])
-    else:
-        __clang_service.remove_tu_ctx([vim.current.buffer.name])
-        clear_highlight()
