@@ -31,7 +31,7 @@ def highlight_window(clang_service, extend=50):
         return
 
     top = vim.bindeval("line('w0')")
-    bottom = vim.bindeval("line('w0')")
+    bottom = vim.bindeval("line('w$')")
 
     draw_syntax = False
     draw_def_ref = False
