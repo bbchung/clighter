@@ -18,7 +18,11 @@ features currently:
 Clighter requires the following:
 
 * Vim version 7.4+ with python2.x enabled
-* libclang(3.5 is recommended) 
+* libclang with clang python binding(3.5 is recommended) 
+	
+For ubuntu:
+`apt-get install libclang1-3.5 python-clang-3.5 `
+
 * Clighter has been tested in linux platform only.
 
 ## Installation
