@@ -7,7 +7,23 @@ endif
 
 if !has('python')
     echohl WarningMsg |
-                \ echomsg "Clighter unavailable: required python2 support" |
+                \ echomsg "Clighter unavailable: requires python2 support" |
+                \ echohl None
+    finish
+endif
+
+python << endpython
+def has_python_clang():
+    try:
+        __import__('imp').find_module('clang')
+        return True
+    except ImportError:
+        return False
+endpython
+
+if !pyeval('has_python_clang()')
+    echohl WarningMsg |
+                \ echomsg "Clighter unavailable: requires clang python binding package" |
                 \ echohl None
     finish
 endif
