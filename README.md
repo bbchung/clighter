@@ -18,11 +18,8 @@ features currently:
 Clighter requires the following:
 
 * Vim version 7.4+ with python2.x enabled
-* libclang with clang python binding(3.5 is recommended) 
-	
-For ubuntu:
-`apt-get install libclang1-3.5 python-clang-3.5 `
-
+* libclang with clang python binding(3.5 is recommended). Please reference to 
+  http://llvm.org/apt/ 
 * Clighter has been tested in linux platform only.
 
 ## Installation
@@ -47,9 +44,10 @@ let g:clighter_autostart = 0
 
 ### g:ClighterCompileArgs
 
-The compiler options for Clang. Clighter will pass these options to libclang to
-parse the code. Notice that bad options will cause clighter not working even
-crashing. For convenience, you can use vim session to remember this option.
+The compiler options for Clang. Clighter will pass these options to libclang
+to parse the code. Notice that bad options will cause clighter not working
+even crashing. For convenience, you can use vim session to remember this
+option.
 
 Default: `'["-Iinclude"]'`
 ```vim
