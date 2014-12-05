@@ -125,7 +125,7 @@ Clighter provides these commands and functions.
 
 * Rename-refactor
 	* It's a experimental function, and it's maybe not reliable.
-	* It's not project scoped(the scope is opend vim buffer list).
+	* It's not project scoped(the scope is opened vim buffer).
 	* Strongly recommend that backing up all files before calling this
 	  function.
 
