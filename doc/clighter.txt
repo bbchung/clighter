@@ -213,9 +213,9 @@ clighterDeclRefExprEnum~
 >
 	hi link clighterDeclRefExprEnum Identifier
 
-clighterCursorDefRef~
+clighterCursorSymbolRef~
 >
-	hi link clighterCursorDefRef IncSearch
+	hi link clighterCursorSymbolRef IncSearch
 
 clighterFunctionDecl~
 >

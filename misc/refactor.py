@@ -11,12 +11,12 @@ def rename(clang_service):
     clang_service.update_unsaved_dict(__get_buffer_dict(), False)
     clang_service.parse_all()
 
-    vim_cursor, def_cursor = clighter_helper.get_vim_cursor_and_def(tu_ctx)
+    symbol = clighter_helper.get_vim_symbol(tu_ctx)
 
-    if vim_cursor is None or def_cursor is None:
+    if symbol is None:
         return
 
-    old_name = clighter_helper.get_spelling_or_displayname(def_cursor)
+    old_name = clighter_helper.get_spelling_or_displayname(symbol)
     vim.command("echohl WildMenu")
     new_name = vim.bindeval(
         "input(' Rename {0} : ', '{1}')".format(old_name, old_name))
@@ -30,11 +30,11 @@ def rename(clang_service):
     pos = vim.current.window.cursor
 
     locs = set()
-    locs.add((def_cursor.location.line, def_cursor.location.column,
-              def_cursor.location.file.name))
-    clighter_helper.search_ref_tokens(
+    locs.add((symbol.location.line, symbol.location.column,
+              symbol.location.file.name))
+    clighter_helper.search_referenced_tokens(
         tu_ctx.translation_unit,
-        def_cursor,
+        symbol,
         locs)
     __vim_multi_replace(
         locs,
@@ -42,16 +42,16 @@ def rename(clang_service):
         new_name,
         vim.vars['clighter_rename_prompt_level'])
 
-    if clighter_helper.is_symbol_cursor(
-            def_cursor) and vim.vars['clighter_enable_cross_rename'] == 1:
-        __cross_buffer_rename(clang_service, def_cursor.get_usr(), new_name)
+    if clighter_helper.is_global_symbol(
+            symbol) and vim.vars['clighter_enable_cross_rename'] == 1:
+        __cross_buffer_rename(clang_service, symbol.get_usr(), new_name)
 
     vim.current.window.cursor = pos
 
     clang_service.update_unsaved_dict(__get_buffer_dict(), True)
 
 
-def __cross_buffer_rename(clang_service, usr, new_name):
+def __cross_buffer_rename(clang_service, symbol_usr, new_name):
     call_bufnr = vim.current.buffer.number
 
     vim.command("bn!")
@@ -59,20 +59,20 @@ def __cross_buffer_rename(clang_service, usr, new_name):
         tu_ctx = clang_service.get_tu_ctx(vim.current.buffer.name)
         if tu_ctx is not None:
             try:
-                __search_usr_and_rename_refs(
-                    tu_ctx.translation_unit, usr, new_name)
+                __search_symbol_and_rename(
+                    tu_ctx.translation_unit, symbol_usr, new_name)
             except:
                 pass
 
         vim.command("bn!")
 
 
-def __search_usr_and_rename_refs(tu, usr, new_name):
+def __search_symbol_and_rename(tu, symbol_usr, new_name):
     if tu is None:
         return
 
     symbols = []
-    clighter_helper.find_cursors_by_usr(tu.cursor, usr, symbols)
+    clighter_helper.search_cursors_by_usr(tu.cursor, symbol_usr, symbols)
 
     if not symbols:
         return
@@ -82,7 +82,7 @@ def __search_usr_and_rename_refs(tu, usr, new_name):
 
     locs = set()
     for sym in symbols:
-        clighter_helper.search_ref_tokens(tu, sym, locs)
+        clighter_helper.search_referenced_tokens(tu, sym, locs)
 
     if len(locs):
         if vim.vars['clighter_rename_prompt_level'] >= 1:

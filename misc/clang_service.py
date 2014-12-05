@@ -10,13 +10,12 @@ class TranslationUnitCtx:
         self.__bufname = bufname
         self.__tu = None
 
-    def get_cursor(self, location):
+    def get_cursor(self, row, col):
         tu = self.__tu
 
         if self.__tu is None:
             return None
 
-        (row, col) = location
         cursor = cindex.Cursor.from_location(
             tu,
             cindex.SourceLocation.from_position(

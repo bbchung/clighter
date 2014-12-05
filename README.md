@@ -180,9 +180,9 @@ Clighter defines these syntax groups corresponding to CursorKind of libclang.
 	hi link clighterDeclRefExprEnum Identifier
 	```
 
-* clighterCursorDefRef
+* clighterCursorSymbolRef
 	```vim
-	hi link clighterCursorDefRef IncSearch
+	hi link clighterCursorSymbolRef IncSearch
 	```
 
 * clighterFunctionDecl

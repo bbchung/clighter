@@ -53,7 +53,7 @@ hi default link clighterClassDecl Type
 hi default link clighterEnumDecl Type
 hi default link clighterEnumConstantDecl Identifier
 hi default link clighterDeclRefExprEnum Identifier
-hi default link clighterCursorDefRef IncSearch
+hi default link clighterCursorSymbolRef IncSearch
 hi default link clighterFunctionDecl None
 hi default link clighterDeclRefExprCall None
 hi default link clighterMemberRefExpr None

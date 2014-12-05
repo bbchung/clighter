@@ -3,20 +3,20 @@ import clighter_helper
 from clang import cindex
 import clang_service
 
-DEF_REF_PRI = -11
+SYMBOL_REF_PRI = -11
 SYNTAX_PRI = -12
 
 
 def clear_highlight():
-    __vim_clear_match_pri(DEF_REF_PRI, SYNTAX_PRI)
+    __vim_clear_match_pri(SYMBOL_REF_PRI, SYNTAX_PRI)
     highlight_window.hl_tick = 0
     highlight_window.syntactic_range = None
-    highlight_window.highlighted_define_cur = None
+    highlight_window.hl_symbol = None
 
 
-def clear_def_ref():
-    __vim_clear_match_pri(DEF_REF_PRI)
-    highlight_window.highlighted_define_cur = None
+def clear_symbol_ref():
+    __vim_clear_match_pri(SYMBOL_REF_PRI)
+    highlight_window.hl_symbol = None
 
 
 def highlight_window(clang_service, extend=50):
@@ -34,7 +34,7 @@ def highlight_window(clang_service, extend=50):
     bottom = vim.bindeval("line('w$')")
 
     draw_syntax = False
-    draw_def_ref = False
+    draw_symbol_ref = False
 
     if highlight_window.hl_tick < clang_service.parse_tick \
             or highlight_window.syntactic_range is None \
@@ -45,34 +45,34 @@ def highlight_window(clang_service, extend=50):
         highlight_window.hl_tick = clang_service.parse_tick
 
     if vim.vars["ClighterCursorHL"] == 1:
-        vim_cursor, def_cursor = clighter_helper.get_vim_cursor_and_def(tu_ctx)
+        symbol = clighter_helper.get_vim_symbol(tu_ctx)
 
-        if highlight_window.highlighted_define_cur is not None \
-                and (def_cursor is None
-                     or highlight_window.highlighted_define_cur != def_cursor):
-            __vim_clear_match_pri(DEF_REF_PRI)
+        if highlight_window.hl_symbol is not None \
+                and (symbol is None
+                     or highlight_window.hl_symbol != symbol):
+            __vim_clear_match_pri(SYMBOL_REF_PRI)
 
-        if def_cursor is not None \
-                and (highlight_window.highlighted_define_cur is None
-                     or highlight_window.highlighted_define_cur != def_cursor):
-            draw_def_ref = True
+        if symbol is not None \
+                and (highlight_window.hl_symbol is None
+                     or highlight_window.hl_symbol != symbol):
+            draw_symbol_ref = True
 
             # special case for preprocessor
-            if def_cursor.kind.is_preprocessing() \
-                    and def_cursor.location.file.name == vim.current.buffer.name:
+            if symbol.kind.is_preprocessing() \
+                    and symbol.location.file.name == vim.current.buffer.name:
                 __vim_matchaddpos(
-                    group='clighterCursorDefRef',
-                    line=def_cursor.location.line,
-                    col=def_cursor.location.column,
+                    group='clighterCursorSymbolRef',
+                    line=symbol.location.line,
+                    col=symbol.location.column,
                     len=len(
                         clighter_helper.get_spelling_or_displayname(
-                            def_cursor)),
-                    priority=DEF_REF_PRI
+                            symbol)),
+                    priority=SYMBOL_REF_PRI
                 )
 
-        highlight_window.highlighted_define_cur = def_cursor
+        highlight_window.hl_symbol = symbol
 
-    if not draw_syntax and not draw_def_ref:
+    if not draw_syntax and not draw_symbol_ref:
         return
 
     target_range = [top, bottom]
@@ -127,20 +127,20 @@ def highlight_window(clang_service, extend=50):
 
         """ Do definition/reference highlighting'
         """
-        if draw_def_ref:
-            t_def_cursor = clighter_helper.get_semantic_definition(t_cursor)
-            if t_def_cursor is not None \
-                    and t_def_cursor == highlight_window.highlighted_define_cur:
+        if draw_symbol_ref:
+            symbol = clighter_helper.get_semantic_symbol(t_cursor)
+            if symbol is not None \
+                    and symbol == highlight_window.hl_symbol:
                 __vim_matchaddpos(
-                    group='clighterCursorDefRef',
+                    group='clighterCursorSymbolRef',
                     line=t.location.line,
                     col=t.location.column,
                     len=len(t.spelling),
-                    priority=DEF_REF_PRI
+                    priority=SYMBOL_REF_PRI
                 )
 
 
-highlight_window.highlighted_define_cur = None
+highlight_window.hl_symbol = None
 highlight_window.hl_tick = 0
 highlight_window.syntactic_range = None
 
