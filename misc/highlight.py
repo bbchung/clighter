@@ -129,8 +129,7 @@ def highlight_window(clang_service, extend=50):
         """
         if draw_symbol_ref:
             symbol = clighter_helper.get_semantic_symbol(t_cursor)
-            if symbol is not None \
-                    and symbol == highlight_window.hl_symbol:
+            if symbol is not None and t.spelling == symbol.spelling and symbol == highlight_window.hl_symbol:
                 __vim_matchaddpos(
                     group='clighterCursorSymbolRef',
                     line=t.location.line,
