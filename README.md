@@ -46,7 +46,7 @@ let g:clighter_autostart = 1
 
 Clighter will pass these args to libclang to parse the code. Notice that bad
 options will cause clighter not working even crashing. For convenience, you
-can use |mksession| to save this option.
+can use mksession to save this option.
 
 Default: `'["-Iinclude"]'`
 ```vim
