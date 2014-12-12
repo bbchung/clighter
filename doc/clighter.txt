@@ -47,9 +47,8 @@ Vundle Install~
 <
 
 Manuall Install~
->
-	Untar the clighter.tar.gz to your vim path.
-<
+
+Untar the clighter.tar.gz to your vim path.
 
 ==============================================================================
 						*clighter-options*
@@ -141,7 +140,7 @@ Enable cursor highlight by default.
 
 Default: `1`
 >
-	let g:clighter_cursor_hl_default = 0
+	let g:clighter_cursor_hl_default = 1
 <
 ==============================================================================
 						*clighter-commands-and-functions*

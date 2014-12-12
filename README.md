@@ -2,14 +2,13 @@
 
 ## Intro
 
-Clighter(C Lighter) is a vim plugin that integrates libclang to improve
+Clighter(C lighter) is a vim plugin that integrates libclang to improve
 development environment for c-family programming. Clighter provides following
 features currently:
 
 * Syntax(semantic) highlighting
 * Cursor word highlighting
-* Customizable color of highlighting
-* Experimental function to for rename-refactoring
+* Experimental rename-refactoring function
 
 ![Clighter GIF demo](http://goo.gl/C7FYg8)
 
@@ -17,12 +16,13 @@ features currently:
 
 Clighter requires the following:
 
-* Vim version 7.4+ with python2.x enabled
-* libclang with clang python binding(3.5 is recommended). Please reference to 
-  http://llvm.org/apt/ 
-* Clighter has been tested in linux platform only.
+* Vim version 7.4 with python2.x enabled
+* libclang with python binding(3.5 is recommended). Please reference
+  http://llvm.org/apt/ to install
+* Clighter has been tested under Linux
 
 ## Installation
+
 * Vundle Install:
 ```vim
 Bundle 'bbchung/clighter'
@@ -31,34 +31,33 @@ Bundle 'bbchung/clighter'
 
 Untar the clighter.tar.gz to your vim path.
 
-
 ## Options
 
 ### g:clighter_autostart
-Clighter automatically start while g:clighter_autostart == `1`.
+
+Clighter will automatically start while g:clighter_autostart == `1`.
 
 Default: `1`
 ```vim
-let g:clighter_autostart = 0
+let g:clighter_autostart = 1
 ```
 
 ### g:ClighterCompileArgs
 
-The compiler options for Clang. Clighter will pass these options to libclang
-to parse the code. Notice that bad options will cause clighter not working
-even crashing. For convenience, you can use vim session to remember this
-option.
+Clighter will pass these args to libclang to parse the code. Notice that bad
+options will cause clighter not working even crashing. For convenience, you
+can use |mksession| to save this option.
 
 Default: `'["-Iinclude"]'`
 ```vim
-let g:ClighterCompileArgs = '["-x", "c++", "-std=c++", "-DLinux"]'
+let g:ClighterCompileArgs = '["-Iinclude"]'
 ```
 
 ### g:clighter_libclang_file
 
-Clighter try to find libclang-3.5 in your system automatically, if clighter
-doesn't find the libclang or other version of libclang is used, you need set
-this path.
+Clighter try to find libclang-3.5 in your system automatically. You must set
+this option if clighter cannot find libclang or other version of libclang is
+used.
 
 Default: `''`
 ```vim
@@ -66,6 +65,7 @@ let g:clighter_libclang_file = '/usr/lib/libclang.so'
 ```
 
 ### g:clighter_rename_prompt_level
+
 The prompt level of rename refactoring.
 
 `0`: no prompt
@@ -80,6 +80,7 @@ let g:clighter_rename_prompt_level = 1
 ```
 
 ### g:clighter_enable_cross_rename
+
 `0`: disable
 
 `1`: enable
@@ -90,120 +91,72 @@ let g:clighter_enable_cross_rename = 1
 ```
 
 ### g:clighter_highlight_groups
-Define the token type of syntax to highlight.
 
-Default:
+Define the token type of syntax to be highlighted.
+
+Default: `['clighterMacroInstantiation','clighterStructDecl','clighterClassDecl','clighterEnumDecl','clighterEnumConstantDecl','clighterTypeRef','clighterDeclRefExprEnum']`
 ```vim
-['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum']
+let g:clighter_highlight_groups = ['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum']
 ```
 
 ### g:clighter_cursor_hl_default
+
 Enable cursor highlight by default
 
 Default: `1`
 ```vim
-let g:clighter_cursor_hl_default = 0
+let g:clighter_cursor_hl_default = 1
 ```
-
-
 
 ## Commands and Functions
 
 Clighter provides these commands and functions.
 
-* Enable Clighter
+### ClighterEnable
 
-	`ClighterEnable`
+Enable clighter plugin.
 
-* Disable Clighter
+### ClighterDisable
 
-	`ClighterDisable`
+Disable clighter plugin.
 
-* Toggle cursor highlighting
+### ClighterToggleCursorHL
 
-	`ClighterToggleCursorHL`
+Toggle cursor highlighting.
 
-* Rename-refactor
-	* It's a experimental function, and it's maybe not reliable.
-	* It's not project scoped(the scope is opened vim buffer).
-	* Strongly recommend that backing up all files before calling this
-	  function.
+### clighter#Rename()
 
-	`clighter#Rename()`
-    
-    For convenience, you can add key mapping in your vimrc:
-	```vim
-    nmap <silent> <Leader>r :call clighter#Rename()<CR>
-	```
+* An experimental function to do rename refactoring.
+* The scope is opened vim buffers.
+* There is no one-step undo/redo method.
+* Strongly recommend that backing up all files before calling this function.
+* For convenience, you can add key mapping in your vimrc:
+```vim
+nmap <silent> <Leader>r :call clighter#Rename()<CR>
+```
 
-* Set clang compile args in runtime
+### clighter#Rename()
 
-	`call clighter#SetCompileArgs()`
+Set clang compile args in runtime.
 
+## Syntax Group
 
-## Customize Colors
+Clighter defines these syntax groups corresponded to libclang.
 
-Clighter defines these syntax groups corresponding to CursorKind of libclang.
-
-* clighterMacroInstantiation
-	```vim
-	hi link clighterMacroInstantiation Constant
-	```
-
-* clighterTypeRef
-	```vim
-	hi link clighterTypeRef Identifier
-	```
-
-* clighterStructDecl
-	```vim
-	hi link clighterStructDecl Type
-	```
-
-* clighterClassDecl
-	```vim
-	hi link clighterClassDecl Type
-	```
-
-* clighterEnumDecl
-	```vim
-	hi link clighterEnumDecl Type
-	```
-
-* clighterEnumConstantDecl
-	```vim
-	hi link clighterEnumConstantDecl Identifier
-	```
-
-* clighterDeclRefExprEnum
-	```vim
-	hi link clighterDeclRefExprEnum Identifier
-	```
-
-* clighterCursorSymbolRef
-	```vim
-	hi link clighterCursorSymbolRef IncSearch
-	```
-
-* clighterFunctionDecl
-	```vim
-	hi link clighterFunctionDecl None
-	```
-
-* clighterDeclRefExprCall
-	```vim
-	hi link clighterDeclRefExprCall None
-	```
-
-* clighterMemberRefExpr
-	```vim
-	hi link clighterMemberRefExpr None
-	```
-
-* clighterNamespace
-	```vim
-	hi link clighterNamespace None
-	```
+```vim
+hi link clighterMacroInstantiation Constant
+hi link clighterTypeRef Identifier
+hi link clighterStructDecl Type
+hi link clighterClassDecl Type
+hi link clighterEnumDecl Type
+hi link clighterEnumConstantDecl Identifier
+hi link clighterDeclRefExprEnum Identifier
+hi link clighterCursorSymbolRef IncSearch
+hi link clighterFunctionDecl None
+hi link clighterDeclRefExprCall None
+hi link clighterMemberRefExpr None
+hi link clighterNamespace None
+```
 
 You can customize these colors in your colorscheme, for example:
 ```vim
@@ -211,15 +164,14 @@ You can customize these colors in your colorscheme, for example:
 	hi clighterClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
 ```
 
-
 ## FAQ
 
 ### The clighter plugin doesn't work.
-Vim version 7.4+ with python2.x is required, and make sure libclang(3.5 is
+Vim version 7.4 with python2.x is required, and make sure libclang(3.5 is
 recommended) is installed correctly and set g:clighter_libclang_file if need.
 
-### Why rename-refactoring function is an experimental function
+### Why rename-refactoring function is an experimental function?
 Even though libclang provides many useful informations, it's not enough to do
-cross file rename-refactoring, so Clighter needs to use its own way way to
+cross file rename-refactoring. Clighter needs to use its own way way to
 'guess' what should be renamed. Clighter can't gurantee the result of
 rename-factoring result is perfect.
