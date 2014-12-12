@@ -101,7 +101,7 @@ let g:clighter_highlight_groups = ['clighterMacroInstantiation', 'clighterStruct
 
 ### g:clighter_cursor_hl_default
 
-Enable cursor highlight by default
+Enable cursor highlight by default.
 
 Default: `1`
 ```vim
@@ -135,7 +135,7 @@ Toggle cursor highlighting.
 nmap <silent> <Leader>r :call clighter#Rename()<CR>
 ```
 
-### clighter#Rename()
+### clighter#SetCompileArgs()
 
 Set clang compile args in runtime.
 
