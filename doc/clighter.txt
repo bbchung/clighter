@@ -79,7 +79,7 @@ g:ClighterCompileArgs~
 
 Clighter will pass these args to libclang to parse the code. Notice that bad
 options will cause clighter not working even crashing. For convenience, you
-can use *mksession* to save this option.
+can use |mksession| to save this option.
 
 Default: `'["-Iinclude"]'`
 >
@@ -221,7 +221,7 @@ You can customize these colors in your colorscheme, for example:
 
 Q. The clighter plugin doesn't work.
 A. Vim version 7.4 with python2.x is required, and make sure libclang(3.5 is
-recommended) is installed correctly and set *g:clighter_libclang_file* if
+recommended) is installed correctly and set |g:clighter_libclang_file| if
 need.
 
 Q. Why rename-refactoring function is an experimental function?
