@@ -1,5 +1,4 @@
 import threading
-import clighter_helper
 from clang import cindex
 
 
