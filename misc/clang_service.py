@@ -59,7 +59,7 @@ class ClangService:
         ClangService.__has_set_libclang = True
 
     def __init__(self):
-        self.__edit_bufname = None
+        self.__current_bufname = None
         self.__translation_ctx = {}
         self.__thread = None
         self.__is_running = False
@@ -121,15 +121,15 @@ class ClangService:
         self.__unsaved = dict
 
         if incr:
-            self.__increase_tick()
+            self.__increase_change_tick()
 
     def update_unsaved(self, bufname, buffer):
         self.__unsaved[bufname] = buffer
-        self.__increase_tick()
+        self.__increase_change_tick()
 
     def switch_buffer(self, bufname):
-        self.__edit_bufname = bufname
-        self.__increase_tick()
+        self.__current_bufname = bufname
+        self.__increase_change_tick()
 
     def parse(self, tu_ctx):
         try:
@@ -182,7 +182,7 @@ class ClangService:
 
                 last_change_tick = self.__change_tick
 
-                tu_ctx = self.__translation_ctx.get(self.__edit_bufname)
+                tu_ctx = self.__translation_ctx.get(self.__current_bufname)
                 if tu_ctx is None:
                     continue
 
@@ -193,7 +193,7 @@ class ClangService:
             except:
                 pass
 
-    def __increase_tick(self):
+    def __increase_change_tick(self):
         with self.__cond:
             self.__change_tick += 1
             self.__cond.notify()
