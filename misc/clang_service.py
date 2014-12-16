@@ -87,7 +87,7 @@ class ClangService:
         if self.__thread is not None:
             return True
 
-        self.__compile_args = list(arg)
+        self.__compile_args = arg
 
         self.__is_running = True
         self.__thread = threading.Thread(target=self.__parsing_worker)
