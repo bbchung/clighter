@@ -49,7 +49,7 @@ fun! clighter#Enable()
     endif
 
     py clighter.clang_switch_buffer()
-    py clighter.clang_create_all_tu_ctx()
+    py clighter.clang_create_all_buf_ctx()
 
     augroup ClighterEnable
         au!

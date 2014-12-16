@@ -57,11 +57,11 @@ def on_FileType():
 
 
 def register_buffer(bufname):
-    __clang_service.create_tu_ctx([bufname])
+    __clang_service.reg_buffers([bufname])
 
 
 def unregister_buffer(bufname):
-    __clang_service.remove_tu_ctx([bufname])
+    __clang_service.unreg_buffers([bufname])
 
 
 def clang_start_service():
@@ -76,13 +76,13 @@ def clang_set_compile_args(args):
     __clang_service.set_compile_args(args)
 
 
-def clang_create_all_tu_ctx():
+def clang_create_all_buf_ctx():
     list = []
     for buf in vim.buffers:
         if clighter_helper.is_vim_buffer_allowed(buf):
             list.append(buf.name)
 
-    __clang_service.create_tu_ctx(list)
+    __clang_service.reg_buffers(list)
 
 
 def clang_switch_buffer():
@@ -92,4 +92,6 @@ def clang_switch_buffer():
 def update_unsaved_if_allow():
     if clighter_helper.is_vim_buffer_allowed(vim.current.buffer):
         __clang_service.update_unsaved(
-            vim.current.buffer.name, '\n'.join(vim.current.buffer))
+            [(vim.current.buffer.name,
+              '\n'.join(vim.current.buffer),
+              vim.bindeval("b:changedtick"))])

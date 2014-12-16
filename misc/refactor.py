@@ -4,14 +4,14 @@ import clang_service
 
 
 def rename(clang_service):
-    tu_ctx = clang_service.get_tu_ctx(vim.current.buffer.name)
-    if tu_ctx is None:
+    buf_ctx = clang_service.get_buf_ctx(vim.current.buffer.name)
+    if buf_ctx is None:
         return
 
-    clang_service.update_unsaved_dict(__get_buffer_dict(), False)
+    clang_service.update_unsaved(__get_bufctx_list(), False)
     clang_service.parse_all()
 
-    symbol = clighter_helper.get_vim_symbol(tu_ctx)
+    symbol = clighter_helper.get_vim_symbol(buf_ctx)
 
     if symbol is None:
         return
@@ -33,7 +33,7 @@ def rename(clang_service):
     locs.add((symbol.location.line, symbol.location.column,
               symbol.location.file.name))
     clighter_helper.search_referenced_tokens(
-        tu_ctx.translation_unit,
+        buf_ctx.translation_unit,
         symbol,
         locs)
     __vim_multi_replace(
@@ -48,7 +48,7 @@ def rename(clang_service):
 
     vim.current.window.cursor = pos
 
-    clang_service.update_unsaved_dict(__get_buffer_dict(), True)
+    clang_service.update_unsaved(__get_bufctx_list(), True)
 
 
 def __cross_buffer_rename(clang_service, symbol_usr, new_name):
@@ -56,11 +56,11 @@ def __cross_buffer_rename(clang_service, symbol_usr, new_name):
 
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
-        tu_ctx = clang_service.get_tu_ctx(vim.current.buffer.name)
-        if tu_ctx is not None:
+        buf_ctx = clang_service.get_buf_ctx(vim.current.buffer.name)
+        if buf_ctx is not None:
             try:
                 __search_symbol_and_rename(
-                    tu_ctx.translation_unit, symbol_usr, new_name)
+                    buf_ctx.translation_unit, symbol_usr, new_name)
             except:
                 pass
 
@@ -125,8 +125,8 @@ def __vim_multi_replace(locs, old, new, prompt_level):
     vim.command(cmd)
 
 
-def __get_buffer_dict():
-    dict = {}
+def __get_bufctx_list():
+    list = []
 
     for buf in vim.buffers:
         if not clighter_helper.is_vim_buffer_allowed(buf):
@@ -135,6 +135,6 @@ def __get_buffer_dict():
         if len(buf) == 1 and not buf[0]:
             continue
 
-        dict[buf.name] = '\n'.join(buf)
+        list.append((buf.name, '\n'.join(buf), vim.bindeval("b:changedtick")))
 
-    return dict
+    return list

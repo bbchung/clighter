@@ -9,7 +9,6 @@ SYNTAX_PRI = -12
 
 def clear_highlight():
     __vim_clear_match_pri(SYMBOL_REF_PRI, SYNTAX_PRI)
-    highlight_window.hl_tick = 0
     highlight_window.syntactic_range = None
     highlight_window.hl_symbol = None
 
@@ -20,12 +19,12 @@ def clear_symbol_ref():
 
 
 def highlight_window(clang_service, extend=50):
-    tu_ctx = clang_service.get_tu_ctx(vim.current.buffer.name)
-    if tu_ctx is None:
+    buf_ctx = clang_service.get_buf_ctx(vim.current.buffer.name)
+    if buf_ctx is None:
         clear_highlight()
         return
 
-    tu = tu_ctx.translation_unit
+    tu = buf_ctx.translation_unit
     if tu is None:
         clear_highlight()
         return
@@ -36,16 +35,17 @@ def highlight_window(clang_service, extend=50):
     draw_syntax = False
     draw_symbol_ref = False
 
-    if highlight_window.hl_tick < clang_service.parse_tick \
+    current_tick = buf_ctx.parse_tick
+    if buf_ctx.hl_tick < current_tick \
             or highlight_window.syntactic_range is None \
             or top < highlight_window.syntactic_range[0] \
             or bottom > highlight_window.syntactic_range[1]:
         draw_syntax = True
         __vim_clear_match_pri(SYNTAX_PRI)
-        highlight_window.hl_tick = clang_service.parse_tick
+        buf_ctx.hl_tick = current_tick
 
     if vim.vars["ClighterCursorHL"] == 1:
-        symbol = clighter_helper.get_vim_symbol(tu_ctx)
+        symbol = clighter_helper.get_vim_symbol(buf_ctx)
 
         if highlight_window.hl_symbol is not None \
                 and (symbol is None
@@ -65,8 +65,7 @@ def highlight_window(clang_service, extend=50):
                     line=symbol.location.line,
                     col=symbol.location.column,
                     len=len(
-                        clighter_helper.get_spelling_or_displayname(
-                            symbol)),
+                        clighter_helper.get_spelling_or_displayname(symbol)),
                     priority=SYMBOL_REF_PRI
                 )
 
@@ -85,7 +84,7 @@ def highlight_window(clang_service, extend=50):
         ]
         highlight_window.syntactic_range = target_range
 
-    file = tu.get_file(tu_ctx.bufname)
+    file = tu.get_file(buf_ctx.bufname)
     tokens = tu.get_tokens(
         extent=cindex.SourceRange.from_locations(
             cindex.SourceLocation.from_position(
@@ -140,7 +139,6 @@ def highlight_window(clang_service, extend=50):
 
 
 highlight_window.hl_symbol = None
-highlight_window.hl_tick = 0
 highlight_window.syntactic_range = None
 
 
