@@ -8,7 +8,7 @@ def rename(clang_service):
     if cc is None:
         return
 
-    clang_service.update_unsaved(__get_bufctx_list(), False)
+    clang_service.update_buffers(__get_bufctx_list(), False)
     clang_service.parse_all()
 
     symbol = clighter_helper.get_vim_symbol(cc)
@@ -48,7 +48,7 @@ def rename(clang_service):
 
     vim.current.window.cursor = pos
 
-    clang_service.update_unsaved(__get_bufctx_list(), True)
+    clang_service.update_buffers(__get_bufctx_list(), True)
 
 
 def __cross_buffer_rename(clang_service, symbol_usr, new_name):
