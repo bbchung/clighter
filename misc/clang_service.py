@@ -52,12 +52,16 @@ class ClangContext(object):
         return self.__change_tick
 
     @property
+    def translation_unit(self):
+        return self.__translation_unit
+
+    @property
     def parse_tick(self):
         return self.__parse_tick
 
-    @property
-    def translation_unit(self):
-        return self.__translation_unit
+    @parse_tick.setter
+    def parse_tick(self, value):
+        self.__parse_tick = value
 
     @property
     def hl_tick(self):
@@ -141,6 +145,7 @@ class ClangService(object):
         if cc is None:
             return
 
+        cc.parse_tick = -1
         cc.hl_tick = -1
         self.__current_cc = cc
         with self.__cond:
