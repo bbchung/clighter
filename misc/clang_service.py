@@ -156,12 +156,11 @@ class ClangService(object):
 
         try:
             unsaved = self.__gen_unsaved()
+            with self.__libclang_lock:
+                cc.parse(
+                    self.__cindex, self.__compile_args, unsaved, tick)
         except:
             return False
-
-        with self.__libclang_lock:
-            cc.parse(
-                self.__cindex, self.__compile_args, unsaved, tick)
 
         return True
 
