@@ -50,18 +50,27 @@ def refactor_rename():
 def on_FileType():
     if clighter_helper.is_vim_buffer_allowed(vim.current.buffer):
         register_buffer(vim.current.buffer.name)
-        __clang_service.switch_buffer(vim.current.buffer.name)
+        __clang_service.switch(vim.current.buffer.name)
     else:
         unregister_buffer(vim.current.buffer.name)
         clear_highlight()
 
 
 def register_buffer(bufname):
-    __clang_service.reg_buffers([bufname])
+    __clang_service.register([bufname])
+
+
+def register_allowed_buffers():
+    list = []
+    for buf in vim.buffers:
+        if clighter_helper.is_vim_buffer_allowed(buf):
+            list.append(buf.name)
+
+    __clang_service.register(list)
 
 
 def unregister_buffer(bufname):
-    __clang_service.unreg_buffers([bufname])
+    __clang_service.unregister([bufname])
 
 
 def clang_start_service():
@@ -73,25 +82,16 @@ def clang_stop_service():
 
 
 def clang_set_compile_args(args):
-    __clang_service.set_compile_args(args)
+    __clang_service.compile_args = args
 
 
-def clang_create_all_buf_ctx():
-    list = []
-    for buf in vim.buffers:
-        if clighter_helper.is_vim_buffer_allowed(buf):
-            list.append(buf.name)
-
-    __clang_service.reg_buffers(list)
+def clang_switch_to_current():
+    __clang_service.switch(vim.current.buffer.name)
 
 
-def clang_switch_buffer():
-    __clang_service.switch_buffer(vim.current.buffer.name)
-
-
-def update_unsaved_if_allow():
+def update_buffer_if_allow():
     if clighter_helper.is_vim_buffer_allowed(vim.current.buffer):
-        __clang_service.update_unsaved(
+        __clang_service.update_buffers(
             [(vim.current.buffer.name,
               '\n'.join(vim.current.buffer),
               vim.bindeval("b:changedtick"))])

@@ -2,191 +2,215 @@ import threading
 from clang import cindex
 
 
-class BufCtx:
+class ClangContext(object):
 
-    def __init__(self, bufname):
+    def __init__(self, name):
 
-        self.__bufname = bufname
-        self.__tu = None
-        self.buffer = None
-        self.change_tick = 0
-        self.parse_tick = -1
-        self.hl_tick = -1
+        self.__name = name
+        self.__buffer = None
+        self.__translation_unit = None
+        self.__change_tick = 0
+        self.__parse_tick = -1
+        self.__hl_tick = -1
+
+    def update_buffer(self, buffer, tick):
+        self.__buffer = buffer
+        self.__change_tick = tick
 
     def get_cursor(self, row, col):
-        tu = self.__tu
+        tu = self.__translation_unit
 
-        if self.__tu is None:
+        if tu is None:
             return None
 
-        cursor = cindex.Cursor.from_location(
+        return cindex.Cursor.from_location(
             tu,
             cindex.SourceLocation.from_position(
                 tu,
-                tu.get_file(self.__bufname),
+                tu.get_file(self.__name),
                 row,
                 col + 1))
 
-        return cursor
-
     def parse(self, idx, args, unsaved, tick):
-        self.parse_tick = tick
-        self.__tu = idx.parse(
-            self.__bufname,
+        self.__translation_unit = idx.parse(
+            self.__name,
             args,
             unsaved,
             options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+        self.__parse_tick = tick
 
     @property
-    def bufname(self):
-        return self.__bufname
+    def name(self):
+        return self.__name
+
+    @property
+    def buffer(self):
+        return self.__buffer
+
+    @property
+    def change_tick(self):
+        return self.__change_tick
+
+    @property
+    def parse_tick(self):
+        return self.__parse_tick
 
     @property
     def translation_unit(self):
-        return self.__tu
+        return self.__translation_unit
+
+    @property
+    def hl_tick(self):
+        return self.__hl_tick
+
+    @hl_tick.setter
+    def hl_tick(self, value):
+        self.__hl_tick = value
 
 
-class ClangService:
-    __has_set_libclang = False
+class ClangService(object):
 
     @staticmethod
     def set_libclang_file(libclang):
-        if ClangService.__has_set_libclang:
-            return
-
         cindex.Config.set_library_file(libclang)
-        ClangService.__has_set_libclang = True
 
     def __init__(self):
-        self.__current_buf_ctx = None
-        self.__buf_ctx = {}
-        self.__thread = None
+        self.__current_cc = None
+        self.__cc_dict = {}
+        self.__parsing_thread = None
         self.__is_running = False
         self.__compile_args = []
         self.__cond = threading.Condition()
         self.__libclang_lock = threading.Lock()
-        self.__idx = None
-
-    def set_compile_args(self, args):
-        self.__compile_args = args
+        self.__cindex = None
 
     def start(self, arg):
-        if self.__idx is None:
+        if self.__cindex is None:
             try:
-                self.__idx = cindex.Index.create()
+                self.__cindex = cindex.Index.create()
             except:
                 return False
 
-        if self.__thread is not None:
+        if self.__parsing_thread is not None:
             return True
 
         self.__compile_args = arg
 
         self.__is_running = True
-        self.__thread = threading.Thread(target=self.__parsing_worker)
-        self.__thread.start()
+        self.__parsing_thread = threading.Thread(target=self.__parsing_worker)
+        self.__parsing_thread.start()
 
         return True
 
     def stop(self):
-        if self.__thread is not None:
+        if self.__parsing_thread is not None:
             self.__is_running = False
             with self.__cond:
                 self.__cond.notify()
-            self.__thread.join()
-            self.__thread = None
+            self.__parsing_thread.join()
+            self.__parsing_thread = None
 
-        self.__buf_ctx.clear()
+        self.__cc_dict.clear()
 
-    def unreg_buffers(self, list):
-        for bufname in list:
-            if bufname in self.__buf_ctx.keys():
-                del self.__buf_ctx[bufname]
+    def unregister(self, list):
+        for name in list:
+            if name in self.__cc_dict.keys():
+                del self.__cc_dict[name]
 
-    def reg_buffers(self, list):
-        for bufname in list:
-            if bufname in self.__buf_ctx.keys():
+    def register(self, list):
+        for name in list:
+            if name in self.__cc_dict.keys():
                 continue
 
-            self.__buf_ctx[bufname] = BufCtx(bufname)
+            self.__cc_dict[name] = ClangContext(name)
 
-    def update_unsaved(self, buf_list, notify=True):
-        for bufname, buffer, tick in buf_list:
-            self.__buf_ctx[bufname].buffer = buffer
-            self.__buf_ctx[bufname].change_tick = tick
+    def update_buffers(self, update_list, notify=True):
+        for name, buffer, tick in update_list:
+            cc = self.__cc_dict.get(name)
+            if cc is None:
+                continue
+
+            cc.update_buffer(buffer, tick)
 
         if notify:
             with self.__cond:
                 self.__cond.notify()
 
-    def switch_buffer(self, bufname):
-        buf_ctx = self.__buf_ctx.get(bufname)
-        if buf_ctx is None:
+    def switch(self, name):
+        cc = self.__cc_dict.get(name)
+        if cc is None:
             return
 
-        buf_ctx.hl_tick = -1
-        self.__current_buf_ctx = buf_ctx
+        cc.hl_tick = -1
+        self.__current_cc = cc
         with self.__cond:
             self.__cond.notify()
 
-    def parse(self, buf_ctx):
-        current_tick = buf_ctx.change_tick
+    def parse_cc(self, cc):
+        tick = cc.change_tick
 
         try:
-            unsaved = self.__get_unsaved_list()
+            unsaved = self.__gen_unsaved()
         except:
             return False
 
         with self.__libclang_lock:
-            buf_ctx.parse(
-                self.__idx, self.__compile_args, unsaved, current_tick)
+            cc.parse(
+                self.__cindex, self.__compile_args, unsaved, tick)
 
         return True
 
     def parse_all(self):
         try:
             tick = {}
-            for buf_ctx in self.__buf_ctx.values():
-                tick[buf_ctx.bufname] = buf_ctx.change_tick
+            for cc in self.__cc_dict.values():
+                tick[cc.name] = cc.change_tick
 
-            unsaved = self.__get_unsaved_list()
+            unsaved = self.__gen_unsaved()
 
-            for buf_ctx in self.__buf_ctx.values():
+            for cc in self.__cc_dict.values():
                 with self.__libclang_lock:
-                    buf_ctx.parse(
-                        self.__idx,
+                    cc.parse(
+                        self.__cindex,
                         self.__compile_args,
                         unsaved,
-                        tick[buf_ctx.bufname])
+                        tick[cc.name])
         except:
             return False
 
         return True
 
-    def get_buf_ctx(self, name):
-        return self.__buf_ctx.get(name)
+    def get_cc(self, name):
+        return self.__cc_dict.get(name)
 
-    def __get_unsaved_list(self):
+    def __gen_unsaved(self):
         unsaved = []
-        for buf_ctx in self.__buf_ctx.values():
-            if buf_ctx.buffer is not None:
-                unsaved.append((buf_ctx.bufname, buf_ctx.buffer))
+        for cc in self.__cc_dict.values():
+            if cc.buffer is not None:
+                unsaved.append((cc.name, cc.buffer))
 
         return unsaved
 
     def __parsing_worker(self):
         while self.__is_running:
-            buf_ctx = self.__current_buf_ctx
+            cc = self.__current_cc
 
-            if buf_ctx is None:
+            if cc is None:
                 continue
 
-            if buf_ctx.parse_tick == buf_ctx.change_tick:
+            if cc.parse_tick == cc.change_tick:
                 with self.__cond:
                     self.__cond.wait()
 
-                if buf_ctx.parse_tick == buf_ctx.change_tick:
+                if cc.parse_tick == cc.change_tick:
                     continue
 
-            if not self.parse(buf_ctx):
-                continue
+            self.parse_cc(cc)
+
+    @property
+    def compile_args(self):
+        return self.__compile_args
+
+    @compile_args.setter
+    def compile_args(self, value):
+        self.__compile_args = value

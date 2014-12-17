@@ -48,14 +48,14 @@ fun! clighter#Enable()
         return
     endif
 
-    py clighter.clang_switch_buffer()
-    py clighter.clang_create_all_buf_ctx()
+    py clighter.register_allowed_buffers()
+    py clighter.clang_switch_to_current()
 
     augroup ClighterEnable
         au!
         au CursorMoved,CursorMovedI,CursorHold,CursorHoldI * py clighter.highlight_window()
-        au TextChanged,TextChangedI * py clighter.update_unsaved_if_allow()
-        au WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_buffer()
+        au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
+        au WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_to_current()
         au FileType * py clighter.on_FileType()
         au BufDelete,BufWipeout * py clighter.unregister_buffer(vim.eval('fnamemodify(expand("<afile>"), ":p")'))
         au VimLeavePre * py clighter.clang_stop_service()

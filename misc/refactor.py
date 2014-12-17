@@ -4,14 +4,14 @@ import clang_service
 
 
 def rename(clang_service):
-    buf_ctx = clang_service.get_buf_ctx(vim.current.buffer.name)
-    if buf_ctx is None:
+    cc = clang_service.get_cc(vim.current.buffer.name)
+    if cc is None:
         return
 
     clang_service.update_unsaved(__get_bufctx_list(), False)
     clang_service.parse_all()
 
-    symbol = clighter_helper.get_vim_symbol(buf_ctx)
+    symbol = clighter_helper.get_vim_symbol(cc)
 
     if symbol is None:
         return
@@ -33,7 +33,7 @@ def rename(clang_service):
     locs.add((symbol.location.line, symbol.location.column,
               symbol.location.file.name))
     clighter_helper.search_referenced_tokens(
-        buf_ctx.translation_unit,
+        cc.translation_unit,
         symbol,
         locs)
     __vim_multi_replace(
@@ -56,11 +56,11 @@ def __cross_buffer_rename(clang_service, symbol_usr, new_name):
 
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
-        buf_ctx = clang_service.get_buf_ctx(vim.current.buffer.name)
-        if buf_ctx is not None:
+        cc = clang_service.get_cc(vim.current.buffer.name)
+        if cc is not None:
             try:
                 __search_symbol_and_rename(
-                    buf_ctx.translation_unit, symbol_usr, new_name)
+                    cc.translation_unit, symbol_usr, new_name)
             except:
                 pass
 

@@ -19,12 +19,12 @@ def clear_symbol_ref():
 
 
 def highlight_window(clang_service, extend=50):
-    buf_ctx = clang_service.get_buf_ctx(vim.current.buffer.name)
-    if buf_ctx is None:
+    cc = clang_service.get_cc(vim.current.buffer.name)
+    if cc is None:
         clear_highlight()
         return
 
-    tu = buf_ctx.translation_unit
+    tu = cc.translation_unit
     if tu is None:
         clear_highlight()
         return
@@ -35,17 +35,17 @@ def highlight_window(clang_service, extend=50):
     draw_syntax = False
     draw_symbol_ref = False
 
-    current_tick = buf_ctx.parse_tick
-    if buf_ctx.hl_tick < current_tick \
+    current_tick = cc.parse_tick
+    if cc.hl_tick < current_tick \
             or highlight_window.syntactic_range is None \
             or top < highlight_window.syntactic_range[0] \
             or bottom > highlight_window.syntactic_range[1]:
         draw_syntax = True
         __vim_clear_match_pri(SYNTAX_PRI)
-        buf_ctx.hl_tick = current_tick
+        cc.hl_tick = current_tick
 
     if vim.vars["ClighterCursorHL"] == 1:
-        symbol = clighter_helper.get_vim_symbol(buf_ctx)
+        symbol = clighter_helper.get_vim_symbol(cc)
 
         if highlight_window.hl_symbol is not None \
                 and (symbol is None
@@ -84,7 +84,7 @@ def highlight_window(clang_service, extend=50):
         ]
         highlight_window.syntactic_range = target_range
 
-    file = tu.get_file(buf_ctx.bufname)
+    file = tu.get_file(cc.name)
     tokens = tu.get_tokens(
         extent=cindex.SourceRange.from_locations(
             cindex.SourceLocation.from_position(

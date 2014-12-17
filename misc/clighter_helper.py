@@ -2,14 +2,14 @@ import vim
 from clang import cindex
 
 
-def get_vim_symbol(buf_ctx):
+def get_vim_symbol(cc):
     symbol = None
 
     row, col = vim.current.window.cursor
     if len(vim.current.line) > col:
         c = vim.current.line[col]
         if c.isalnum() or c == '_':
-            vim_cursor = buf_ctx.get_cursor(row, col)
+            vim_cursor = cc.get_cursor(row, col)
 
             if vim_cursor is not None:
                 symbol = get_semantic_symbol(vim_cursor)
