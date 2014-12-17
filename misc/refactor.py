@@ -11,7 +11,7 @@ def rename(clang_service):
     clang_service.update_buffers(__get_bufctx_list(), False)
     clang_service.parse_all()
 
-    symbol = clighter_helper.get_vim_symbol(cc)
+    symbol = clighter_helper.get_vim_symbol(clighter_helper.get_vim_cursor(cc))
 
     if symbol is None:
         return
