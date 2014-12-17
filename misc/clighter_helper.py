@@ -2,17 +2,8 @@ import vim
 from clang import cindex
 
 
-def get_vim_symbol(cc):
-    symbol = None
-
-    row, col = vim.current.window.cursor
-    if len(vim.current.line) > col:
-        c = vim.current.line[col]
-        if c.isalnum() or c == '_':
-            vim_cursor = cc.get_cursor(row, col)
-
-            if vim_cursor is not None:
-                symbol = get_semantic_symbol(vim_cursor)
+def get_vim_symbol(cursor):
+    symbol = get_semantic_symbol(cursor)
 
     if symbol is None:
         return None
@@ -22,6 +13,26 @@ def get_vim_symbol(cc):
 
     return symbol
 
+def get_vim_cursor(cc):
+    row, col = vim.current.window.cursor
+    if len(vim.current.line) <= col:
+        return None
+
+    c = vim.current.line[col]
+    if not c.isalnum() and c != '_':
+        return None
+
+    tu = cc.translation_unit
+    if tu is None:
+        return None
+
+    return cindex.Cursor.from_location(
+        tu,
+        cindex.SourceLocation.from_position(
+            tu,
+            tu.get_file(cc.name),
+            row,
+            col + 1))
 
 def is_vim_buffer_allowed(buf):
     return buf.options['filetype'] in ["c", "cpp", "objc", "objcpp"]

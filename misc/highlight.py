@@ -46,15 +46,14 @@ def highlight_window(clang_service, extend=50):
 
     symbol = None
     if vim.vars["ClighterCursorHL"] == 1:
-        row, col = vim.current.window.cursor
-        vim_cursor = cc.get_cursor(row, col)
+        vim_cursor = clighter_helper.get_vim_cursor(cc)
 
         if highlight_window.hl_cursor is not None and (vim_cursor is None or highlight_window.hl_cursor != vim_cursor):
             __vim_clear_match_pri(SYMBOL_REF_PRI)
 
-            symbol = clighter_helper.get_vim_symbol(cc)
-            if symbol is not None:
-                draw_symbol_ref = True
+        symbol = clighter_helper.get_vim_symbol(vim_cursor)
+        if symbol is not None:
+            draw_symbol_ref = True
 
         highlight_window.hl_cursor = vim_cursor
 
