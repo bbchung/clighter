@@ -153,36 +153,25 @@ class ClangService(object):
 
     def parse_cc(self, cc):
         tick = cc.change_tick
-
-        try:
-            unsaved = self.__gen_unsaved()
-            with self.__libclang_lock:
-                cc.parse(
-                    self.__cindex, self.__compile_args, unsaved, tick)
-        except:
-            return False
-
-        return True
+        unsaved = self.__gen_unsaved()
+        with self.__libclang_lock:
+            cc.parse(
+                self.__cindex, self.__compile_args, unsaved, tick)
 
     def parse_all(self):
-        try:
-            tick = {}
-            for cc in self.__cc_dict.values():
-                tick[cc.name] = cc.change_tick
+        tick = {}
+        for cc in self.__cc_dict.values():
+            tick[cc.name] = cc.change_tick
 
-            unsaved = self.__gen_unsaved()
+        unsaved = self.__gen_unsaved()
 
-            for cc in self.__cc_dict.values():
-                with self.__libclang_lock:
-                    cc.parse(
-                        self.__cindex,
-                        self.__compile_args,
-                        unsaved,
-                        tick[cc.name])
-        except:
-            return False
-
-        return True
+        for cc in self.__cc_dict.values():
+            with self.__libclang_lock:
+                cc.parse(
+                    self.__cindex,
+                    self.__compile_args,
+                    unsaved,
+                    tick[cc.name])
 
     def get_cc(self, name):
         return self.__cc_dict.get(name)
@@ -209,7 +198,10 @@ class ClangService(object):
                 if cc.parse_tick == cc.change_tick:
                     continue
 
-            self.parse_cc(cc)
+            try:
+                self.parse_cc(cc)
+            except:
+                pass
 
     @property
     def compile_args(self):
