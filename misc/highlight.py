@@ -71,20 +71,10 @@ def highlight_window(clang_service, extend=50):
         highlight_window.syntactic_range = target_range
 
     file = tu.get_file(cc.name)
-    tokens = tu.get_tokens(
-        extent=cindex.SourceRange.from_locations(
-            cindex.SourceLocation.from_position(
-                tu, file,
-                line=target_range[0],
-                column=1
-            ),
-            cindex.SourceLocation.from_position(
-                tu, file,
-                line=target_range[1] + 1,
-                column=1
-            )
-        )
-    )
+
+    location1 = cindex.SourceLocation.from_position(tu, file, line=target_range[0], column=1)
+    location2 = cindex.SourceLocation.from_position(tu, file, line=target_range[1] + 1, column=1)
+    tokens = tu.get_tokens(extent=cindex.SourceRange.from_locations(location1, location2))
 
     for t in tokens:
         """ Do semantic highlighting'
