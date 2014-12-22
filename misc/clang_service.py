@@ -11,7 +11,6 @@ class ClangContext(object):
         self.__translation_unit = None
         self.__change_tick = 0
         self.__parse_tick = -1
-        self.__hl_tick = -1
 
     def update_buffer(self, buffer, tick):
         self.__buffer = buffer
@@ -62,14 +61,6 @@ class ClangContext(object):
     @parse_tick.setter
     def parse_tick(self, value):
         self.__parse_tick = value
-
-    @property
-    def hl_tick(self):
-        return self.__hl_tick
-
-    @hl_tick.setter
-    def hl_tick(self, value):
-        self.__hl_tick = value
 
 
 class ClangService(object):
@@ -146,7 +137,6 @@ class ClangService(object):
             return
 
         cc.parse_tick = -1
-        cc.hl_tick = -1
         self.__current_cc = cc
         with self.__cond:
             self.__cond.notify()

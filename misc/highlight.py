@@ -36,13 +36,13 @@ def highlight_window(clang_service, extend=50):
     draw_symbol_ref = False
 
     parse_tick = cc.parse_tick
-    if cc.hl_tick < parse_tick \
+    if vim.current.window.vars['hl_tick'] < parse_tick \
             or highlight_window.syntactic_range is None \
             or top < highlight_window.syntactic_range[0] \
             or bottom > highlight_window.syntactic_range[1]:
         draw_syntax = True
         __vim_clear_match_pri(SYNTAX_PRI)
-        cc.hl_tick = parse_tick
+        vim.current.window.vars['hl_tick'] = parse_tick
 
     symbol = None
     if vim.vars["ClighterCursorHL"] == 1:

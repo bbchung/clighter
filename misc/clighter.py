@@ -87,6 +87,7 @@ def clang_set_compile_args(args):
 
 def clang_switch_to_current():
     __clang_service.switch(vim.current.buffer.name)
+    vim.current.window.vars["hl_tick"] = -1
 
 
 def update_buffer_if_allow():
