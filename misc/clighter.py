@@ -82,7 +82,7 @@ def clang_stop_service():
 
 
 def clang_set_compile_args(args):
-    __clang_service.compile_args = args
+    __clang_service.compile_args = list(args) # list() is need to copy
 
 
 def clang_switch_to_current():
