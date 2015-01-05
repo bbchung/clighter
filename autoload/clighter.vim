@@ -77,7 +77,7 @@ fun! clighter#Rename()
     py clighter.refactor_rename()
 endf
 
-fun! clighter#SetCompileArgs(str_args)
-    let g:ClighterCompileArgs = a:str_args
-    py clighter.clang_set_compile_args(eval(vim.bindeval('a:str_args')))
+fun! clighter#SetCompileArgs(args)
+    let g:ClighterCompileArgs = a:args
+    py clighter.clang_set_compile_args(vim.vars['ClighterCompileArgs'])
 endf

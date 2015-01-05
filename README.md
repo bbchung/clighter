@@ -48,9 +48,9 @@ Clighter will pass these args to libclang to parse the code. Notice that bad
 options will cause clighter not working even crashing. For convenience, you
 can use mksession to save this option.
 
-Default: `'["-Iinclude"]'`
+Default: `["-Iinclude"]`
 ```vim
-let g:ClighterCompileArgs = '["-Iinclude"]'
+let g:ClighterCompileArgs = ["-Iinclude"]
 ```
 
 ### g:clighter_libclang_file

@@ -74,7 +74,7 @@ def unregister_buffer(bufname):
 
 
 def clang_start_service():
-    return __clang_service.start(eval(vim.vars["ClighterCompileArgs"]))
+    return __clang_service.start(list(vim.vars["ClighterCompileArgs"]))
 
 
 def clang_stop_service():
