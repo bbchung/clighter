@@ -169,8 +169,10 @@ class ClangService(object):
     def __gen_unsaved(self):
         unsaved = []
         for cc in self.__cc_dict.values():
-            if cc.buffer is not None:
-                unsaved.append((cc.name, cc.buffer))
+            buffer = cc.buffer
+
+            if buffer is not None:
+                unsaved.append((cc.name, buffer))
 
         return unsaved
 
