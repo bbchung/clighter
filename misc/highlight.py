@@ -21,12 +21,10 @@ def clear_symbol_ref():
 def highlight_window(clang_service, extend=50):
     cc = clang_service.get_cc(vim.current.buffer.name)
     if cc is None:
-        clear_highlight()
         return
 
     tu = cc.current_tu
     if tu is None:
-        clear_highlight()
         return
 
     top = vim.bindeval("line('w0')")
