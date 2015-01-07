@@ -8,10 +8,12 @@ def rename(clang_service):
     if cc is None:
         return
 
+    tu = cc.translation_unit
+
     clang_service.update_buffers(__get_bufctx_list(), False)
     clang_service.parse_all()
 
-    symbol = clighter_helper.get_vim_symbol(clighter_helper.get_vim_cursor(cc))
+    symbol = clighter_helper.get_vim_symbol(clighter_helper.get_vim_cursor(tu, tu.get_file(cc.name)))
 
     if symbol is None:
         return
@@ -33,7 +35,7 @@ def rename(clang_service):
     locs.add((symbol.location.line, symbol.location.column,
               symbol.location.file.name))
     clighter_helper.search_referenced_tokens(
-        cc.translation_unit,
+        tu,
         symbol,
         locs)
     __vim_multi_replace(

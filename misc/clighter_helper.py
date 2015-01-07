@@ -13,7 +13,7 @@ def get_vim_symbol(cursor):
 
     return symbol
 
-def get_vim_cursor(cc):
+def get_vim_cursor(tu, file):
     row, col = vim.current.window.cursor
     if len(vim.current.line) <= col:
         return None
@@ -22,15 +22,11 @@ def get_vim_cursor(cc):
     if not c.isalnum() and c != '_':
         return None
 
-    tu = cc.translation_unit
-    if tu is None:
-        return None
-
     return cindex.Cursor.from_location(
         tu,
         cindex.SourceLocation.from_position(
             tu,
-            tu.get_file(cc.name),
+            file,
             row,
             col + 1))
 

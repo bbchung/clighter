@@ -44,9 +44,10 @@ def highlight_window(clang_service, extend=50):
         __vim_clear_match_pri(SYNTAX_PRI)
         vim.current.window.vars['hl_tick'] = parse_tick
 
+    file = tu.get_file(cc.name)
     symbol = None
     if vim.vars["ClighterCursorHL"] == 1:
-        vim_cursor = clighter_helper.get_vim_cursor(cc)
+        vim_cursor = clighter_helper.get_vim_cursor(tu, file)
 
         if highlight_window.hl_cursor is not None and (vim_cursor is None or highlight_window.hl_cursor != vim_cursor):
             __vim_clear_match_pri(SYMBOL_REF_PRI)
@@ -69,8 +70,6 @@ def highlight_window(clang_service, extend=50):
             min(bottom + extend, buflinenr)
         ]
         highlight_window.syntactic_range = target_range
-
-    file = tu.get_file(cc.name)
 
     location1 = cindex.SourceLocation.from_position(tu, file, line=target_range[0], column=1)
     location2 = cindex.SourceLocation.from_position(tu, file, line=target_range[1] + 1, column=1)

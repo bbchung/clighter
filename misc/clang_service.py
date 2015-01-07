@@ -74,7 +74,7 @@ class ClangService(object):
         self.__cc_dict = {}
         self.__parsing_thread = None
         self.__is_running = False
-        self.__compile_args = []
+        self.__compile_args = None
         self.__cond = threading.Condition()
         self.__libclang_lock = threading.Lock()
         self.__cindex = None
