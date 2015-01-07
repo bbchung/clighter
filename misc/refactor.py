@@ -8,7 +8,7 @@ def rename(clang_service):
     if cc is None:
         return
 
-    tu = cc.translation_unit
+    tu = cc.current_tu
 
     clang_service.update_buffers(__get_bufctx_list(), False)
     clang_service.parse_all()
@@ -62,7 +62,7 @@ def __cross_buffer_rename(clang_service, symbol_usr, new_name):
         if cc is not None:
             try:
                 __search_symbol_and_rename(
-                    cc.translation_unit, symbol_usr, new_name)
+                    cc.current_tu, symbol_usr, new_name)
             except:
                 pass
 

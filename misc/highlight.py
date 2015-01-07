@@ -24,7 +24,7 @@ def highlight_window(clang_service, extend=50):
         clear_highlight()
         return
 
-    tu = cc.translation_unit
+    tu = cc.current_tu
     if tu is None:
         clear_highlight()
         return
@@ -148,31 +148,6 @@ def __draw_token(line, col, len, cursor_kind, type_kind):
 
     if group in highlight_groups:
         __vim_matchaddpos(group, line, col, len, SYNTAX_PRI)
-
-
-    #if kind == cindex.CursorKind.MACRO_INSTANTIATION:
-        #draw('clighterMacroInstantiation')
-    #elif kind == cindex.CursorKind.STRUCT_DECL:
-        #draw('clighterStructDecl')
-    #elif kind == cindex.CursorKind.CLASS_DECL:
-        #draw('clighterClassDecl')
-    #elif kind == cindex.CursorKind.ENUM_DECL:
-        #draw('clighterEnumDecl')
-    #elif kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
-        #draw('clighterEnumConstantDecl')
-    #elif kind == cindex.CursorKind.TYPE_REF:
-        #draw('clighterTypeRef')
-    #elif kind == cindex.CursorKind.FUNCTION_DECL:
-        #draw('clighterFunctionDecl')
-    #elif kind == cindex.CursorKind.MEMBER_REF_EXPR:
-        #draw('clighterMemberRefExpr')
-    #elif kind in (cindex.CursorKind.NAMESPACE_REF, cindex.CursorKind.NAMESPACE):
-        #draw('clighterNamespace')
-    #elif kind == cindex.CursorKind.DECL_REF_EXPR:
-        #if type == cindex.TypeKind.ENUM:
-            #draw('clighterDeclRefExprEnum')
-        #elif type == cindex.TypeKind.FUNCTIONPROTO:
-            #draw('clighterDeclRefExprCall')
 
 
 def __vim_matchaddpos(group, line, col, len, priority):

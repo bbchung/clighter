@@ -8,7 +8,7 @@ class ClangContext(object):
 
         self.__name = name
         self.__buffer = None
-        self.__translation_unit = None
+        self.__tu = None
         self.__change_tick = 0
         self.__parse_tick = -1
 
@@ -17,7 +17,7 @@ class ClangContext(object):
         self.__change_tick = tick
 
     def get_cursor(self, row, col):
-        tu = self.__translation_unit
+        tu = self.__tu
 
         if tu is None:
             return None
@@ -31,7 +31,7 @@ class ClangContext(object):
                 col + 1))
 
     def parse(self, idx, args, unsaved, tick):
-        self.__translation_unit = idx.parse(
+        self.__tu = idx.parse(
             self.__name,
             args,
             unsaved,
@@ -51,8 +51,8 @@ class ClangContext(object):
         return self.__change_tick
 
     @property
-    def translation_unit(self):
-        return self.__translation_unit
+    def current_tu(self):
+        return self.__tu
 
     @property
     def parse_tick(self):
