@@ -4,14 +4,16 @@ import clang_service
 
 
 def rename(clang_service):
+    clang_service.update_buffers(__get_bufctx_list(), False)
+    clang_service.parse_all()
+
     cc = clang_service.get_cc(vim.current.buffer.name)
     if cc is None:
         return
 
     tu = cc.current_tu
-
-    clang_service.update_buffers(__get_bufctx_list(), False)
-    clang_service.parse_all()
+    if tu is None:
+        return
 
     symbol = clighter_helper.get_vim_symbol(clighter_helper.get_vim_cursor(tu, tu.get_file(cc.name)))
 
