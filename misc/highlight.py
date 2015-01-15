@@ -10,12 +10,10 @@ SYNTAX_PRI = -12
 def clear_highlight():
     __vim_clear_match_pri(SYMBOL_REF_PRI, SYNTAX_PRI)
     highlight_window.syntactic_range = None
-#    highlight_window.hl_cursor = None
 
 
 def clear_symbol_ref():
     __vim_clear_match_pri(SYMBOL_REF_PRI)
-#    highlight_window.hl_cursor = None
 
 
 def highlight_window(clang_service, extend=50):
@@ -47,14 +45,11 @@ def highlight_window(clang_service, extend=50):
     if vim.vars["ClighterCursorHL"] == 1:
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
 
-#        if highlight_window.hl_cursor is not None and (vim_cursor is None or highlight_window.hl_cursor != vim_cursor):
         __vim_clear_match_pri(SYMBOL_REF_PRI)
 
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
         if symbol is not None:
             draw_symbol_ref = True
-
-#        highlight_window.hl_cursor = vim_cursor
 
     if not draw_syntax and not draw_symbol_ref:
         return
@@ -69,9 +64,14 @@ def highlight_window(clang_service, extend=50):
         ]
         highlight_window.syntactic_range = target_range
 
-    location1 = cindex.SourceLocation.from_position(tu, file, line=target_range[0], column=1)
-    location2 = cindex.SourceLocation.from_position(tu, file, line=target_range[1] + 1, column=1)
-    tokens = tu.get_tokens(extent=cindex.SourceRange.from_locations(location1, location2))
+    location1 = cindex.SourceLocation.from_position(
+        tu, file, line=target_range[0], column=1)
+    location2 = cindex.SourceLocation.from_position(
+        tu, file, line=target_range[1] + 1, column=1)
+    tokens = tu.get_tokens(
+        extent=cindex.SourceRange.from_locations(
+            location1,
+            location2))
 
     for t in tokens:
         """ Do semantic highlighting'
@@ -110,27 +110,26 @@ def highlight_window(clang_service, extend=50):
                     priority=SYMBOL_REF_PRI
                 )
 
-
-#highlight_window.hl_cursor = None
 highlight_window.syntactic_range = None
 
 group_map = {
-        cindex.CursorKind.MACRO_INSTANTIATION:'clighterMacroInstantiation',
-        cindex.CursorKind.STRUCT_DECL:'clighterStructDecl',
-        cindex.CursorKind.CLASS_DECL:'clighterClassDecl',
-        cindex.CursorKind.ENUM_DECL:'clighterEnumDecl',
-        cindex.CursorKind.ENUM_CONSTANT_DECL:'clighterEnumConstantDecl',
-        cindex.CursorKind.TYPE_REF:'clighterTypeRef',
-        cindex.CursorKind.FUNCTION_DECL:'clighterFunctionDecl',
-        cindex.CursorKind.MEMBER_REF_EXPR:'clighterMemberRefExpr',
-        cindex.CursorKind.NAMESPACE_REF:'clighterNamespace',
-        cindex.CursorKind.NAMESPACE:'clighterNamespace',
+    cindex.CursorKind.MACRO_INSTANTIATION: 'clighterMacroInstantiation',
+        cindex.CursorKind.STRUCT_DECL: 'clighterStructDecl',
+        cindex.CursorKind.CLASS_DECL: 'clighterClassDecl',
+        cindex.CursorKind.ENUM_DECL: 'clighterEnumDecl',
+        cindex.CursorKind.ENUM_CONSTANT_DECL: 'clighterEnumConstantDecl',
+        cindex.CursorKind.TYPE_REF: 'clighterTypeRef',
+        cindex.CursorKind.FUNCTION_DECL: 'clighterFunctionDecl',
+        cindex.CursorKind.MEMBER_REF_EXPR: 'clighterMemberRefExpr',
+        cindex.CursorKind.NAMESPACE_REF: 'clighterNamespace',
+        cindex.CursorKind.NAMESPACE: 'clighterNamespace',
         cindex.CursorKind.DECL_REF_EXPR:
         {
-            cindex.TypeKind.ENUM:'clighterDeclRefExprEnum',
-            cindex.TypeKind.FUNCTIONPROTO:'clighterDeclRefExprCall'
+            cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum',
+            cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall'
         }
 }
+
 
 def __draw_token(line, col, len, cursor_kind, type_kind):
     highlight_groups = vim.vars['clighter_highlight_groups']
@@ -139,7 +138,7 @@ def __draw_token(line, col, len, cursor_kind, type_kind):
     if group is None:
         return
 
-    if type(group) is dict:
+    if isinstance(group, dict):
         group = group.get(type_kind)
         if group is None:
             return
