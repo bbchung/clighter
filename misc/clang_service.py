@@ -16,20 +16,6 @@ class ClangContext(object):
         self.__buffer = buffer
         self.__change_tick = tick
 
-    def get_cursor(self, row, col):
-        tu = self.__tu
-
-        if tu is None:
-            return None
-
-        return cindex.Cursor.from_location(
-            tu,
-            cindex.SourceLocation.from_position(
-                tu,
-                tu.get_file(self.__name),
-                row,
-                col + 1))
-
     def parse(self, idx, args, unsaved, tick):
         self.__tu = idx.parse(
             self.__name,
