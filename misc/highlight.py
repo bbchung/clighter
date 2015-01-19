@@ -16,7 +16,7 @@ def clear_symbol_ref():
     __vim_clear_match_pri(SYMBOL_REF_PRI)
 
 
-def highlight_window(clang_service, extend=50):
+def highlight_window(clang_service):
     cc = clang_service.get_cc(vim.current.buffer.name)
     if cc is None:
         return
@@ -55,12 +55,13 @@ def highlight_window(clang_service, extend=50):
         return
 
     target_range = [top, bottom]
+    height = bottom - top + 1
 
     if draw_syntax:
         buflinenr = len(vim.current.buffer)
         target_range = [
-            max(top - extend, 1),
-            min(bottom + extend, buflinenr)
+            max(top - height, 1),
+            min(bottom + height, buflinenr)
         ]
         highlight_window.syntactic_range = target_range
 
@@ -86,7 +87,7 @@ def highlight_window(clang_service, extend=50):
                 t.location.line,
                 t.location.column
             )
-        )  # cursor under vim
+        )
 
         if draw_syntax:
             __draw_token(
@@ -99,7 +100,7 @@ def highlight_window(clang_service, extend=50):
 
         """ Do definition/reference highlighting'
         """
-        if draw_symbol_ref:
+        if draw_symbol_ref and t.location.line >= top and t.location.line <= bottom:
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
             if t_symbol is not None and t.spelling == t_symbol.spelling and t_symbol == symbol:
                 __vim_matchaddpos(
