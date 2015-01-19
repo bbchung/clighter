@@ -236,6 +236,8 @@ License ~
 
 This software is licensed under the GPL v3 license.
 
+Note: This license does not cover the files that come from the LLVM project.
+
 ==============================================================================
 
 

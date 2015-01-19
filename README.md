@@ -180,4 +180,7 @@ rename-factoring result is perfect.
 
 This software is licensed under the [GPL v3 license][gpl].
 
+Note: This license does not cover the files that come from the LLVM project.
+
+
 [gpl]: http://www.gnu.org/copyleft/gpl.html
