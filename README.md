@@ -175,3 +175,9 @@ Even though libclang provides many useful informations, it's not enough to do
 cross file rename-refactoring. Clighter needs to use its own way way to
 'guess' what should be renamed. Clighter can't gurantee the result of
 rename-factoring result is perfect.
+
+## LICENSE
+
+This software is licensed under the [GPL v3 license][gpl].
+
+[gpl]: http://www.gnu.org/copyleft/gpl.html
