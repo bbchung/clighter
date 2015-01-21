@@ -43,7 +43,7 @@ fun! clighter#Enable()
 
     if !pyeval('clighter.clang_start_service()')
         echohl WarningMsg |
-                    \ echomsg "Clighter unavailable: cannot enable clighter, try set g:clighter_libclang_file" |
+                    \ echomsg "Clighter unavailable: clang service failed, you must setup clang environment for clighter" |
                     \ echohl None
         return
     endif
