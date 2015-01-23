@@ -2,12 +2,11 @@
 
 ## Intro
 
-Clighter(C lighter) is a vim plugin that integrates libclang to improve
-development environment for c-family programming. Clighter provides following
-features currently:
+Clighter(C lighter) makes vim a better c-family development environment as a
+plugin based on libclang. Clighter provides following features currently:
 
-* Syntax(semantic) highlighting
-* Cursor word highlighting
+* Context-sensitive syntax highlighting
+* Context-sensitive cursor word highlighting
 * Experimental rename-refactoring function
 
 ![Clighter GIF demo](http://goo.gl/C7FYg8)
@@ -17,7 +16,7 @@ features currently:
 Clighter requires the following:
 
 * Vim version 7.4 with python2.x enabled
-* libclang with python binding(3.5 is recommended). Please reference
+* libclang with its python binding(3.5 is recommended). Please reference
   http://llvm.org/apt/ to install
 * Clighter has been tested under Linux
 
@@ -44,9 +43,11 @@ let g:clighter_autostart = 1
 
 ### g:ClighterCompileArgs
 
-Clighter will pass these args to libclang to parse the code. Notice that bad
-options will cause clighter not working even crashing. For convenience, you
-can use mksession to save this option.
+Clighter pass g:ClighterCompileArgs to libclang while parsing the code. Notice
+that an improper setting may cause clighter failing even crashing. Clighter
+doesn't provide its mechanism to load compilation args from an external file
+for each project like [YouCompleteMe][ycm], however vim sessions can help you
+to do that. 
 
 Default: `["-Iinclude"]`
 ```vim
@@ -55,8 +56,8 @@ let g:ClighterCompileArgs = ["-Iinclude"]
 
 ### g:clighter_libclang_file
 
-Clighter try to find libclang-3.5 in your system automatically. You must set
-this option if clighter cannot find libclang or other version of libclang is
+Clighter searches libclang-3.5 in your system automatically. You must set this
+option when clighter cannot find libclang, or other version of libclang is
 used.
 
 Default: `''`
@@ -92,7 +93,7 @@ let g:clighter_enable_cross_rename = 1
 
 ### g:clighter_highlight_groups
 
-Define the token type of syntax to be highlighted.
+Define the syntax to be highlighted.
 
 Default: `['clighterMacroInstantiation','clighterStructDecl','clighterClassDecl','clighterEnumDecl','clighterEnumConstantDecl','clighterTypeRef','clighterDeclRefExprEnum']`
 ```vim
@@ -184,3 +185,4 @@ Note: This license does not cover the files that come from the LLVM project.
 
 
 [gpl]: http://www.gnu.org/copyleft/gpl.html
+[ycm]: https://github.com/Valloric/YouCompleteMe
