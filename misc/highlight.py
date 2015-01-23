@@ -21,6 +21,8 @@ def highlight_window(clang_service):
     if cc is None:
         return
 
+    parse_tick = cc.parse_tick
+
     tu = cc.current_tu
     if tu is None:
         return
@@ -31,7 +33,6 @@ def highlight_window(clang_service):
     draw_syntax = False
     draw_symbol_ref = False
 
-    parse_tick = cc.parse_tick
     if vim.current.window.vars['hl_tick'] < parse_tick \
             or highlight_window.syntactic_range is None \
             or top < highlight_window.syntactic_range[0] \
