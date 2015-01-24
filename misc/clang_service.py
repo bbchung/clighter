@@ -11,17 +11,20 @@ class ClangContext(object):
         self.__tu = None
         self.__change_tick = 0
         self.__parse_tick = -1
+        self.__libclang_lock = threading.Lock()
 
     def update_buffer(self, buffer, tick):
         self.__buffer = buffer
         self.__change_tick = tick
 
     def parse(self, idx, args, unsaved, tick):
-        self.__tu = idx.parse(
-            self.__name,
-            args,
-            unsaved,
-            options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+        with self.__libclang_lock:
+            self.__tu = idx.parse(
+                self.__name,
+                args,
+                unsaved,
+                options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+
         self.__parse_tick = tick
 
     @property
@@ -38,7 +41,8 @@ class ClangContext(object):
 
     @property
     def current_tu(self):
-        return self.__tu
+        with self.__libclang_lock:
+            return self.__tu
 
     @property
     def parse_tick(self):
@@ -62,7 +66,6 @@ class ClangService(object):
         self.__is_running = False
         self.__compile_args = None
         self.__cond = threading.Condition()
-        self.__libclang_lock = threading.Lock()
         self.__cindex = None
 
     def start(self, arg):
@@ -130,9 +133,7 @@ class ClangService(object):
     def parse_cc(self, cc):
         tick = cc.change_tick
         unsaved = self.__gen_unsaved()
-        with self.__libclang_lock:
-            cc.parse(
-                self.__cindex, self.__compile_args, unsaved, tick)
+        cc.parse(self.__cindex, self.__compile_args, unsaved, tick)
 
     def parse_all(self):
         tick = {}
@@ -142,12 +143,11 @@ class ClangService(object):
         unsaved = self.__gen_unsaved()
 
         for cc in self.__cc_dict.values():
-            with self.__libclang_lock:
-                cc.parse(
-                    self.__cindex,
-                    self.__compile_args,
-                    unsaved,
-                    tick[cc.name])
+            cc.parse(
+                self.__cindex,
+                self.__compile_args,
+                unsaved,
+                tick[cc.name])
 
     def get_cc(self, name):
         return self.__cc_dict.get(name)
