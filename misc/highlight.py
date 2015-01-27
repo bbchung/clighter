@@ -1,4 +1,5 @@
 import vim
+import string
 import clighter_helper
 from clang import cindex
 import clang_service
@@ -27,8 +28,8 @@ def highlight_window(clang_service):
     if tu is None:
         return
 
-    top = vim.bindeval("line('w0')")
-    bottom = vim.bindeval("line('w$')")
+    top = string.atoi(vim.eval("line('w0')"))
+    bottom = string.atoi(vim.eval("line('w$')"))
 
     draw_syntax = False
     draw_symbol_ref = False

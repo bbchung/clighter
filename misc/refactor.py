@@ -1,4 +1,5 @@
 import vim
+import string
 import clighter_helper
 import clang_service
 
@@ -22,7 +23,7 @@ def rename(clang_service):
 
     old_name = clighter_helper.get_spelling_or_displayname(symbol)
     vim.command("echohl WildMenu")
-    new_name = vim.bindeval(
+    new_name = vim.eval(
         "input(' Rename {0} : ', '{1}')".format(old_name, old_name))
     vim.command("echohl None")
 
@@ -90,9 +91,9 @@ def __search_symbol_and_rename(tu, symbol_usr, new_name):
 
     if len(locs):
         if vim.vars['clighter_rename_prompt_level'] >= 1:
-            if vim.bindeval(
+            if vim.eval(
                 "confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 1)".format(
-                    vim.current.buffer.name)) == 2:
+                    vim.current.buffer.name)) == "2":
                 return
 
         __vim_multi_replace(
@@ -139,6 +140,6 @@ def __get_bufctx_list():
         if len(buf) == 1 and not buf[0]:
             continue
 
-        list.append((buf.name, '\n'.join(buf), vim.bindeval("b:changedtick")))
+        list.append((buf.name, '\n'.join(buf), string.atoi(vim.eval("b:changedtick"))))
 
     return list

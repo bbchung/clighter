@@ -1,4 +1,5 @@
 import vim
+import string
 import clighter_helper
 import clang_service
 import highlight
@@ -95,4 +96,4 @@ def update_buffer_if_allow():
         __clang_service.update_buffers(
             [(vim.current.buffer.name,
               '\n'.join(vim.current.buffer),
-              vim.bindeval("b:changedtick"))])
+              string.atoi(vim.eval("b:changedtick")))])
