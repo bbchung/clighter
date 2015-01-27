@@ -41,8 +41,7 @@ class ClangContext(object):
 
     @property
     def current_tu(self):
-        with self.__libclang_lock:
-            return self.__tu
+        return self.__tu
 
     @property
     def parse_tick(self):
