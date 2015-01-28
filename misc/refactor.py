@@ -16,7 +16,8 @@ def rename(clang_service):
     if tu is None:
         return
 
-    symbol = clighter_helper.get_vim_symbol(clighter_helper.get_vim_cursor(tu, tu.get_file(cc.name)))
+    symbol = clighter_helper.get_vim_symbol(
+        clighter_helper.get_vim_cursor(tu, tu.get_file(cc.name)))
 
     if symbol is None:
         return
@@ -41,22 +42,29 @@ def rename(clang_service):
         tu,
         symbol,
         locs)
+
+    prompt = string.atoi(vim.eval('g:clighter_rename_prompt_level'))
+
     __vim_multi_replace(
         locs,
         old_name,
         new_name,
-        vim.vars['clighter_rename_prompt_level'])
+        prompt)
 
     if clighter_helper.is_global_symbol(
-            symbol) and vim.vars['clighter_enable_cross_rename'] == 1:
-        __cross_buffer_rename(clang_service, symbol.get_usr(), new_name)
+            symbol) and vim.eval('g:clighter_enable_cross_rename') == '1':
+        __cross_buffer_rename(
+            clang_service,
+            symbol.get_usr(),
+            new_name,
+            prompt)
 
     vim.current.window.cursor = pos
 
     clang_service.update_buffers(__get_bufctx_list(), True)
 
 
-def __cross_buffer_rename(clang_service, symbol_usr, new_name):
+def __cross_buffer_rename(clang_service, symbol_usr, new_name, prompt):
     call_bufnr = vim.current.buffer.number
 
     vim.command("bn!")
@@ -65,14 +73,14 @@ def __cross_buffer_rename(clang_service, symbol_usr, new_name):
         if cc is not None:
             try:
                 __search_symbol_and_rename(
-                    cc.current_tu, symbol_usr, new_name)
+                    cc.current_tu, symbol_usr, new_name, prompt)
             except:
                 pass
 
         vim.command("bn!")
 
 
-def __search_symbol_and_rename(tu, symbol_usr, new_name):
+def __search_symbol_and_rename(tu, symbol_usr, new_name, prompt):
     if tu is None:
         return
 
@@ -90,7 +98,7 @@ def __search_symbol_and_rename(tu, symbol_usr, new_name):
         clighter_helper.search_referenced_tokens(tu, sym, locs)
 
     if len(locs):
-        if vim.vars['clighter_rename_prompt_level'] >= 1:
+        if prompt >= 1:
             if vim.eval(
                 "confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 1)".format(
                     vim.current.buffer.name)) == "2":
@@ -100,10 +108,10 @@ def __search_symbol_and_rename(tu, symbol_usr, new_name):
             locs,
             old_name,
             new_name,
-            vim.vars['clighter_rename_prompt_level'])
+            prompt)
 
 
-def __vim_multi_replace(locs, old, new, prompt_level):
+def __vim_multi_replace(locs, old, new, prompt):
     if locs is None:
         return
 
@@ -124,7 +132,7 @@ def __vim_multi_replace(locs, old, new, prompt_level):
 
     cmd = "%s/" + pattern + "/" + new + "/gI"
 
-    if prompt_level >= 2:
+    if prompt >= 2:
         cmd = cmd + "c"
 
     vim.command(cmd)
@@ -140,6 +148,9 @@ def __get_bufctx_list():
         if len(buf) == 1 and not buf[0]:
             continue
 
-        list.append((buf.name, '\n'.join(buf), string.atoi(vim.eval("b:changedtick"))))
+        list.append(
+            (buf.name,
+             '\n'.join(buf),
+             string.atoi(vim.eval("b:changedtick"))))
 
     return list

@@ -13,6 +13,7 @@ def get_vim_symbol(cursor):
 
     return symbol
 
+
 def get_vim_cursor(tu, file):
     row, col = vim.current.window.cursor
     if len(vim.current.line) <= col:
@@ -29,6 +30,7 @@ def get_vim_cursor(tu, file):
             file,
             row,
             col + 1))
+
 
 def is_vim_buffer_allowed(buf):
     return buf.options['filetype'] in ["c", "cpp", "objc", "objcpp"]

@@ -44,7 +44,7 @@ def highlight_window(clang_service):
 
     file = tu.get_file(cc.name)
     symbol = None
-    if vim.vars["ClighterCursorHL"] == 1:
+    if vim.eval('g:ClighterCursorHL') == '1':
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
 
         __vim_clear_match_pri(SYMBOL_REF_PRI)
@@ -135,7 +135,7 @@ group_map = {
 
 
 def __draw_token(line, col, len, cursor_kind, type_kind):
-    highlight_groups = vim.vars['clighter_highlight_groups']
+    highlight_groups = vim.eval('g:clighter_highlight_groups')
 
     group = group_map.get(cursor_kind)
     if group is None:

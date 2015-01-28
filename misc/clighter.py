@@ -6,9 +6,10 @@ import highlight
 import refactor
 
 
-if vim.vars['clighter_libclang_file']:
+libclang_file = vim.eval('g:clighter_libclang_file')
+if libclang_file:
     clang_service.ClangService.set_libclang_file(
-        vim.vars['clighter_libclang_file'])
+        libclang_file)
 
 __clang_service = clang_service.ClangService()
 
@@ -75,7 +76,7 @@ def unregister_buffer(bufname):
 
 
 def clang_start_service():
-    return __clang_service.start(list(vim.vars["ClighterCompileArgs"]))
+    return __clang_service.start(vim.eval('g:ClighterCompileArgs'))
 
 
 def clang_stop_service():
@@ -83,12 +84,12 @@ def clang_stop_service():
 
 
 def clang_set_compile_args(args):
-    __clang_service.compile_args = list(args) # list() is need to copy
+    __clang_service.compile_args = list(args)  # list() is need to copy
 
 
 def clang_switch_to_current():
     __clang_service.switch(vim.current.buffer.name)
-    vim.current.window.vars["hl_tick"] = -1
+    vim.current.window.vars['hl_tick'] = -1
 
 
 def update_buffer_if_allow():
@@ -96,4 +97,4 @@ def update_buffer_if_allow():
         __clang_service.update_buffers(
             [(vim.current.buffer.name,
               '\n'.join(vim.current.buffer),
-              string.atoi(vim.eval("b:changedtick")))])
+              string.atoi(vim.eval('b:changedtick')))])

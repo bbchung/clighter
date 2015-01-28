@@ -79,5 +79,5 @@ endf
 
 fun! clighter#SetCompileArgs(args)
     let g:ClighterCompileArgs = a:args
-    py clighter.clang_set_compile_args(vim.vars['ClighterCompileArgs'])
+    py clighter.clang_set_compile_args(vim.eval('g:ClighterCompileArgs'))
 endf
