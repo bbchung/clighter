@@ -3,14 +3,14 @@ py import sys
 py import vim
 exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
 py import clighter
-py import highlight
+py import highlighting
 py import clang_service
 py import refactor
 
 fun! clighter#ToggleCursorHL()
     if g:ClighterCursorHL==1
         let a:wnr = winnr()
-        windo py highlight.clear_symbol_ref()
+        windo py highlighting.clear_symbol_ref()
         exe a:wnr."wincmd w"
     endif
 
@@ -56,7 +56,7 @@ fun! clighter#Enable()
 
     augroup ClighterEnable
         au!
-        au CursorMoved,CursorMovedI,CursorHold,CursorHoldI * py highlight.highlight_window(clang_service.ClangService())
+        au CursorMoved,CursorMovedI,CursorHold,CursorHoldI * py highlighting.highlight_window(clang_service.ClangService())
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
         au WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_to_current()
         au FileType * py clighter.on_FileType()
@@ -72,7 +72,7 @@ fun! clighter#Disable()
     py clang_service.ClangService().stop()
     silent! unlet s:clang_initialized
     let a:wnr = winnr()
-    windo py highlight.clear_highlight()
+    windo py highlighting.clear_highlight()
     exe a:wnr."wincmd w"
 endf
 

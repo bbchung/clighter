@@ -3,7 +3,7 @@ from clang import cindex
 import string
 import clighter_helper
 import clang_service
-import highlight
+import highlighting
 
 
 def on_FileType():
@@ -12,7 +12,7 @@ def on_FileType():
         clang_service.ClangService().switch(vim.current.buffer.name)
     else:
         clang_service.ClangService().unregister([vim.current.buffer.name])
-        highlight.clear_highlight()
+        highlighting.clear_highlight()
 
 
 def register_allowed_buffers():
