@@ -59,16 +59,6 @@ hi default link clighterDeclRefExprCall None
 hi default link clighterMemberRefExpr None
 hi default link clighterNamespace None
 
-if !empty(g:clighter_libclang_file)
-
-python << endpython
-import vim
-from clang import cindex
-cindex.Config.set_library_file(vim.eval('g:clighter_libclang_file'))
-endpython
-
-endif
-
 if g:clighter_autostart == 1
     augroup ClighterAutoStart
         au FileType c,cpp,objc,objcpp call clighter#Enable()

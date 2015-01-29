@@ -1,11 +1,22 @@
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 py import sys
-py import vim
 exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
+py import vim
 py import clighter
 py import highlighting
 py import clang_service
 py import refactor
+
+if !empty(g:clighter_libclang_file)
+
+python << endpython
+import vim
+from clang import cindex
+cindex.Config.set_library_file(vim.eval('g:clighter_libclang_file'))
+endpython
+
+endif
+
 
 fun! clighter#ToggleCursorHL()
     if g:ClighterCursorHL==1
