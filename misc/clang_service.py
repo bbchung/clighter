@@ -52,11 +52,20 @@ class ClangContext(object):
         self.__parse_tick = value
 
 
-class ClangService(object):
+class Singleton(type):
+    _instances = {}
 
-    @staticmethod
-    def set_libclang_file(libclang):
-        cindex.Config.set_library_file(libclang)
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(
+                Singleton,
+                cls).__call__(*args,
+                              **kwargs)
+        return cls._instances[cls]
+
+
+class ClangService(object):
+    __metaclass__ = Singleton
 
     def __init__(self):
         self.__current_cc = None
@@ -66,6 +75,9 @@ class ClangService(object):
         self.__compile_args = None
         self.__cond = threading.Condition()
         self.__cindex = None
+
+    def __del__(self):
+        self.stop()
 
     def start(self, arg):
         if self.__cindex is None:
@@ -94,6 +106,7 @@ class ClangService(object):
             self.__parsing_thread = None
 
         self.__cc_dict.clear()
+        self.__cindex = None
 
     def unregister(self, list):
         for name in list:

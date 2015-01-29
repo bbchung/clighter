@@ -3,11 +3,14 @@ py import sys
 py import vim
 exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
 py import clighter
+py import highlight
+py import clang_service
+py import refactor
 
 fun! clighter#ToggleCursorHL()
     if g:ClighterCursorHL==1
         let a:wnr = winnr()
-        windo py clighter.clear_symbol_ref()
+        windo py highlight.clear_symbol_ref()
         exe a:wnr."wincmd w"
     endif
 
@@ -41,7 +44,7 @@ fun! clighter#Enable()
         return
     endif
 
-    if !pyeval('clighter.clang_start_service()')
+    if !pyeval("clang_service.ClangService().start(vim.eval('g:ClighterCompileArgs'))")
         echohl WarningMsg |
                     \ echomsg "Clighter unavailable: clang service failed, you must setup clang environment for clighter" |
                     \ echohl None
@@ -53,12 +56,12 @@ fun! clighter#Enable()
 
     augroup ClighterEnable
         au!
-        au CursorMoved,CursorMovedI,CursorHold,CursorHoldI * py clighter.highlight_window()
+        au CursorMoved,CursorMovedI,CursorHold,CursorHoldI * py highlight.highlight_window(clang_service.ClangService())
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
         au WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_to_current()
         au FileType * py clighter.on_FileType()
-        au BufDelete,BufWipeout * py clighter.unregister_buffer(vim.eval('fnamemodify(expand("<afile>"), ":p")'))
-        au VimLeavePre * py clighter.clang_stop_service()
+        au BufDelete,BufWipeout * py clang_service.ClangService().unregister([vim.eval('fnamemodify(expand("<afile>"), ":p")')])
+        au VimLeavePre * py clang_service.ClangService().stop()
     augroup END
 
     let s:clang_initialized=1
@@ -66,18 +69,18 @@ endf
 
 fun! clighter#Disable()
     silent! au! ClighterEnable
-    py clighter.clang_stop_service()
+    py clang_service.ClangService().stop()
     silent! unlet s:clang_initialized
     let a:wnr = winnr()
-    windo py clighter.clear_highlight()
+    windo py highlight.clear_highlight()
     exe a:wnr."wincmd w"
 endf
 
 fun! clighter#Rename()
-    py clighter.refactor_rename()
+    py refactor.rename(clang_service.ClangService())
 endf
 
 fun! clighter#SetCompileArgs(args)
     let g:ClighterCompileArgs = a:args
-    py clighter.clang_set_compile_args(vim.eval('g:ClighterCompileArgs'))
+    py clang_service.ClangService().compile_args = vim.eval('g:ClighterCompileArgs')
 endf
