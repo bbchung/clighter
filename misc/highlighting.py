@@ -11,12 +11,10 @@ SYNTAX_PRI = -12
 def clear_highlight():
     __vim_clear_match_pri(SYMBOL_REF_PRI, SYNTAX_PRI)
     highlight_window.syntactic_range = None
-    highlight_window.symbol = None
 
 
 def clear_symbol_ref():
     __vim_clear_match_pri(SYMBOL_REF_PRI)
-    highlight_window.symbol = None
 
 
 def highlight_window(clang_service):
@@ -48,15 +46,12 @@ def highlight_window(clang_service):
     symbol = None
     if vim.eval('g:ClighterCursorHL') == '1':
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
+
+        __vim_clear_match_pri(SYMBOL_REF_PRI)
+
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
-
-        if highlight_window.symbol is not None and (symbol is None or symbol != highlight_window.symbol):
-            __vim_clear_match_pri(SYMBOL_REF_PRI)
-
-        if symbol is not None and (highlight_window.symbol is None or symbol != highlight_window.symbol):
+        if symbol is not None:
             draw_symbol_ref = True
-
-        highlight_window.symbol = symbol
 
     if not draw_syntax and not draw_symbol_ref:
         return
@@ -119,7 +114,6 @@ def highlight_window(clang_service):
                 )
 
 highlight_window.syntactic_range = None
-highlight_window.symbol = None
 
 group_map = {
     cindex.CursorKind.MACRO_INSTANTIATION: 'clighterMacroInstantiation',
