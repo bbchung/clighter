@@ -136,12 +136,6 @@ class ClangService(object):
         with self.__cond:
             self.__cond.notify()
 
-    def parse_cc(self, cc):
-        tick = cc.change_tick
-        unsaved = self.__gen_unsaved()
-
-        cc.parse(self.__cindex, self.__compile_args, unsaved, tick)
-
     def parse_all(self):
         tick = {}
         for cc in self.__cc_dict.values():
@@ -184,7 +178,10 @@ class ClangService(object):
                     continue
 
             try:
-                self.parse_cc(cc)
+                tick = cc.change_tick
+                unsaved = self.__gen_unsaved()
+
+                cc.parse(self.__cindex, self.__compile_args, unsaved, tick)
             except:
                 pass
 
