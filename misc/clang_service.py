@@ -3,6 +3,7 @@ from clang import cindex
 
 
 class ClangContext(object):
+    __libclang_lock = threading.Lock()
 
     def __init__(self, name):
 
@@ -11,7 +12,6 @@ class ClangContext(object):
         self.__tu = None
         self.__change_tick = 0
         self.__parse_tick = -1
-        self.__libclang_lock = threading.Lock()
 
     def update_buffer(self, buffer, tick):
         self.__buffer = buffer
