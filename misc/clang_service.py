@@ -3,8 +3,6 @@ from clang import cindex
 
 
 class ClangContext(object):
-    __libclang_lock = threading.Lock()
-
     def __init__(self, name):
 
         self.__name = name
@@ -18,12 +16,11 @@ class ClangContext(object):
         self.__change_tick = tick
 
     def parse(self, idx, args, unsaved, tick):
-        with self.__libclang_lock:
-            tu = idx.parse(
-                self.__name,
-                args,
-                unsaved,
-                options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+        tu = idx.parse(
+            self.__name,
+            args,
+            unsaved,
+            options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
         self.__tu = tu
         self.__parse_tick = tick
