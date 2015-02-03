@@ -6,14 +6,11 @@ class ClangContext(object):
     def __init__(self, name):
 
         self.__name = name
-        self.__buffer = None
-        self.__tu = None
-        self.__change_tick = 0
-        self.__parse_tick = -1
+        self.__tu_tick = [None, -1]
+        self.__buffer_tick = [None, 0]
 
     def update_buffer(self, buffer, tick):
-        self.__buffer = buffer
-        self.__change_tick = tick
+        self.__buffer_tick = [buffer, tick]
 
     def parse(self, idx, args, unsaved, tick):
         tu = idx.parse(
@@ -22,8 +19,7 @@ class ClangContext(object):
             unsaved,
             options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
-        self.__tu = tu
-        self.__parse_tick = tick
+        self.__tu_tick = [tu, tick]
 
     @property
     def name(self):
@@ -31,23 +27,23 @@ class ClangContext(object):
 
     @property
     def buffer(self):
-        return self.__buffer
+        return self.__buffer_tick[0]
 
     @property
     def change_tick(self):
-        return self.__change_tick
+        return self.__buffer_tick[1]
 
     @property
     def current_tu(self):
-        return self.__tu
+        return self.__tu_tick[0]
 
     @property
     def parse_tick(self):
-        return self.__parse_tick
+        return self.__tu_tick[1]
 
     @parse_tick.setter
     def parse_tick(self, value):
-        self.__parse_tick = value
+        self.__tu_tick[1] = value
 
 
 class Singleton(type):
@@ -143,6 +139,7 @@ class ClangService(object):
     def parse_cc(self, cc):
         tick = cc.change_tick
         unsaved = self.__gen_unsaved()
+
         cc.parse(self.__cindex, self.__compile_args, unsaved, tick)
 
     def parse_all(self):
