@@ -19,12 +19,13 @@ class ClangContext(object):
 
     def parse(self, idx, args, unsaved, tick):
         with self.__libclang_lock:
-            self.__tu = idx.parse(
+            tu = idx.parse(
                 self.__name,
                 args,
                 unsaved,
                 options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
 
+        self.__tu = tu
         self.__parse_tick = tick
 
     @property
