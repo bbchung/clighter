@@ -45,7 +45,6 @@ def highlight_window(clang_service):
         vim.current.window.vars['hl_tick'] = parse_tick
 
     file = tu.get_file(cc.name)
-    symbol = None
     if vim.eval('g:ClighterCursorHL') == '1':
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
@@ -109,7 +108,7 @@ def highlight_window(clang_service):
         """
         if draw_symbol_ref and t.location.line >= top and t.location.line <= bottom:
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
-            if t_symbol is not None and t.spelling == t_symbol.spelling and t_symbol == symbol:
+            if t_symbol is not None and t.spelling == t_symbol.spelling and t_symbol == highlight_window.symbol:
                 __vim_matchaddpos(
                     group='clighterCursorSymbolRef',
                     line=t.location.line,
