@@ -7,9 +7,10 @@ CONTENTS					*clighter-contents*
 3. Installation			|clighter-installation|
 4. Options			|clighter-options|
 5. Commands and Functions	|clighter-commands-and-functions|
-6. Syntax Group			|clighter-syntax-group|
-7. FAQ				|clighter-faq|
-7. LICENSE			|clighter-license|
+6. Compilation Database		|clighter-compilation-database|
+7. Syntax Group			|clighter-syntax-group|
+8. FAQ				|clighter-faq|
+9. LICENSE			|clighter-license|
 
 ==============================================================================
 						*clighter-intro*
@@ -55,7 +56,6 @@ Untar the clighter.tar.gz to your vim path.
 4. Options~
 
 |g:clighter_autostart|
-|g:ClighterCompileArgs|
 |g:clighter_libclang_file|
 |g:clighter_rename_prompt_level|
 |g:clighter_enable_cross_rename|
@@ -71,20 +71,6 @@ Clighter will automatically start while g:clighter_autostart == `1`.
 Default: `1`
 >
 	let g:clighter_autostart = 1
-<
-------------------------------------------------------------------------------
-						*g:ClighterCompileArgs*
-g:ClighterCompileArgs~
-
-Clighter pass g:ClighterCompileArgs to libclang while parsing the code. Notice
-that an improper setting may cause clighter failing even crashing. Clighter
-doesn't provide its mechanism to load compilation args from an external file
-for each project like YouCompleteMe, however vim sessions can help you to do
-that. 
-
-Default: `["-Iinclude"]`
->
-	let g:ClighterCompileArgs = ["-Iinclude"]
 <
 ------------------------------------------------------------------------------
 						*g:clighter_libclang_file*
@@ -192,8 +178,16 @@ clighter#SetCompileArgs()~
 Set clang compile args in runtime.
 
 ==============================================================================
+						*clighter-compilation-database*
+6. Compilation Database~
+
+Clighter automatically load and parse the compilation database
+"compile_commands.json" if it exists in current working directory, then the
+compile options will be passed to libclang.  
+
+==============================================================================
 						*clighter-syntax-group*
-6. Syntax Group~
+7. Syntax Group~
 
 Clighter defines these syntax groups corresponded to libclang.
 
@@ -217,7 +211,7 @@ You can customize these colors in your colorscheme, for example:
 <
 ==============================================================================
 						*clighter-faq*
-7. FAQ
+8. FAQ~
 
 Q. The clighter plugin doesn't work.
 A. Vim version 7.4 with python2.x is required, and make sure libclang(3.5 is
@@ -232,7 +226,7 @@ rename-factoring result is perfect.
 
 ==============================================================================
                                                         *clighter-license*
-License ~
+9. License ~
 
 This software is licensed under the GPL v3 license.
 

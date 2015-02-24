@@ -41,19 +41,6 @@ Default: `1`
 let g:clighter_autostart = 1
 ```
 
-### g:ClighterCompileArgs
-
-Clighter pass g:ClighterCompileArgs to libclang while parsing the code. Notice
-that an improper setting may cause clighter failing even crashing. Clighter
-doesn't provide its mechanism to load compilation args from an external file
-for each project like [YouCompleteMe][ycm], however vim sessions can help you
-to do that. 
-
-Default: `["-Iinclude"]`
-```vim
-let g:ClighterCompileArgs = ["-Iinclude"]
-```
-
 ### g:clighter_libclang_file
 
 Clighter searches libclang-3.5 in your system automatically. You must set this
@@ -140,6 +127,13 @@ nmap <silent> <Leader>r :call clighter#Rename()<CR>
 
 Set clang compile args in runtime.
 
+## Compilation Database
+
+Clighter automatically load and parse the compilation database
+"compile_commands.json" if it exists in current working directory, then the
+compile options will be passed to libclang. For more information about
+compilation database, please reference [Compilation Database][cdb] 
+
 ## Syntax Group
 
 Clighter defines these syntax groups corresponded to libclang.
@@ -186,3 +180,4 @@ Note: This license does not cover the files that come from the LLVM project.
 
 [gpl]: http://www.gnu.org/copyleft/gpl.html
 [ycm]: https://github.com/Valloric/YouCompleteMe
+[cdb]: http://clang.llvm.org/docs/JSONCompilationDatabase.html
