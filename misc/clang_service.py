@@ -1,4 +1,3 @@
-import argparse
 import threading
 from clang import cindex
 
@@ -74,9 +73,6 @@ class ClangService(object):
         self.__cond = threading.Condition()
         self.__cindex = None
         self.__cdb = None
-        self.__arg_parser = argparse.ArgumentParser()
-        self.__arg_parser.add_argument('-D')
-        self.__arg_parser.add_argument('-I')
 
     def __del__(self):
         self.stop()
@@ -90,14 +86,25 @@ class ClangService(object):
         if not ccmds:
             return None
 
-        arguments = list(ccmds[0].arguments)
+        args = list(ccmds[0].arguments)
 
-        if len(arguments) <= 1:
-            return None
+        num = len(args)
+        p = 0
 
-        opts, unknown = self.__arg_parser.parse_known_args(arguments[1:])
+        ret = []
 
-        return [arg for (k, v) in vars(opts).items() for arg in ('-' + k, v)]
+        while p < num:
+            prefix = args[p][0:2]
+            if prefix == "-D" or prefix == "-I":
+                ret.append(args[p])
+                if len(args[p]) == 2:
+                    p += 1
+                    if p < num:
+                        ret.append(args[p])
+
+            p += 1
+
+        return ret
 
     def start(self, cdb_dir):
         if self.__cindex is None:
