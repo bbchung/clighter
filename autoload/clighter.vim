@@ -55,7 +55,12 @@ fun! clighter#Enable()
         return
     endif
 
-    let a:start_cmd = printf("clang_service.ClangService().start('%s')", getcwd())
+    let a:cwd = getcwd()
+    if !filereadable(a:cwd.'/compile_commands.json')
+        let a:cwd = ''
+    endif
+
+    let a:start_cmd = printf("clang_service.ClangService().start('%s')", a:cwd)
 
     if !pyeval(a:start_cmd)
         echohl WarningMsg |

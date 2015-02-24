@@ -1,8 +1,10 @@
+import argparse
 import threading
 from clang import cindex
 
 
 class ClangContext(object):
+
     def __init__(self, name):
 
         self.__name = name
@@ -77,15 +79,27 @@ class ClangService(object):
         self.stop()
 
     def __get_args(self, name):
-        args = None
-        if self.__cdb:
-            ccmd = self.__cdb.getCompileCommands(name)
-            if ccmd:
-                args = list(ccmd[0].arguments)
-        
-        return args
+        if not self.__cdb:
+            return None
 
-    def start(self, dir):
+        ccmds = self.__cdb.getCompileCommands(name)
+
+        if not ccmds:
+            return None
+
+        arguments = list(ccmds[0].arguments)
+
+        if len(arguments) <= 1:
+            return None
+
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-D')
+        parser.add_argument('-I')
+        opts, unknown = parser.parse_known_args(arguments[1:])
+
+        return [arg for (k, v) in vars(opts).items() for arg in ('-' + k, v)]
+
+    def start(self, cdb_dir):
         if self.__cindex is None:
             try:
                 self.__cindex = cindex.Index.create()
@@ -95,10 +109,11 @@ class ClangService(object):
         if self.__parsing_thread:
             return True
 
-        try:
-            self.__cdb = cindex.CompilationDatabase.fromDirectory(dir)
-        except:
-            pass
+        if cdb_dir:
+            try:
+                self.__cdb = cindex.CompilationDatabase.fromDirectory(cdb_dir)
+            except:
+                pass
 
         self.__is_running = True
         self.__parsing_thread = threading.Thread(target=self.__parsing_worker)
