@@ -13,13 +13,16 @@ class ClangContext(object):
         self.__buffer_tick = [buffer, tick]
 
     def parse(self, idx, args, unsaved, tick):
-        tu = idx.parse(
-            self.__name,
-            args,
-            unsaved,
-            options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
-
-        self.__tu_tick = [tu, tick]
+        try:
+            tu = idx.parse(
+                self.__name,
+                args,
+                unsaved,
+                options=cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD)
+        except:
+            tu = None
+        finally:
+            self.__tu_tick = [tu, tick]
 
     @property
     def name(self):
@@ -66,24 +69,36 @@ class ClangService(object):
         self.__cc_dict = {}
         self.__parsing_thread = None
         self.__is_running = False
-        self.__compile_args = None
         self.__cond = threading.Condition()
         self.__cindex = None
+        self.__cdb = None
 
     def __del__(self):
         self.stop()
 
-    def start(self, arg):
+    def __get_args(self, name):
+        args = None
+        if self.__cdb:
+            ccmd = self.__cdb.getCompileCommands(name)
+            if ccmd:
+                args = list(ccmd[0].arguments)
+        
+        return args
+
+    def start(self, dir):
         if self.__cindex is None:
             try:
                 self.__cindex = cindex.Index.create()
             except:
                 return False
 
-        if self.__parsing_thread is not None:
+        if self.__parsing_thread:
             return True
 
-        self.__compile_args = arg
+        try:
+            self.__cdb = cindex.CompilationDatabase.fromDirectory(dir)
+        except:
+            pass
 
         self.__is_running = True
         self.__parsing_thread = threading.Thread(target=self.__parsing_worker)
@@ -92,7 +107,7 @@ class ClangService(object):
         return True
 
     def stop(self):
-        if self.__parsing_thread is not None:
+        if self.__parsing_thread:
             self.__is_running = False
             with self.__cond:
                 self.__cond.notify()
@@ -146,7 +161,7 @@ class ClangService(object):
         for cc in self.__cc_dict.values():
             cc.parse(
                 self.__cindex,
-                self.__compile_args,
+                self.__get_args(cc.name),
                 unsaved,
                 tick[cc.name])
 
@@ -158,7 +173,7 @@ class ClangService(object):
         for cc in self.__cc_dict.values():
             buffer = cc.buffer
 
-            if buffer is not None:
+            if buffer:
                 unsaved.append((cc.name, buffer))
 
         return unsaved
@@ -180,15 +195,7 @@ class ClangService(object):
             try:
                 tick = cc.change_tick
                 unsaved = self.__gen_unsaved()
-
-                cc.parse(self.__cindex, self.__compile_args, unsaved, tick)
             except:
                 pass
 
-    @property
-    def compile_args(self):
-        return self.__compile_args
-
-    @compile_args.setter
-    def compile_args(self, value):
-        self.__compile_args = value
+            cc.parse(self.__cindex, self.__get_args(cc.name), unsaved, tick)

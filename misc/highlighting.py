@@ -49,10 +49,10 @@ def highlight_window(clang_service):
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
 
-        if highlight_window.symbol is not None and (symbol is None or symbol != highlight_window.symbol):
+        if highlight_window.symbol and (symbol is None or symbol != highlight_window.symbol):
             __vim_clear_match_pri(SYMBOL_REF_PRI)
 
-        if symbol is not None and (highlight_window.symbol is None or symbol != highlight_window.symbol):
+        if symbol and (highlight_window.symbol is None or symbol != highlight_window.symbol):
             draw_symbol_ref = True
 
         highlight_window.symbol = symbol
@@ -108,7 +108,7 @@ def highlight_window(clang_service):
         """
         if draw_symbol_ref and t.location.line >= top and t.location.line <= bottom:
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
-            if t_symbol is not None and t.spelling == t_symbol.spelling and t_symbol == highlight_window.symbol:
+            if t_symbol and t.spelling == t_symbol.spelling and t_symbol == highlight_window.symbol:
                 __vim_matchaddpos(
                     group='clighterCursorSymbolRef',
                     line=t.location.line,

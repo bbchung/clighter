@@ -70,7 +70,7 @@ def get_semantic_symbol(cursor):
 
 
 def get_spelling_or_displayname(cursor):
-    return cursor.spelling if cursor.spelling is not None else cursor.displayname
+    return cursor.spelling if cursor.spelling else cursor.displayname
 
 
 def search_referenced_tokens(tu, symbol, locs):
@@ -90,6 +90,6 @@ def search_referenced_tokens(tu, symbol, locs):
 
         t_symbol = get_semantic_symbol(t_cursor)
 
-        if t_symbol is not None and t_symbol == symbol:
+        if t_symbol and t_symbol == symbol:
             locs.add(
                 (t.location.line, t.location.column, t.location.file.name))

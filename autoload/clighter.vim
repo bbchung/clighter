@@ -55,7 +55,9 @@ fun! clighter#Enable()
         return
     endif
 
-    if !pyeval("clang_service.ClangService().start(vim.eval('g:ClighterCompileArgs'))")
+    let a:start_cmd = printf("clang_service.ClangService().start('%s')", getcwd())
+
+    if !pyeval(a:start_cmd)
         echohl WarningMsg |
                     \ echomsg "Clighter unavailable: clang service failed, you must setup clang environment for clighter" |
                     \ echohl None
@@ -89,9 +91,4 @@ endf
 
 fun! clighter#Rename()
     py refactor.rename(clang_service.ClangService())
-endf
-
-fun! clighter#SetCompileArgs(args)
-    let g:ClighterCompileArgs = a:args
-    py clang_service.ClangService().compile_args = vim.eval('g:ClighterCompileArgs')
 endf

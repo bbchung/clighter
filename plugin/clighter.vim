@@ -40,7 +40,6 @@ let g:clighter_highlight_groups = get(g:, 'clighter_highlight_groups', ['clighte
 let g:clighter_cursor_hl_default = get(g:, 'clighter_cursor_hl_default', 1)
 
 let g:ClighterCursorHL = get(g:, 'ClighterCursorHL', g:clighter_cursor_hl_default)
-let g:ClighterCompileArgs = get(g:, 'ClighterCompileArgs', ["-Iinclude"])
 
 command! ClighterEnable call clighter#Enable()
 command! ClighterDisable call clighter#Disable()
