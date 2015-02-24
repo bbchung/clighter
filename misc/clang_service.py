@@ -74,6 +74,9 @@ class ClangService(object):
         self.__cond = threading.Condition()
         self.__cindex = None
         self.__cdb = None
+        self.__arg_parser = argparse.ArgumentParser()
+        self.__arg_parser.add_argument('-D')
+        self.__arg_parser.add_argument('-I')
 
     def __del__(self):
         self.stop()
@@ -92,10 +95,7 @@ class ClangService(object):
         if len(arguments) <= 1:
             return None
 
-        parser = argparse.ArgumentParser()
-        parser.add_argument('-D')
-        parser.add_argument('-I')
-        opts, unknown = parser.parse_known_args(arguments[1:])
+        opts, unknown = self.__arg_parser.parse_known_args(arguments[1:])
 
         return [arg for (k, v) in vars(opts).items() for arg in ('-' + k, v)]
 
