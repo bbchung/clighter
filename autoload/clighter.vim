@@ -21,7 +21,7 @@ endif
 fun! clighter#ToggleCursorHL()
     if g:ClighterCursorHL==1
         let a:wnr = winnr()
-        windo py highlighting.clear_symbol_ref()
+        windo py highlighting.clear_symbol_hl()
         exe a:wnr."wincmd w"
     endif
 

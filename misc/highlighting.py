@@ -11,10 +11,12 @@ SYNTAX_PRI = -12
 def clear_highlight():
     __vim_clear_match_pri(SYMBOL_REF_PRI, SYNTAX_PRI)
     highlight_window.syntactic_range = None
+    highlight_window.symbol = None
 
 
-def clear_symbol_ref():
+def clear_symbol_hl():
     __vim_clear_match_pri(SYMBOL_REF_PRI)
+    highlight_window.symbol = None
 
 
 def highlight_window(clang_service, do_symbol_hl):
@@ -43,12 +45,18 @@ def highlight_window(clang_service, do_symbol_hl):
         vim.current.window.vars['hl_tick'] = parse_tick
 
     file = tu.get_file(cc.name)
-    if vim.eval('g:ClighterCursorHL') == '1' and do_symbol_hl:
+    if vim.eval('g:ClighterCursorHL') == '1':
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
-        __vim_clear_match_pri(SYMBOL_REF_PRI)
 
-    if not draw_syntax and not symbol:
+        if highlight_window.symbol and (not symbol or symbol != highlight_window.symbol):
+            clear_symbol_hl()
+            highlight_window.symbol = None
+
+        if do_symbol_hl:
+            highlight_window.symbol = symbol
+
+    if not draw_syntax and not highlight_window.symbol:
         return
 
     target_range = [top, bottom]
@@ -97,9 +105,9 @@ def highlight_window(clang_service, do_symbol_hl):
 
         """ Do definition/reference highlighting'
         """
-        if symbol and t.location.line >= top and t.location.line <= bottom:
+        if highlight_window.symbol and t.location.line >= top and t.location.line <= bottom:
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
-            if t_symbol and t.spelling == t_symbol.spelling and t_symbol == symbol:
+            if t_symbol and t.spelling == t_symbol.spelling and t_symbol == highlight_window.symbol:
                 __vim_matchaddpos(
                     group='clighterCursorSymbolRef',
                     line=t.location.line,
@@ -109,6 +117,7 @@ def highlight_window(clang_service, do_symbol_hl):
                 )
 
 highlight_window.syntactic_range = None
+highlight_window.symbol = None
 
 group_map = {
     cindex.CursorKind.MACRO_INSTANTIATION: 'clighterMacroInstantiation',
