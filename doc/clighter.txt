@@ -139,7 +139,6 @@ Clighter provides these commands and functions.
 |ClighterDisable|
 |ClighterToggleCursorHL|
 |clighter#Rename()|
-|clighter#SetCompileArgs()|
 
 ------------------------------------------------------------------------------
 						*ClighterEnable*
@@ -171,12 +170,6 @@ clighter#Rename()~
 >
 	nmap <silent> <Leader>r :call clighter#Rename()<CR>
 >
-------------------------------------------------------------------------------
-						*clighter#SetCompileArgs()*
-clighter#SetCompileArgs()~
-
-Set clang compile args in runtime.
-
 ==============================================================================
 						*clighter-compilation-database*
 6. Compilation Database~

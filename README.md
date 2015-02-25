@@ -123,10 +123,6 @@ Toggle cursor highlighting.
 nmap <silent> <Leader>r :call clighter#Rename()<CR>
 ```
 
-### clighter#SetCompileArgs()
-
-Set clang compile args in runtime.
-
 ## Compilation Database
 
 Clighter automatically load and parse the compilation database
