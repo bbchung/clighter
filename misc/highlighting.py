@@ -11,12 +11,10 @@ SYNTAX_PRI = -12
 def clear_highlight():
     __vim_clear_match_pri(SYMBOL_REF_PRI, SYNTAX_PRI)
     highlight_window.syntactic_range = None
-    highlight_window.symbol = None
 
 
 def clear_symbol_ref():
     __vim_clear_match_pri(SYMBOL_REF_PRI)
-    highlight_window.symbol = None
 
 
 def highlight_window(clang_service):
@@ -34,7 +32,7 @@ def highlight_window(clang_service):
     bottom = string.atoi(vim.eval("line('w$')"))
 
     draw_syntax = False
-    draw_symbol_ref = False
+    symbol = None
 
     if vim.current.window.vars['hl_tick'] < parse_tick \
             or highlight_window.syntactic_range is None \
@@ -48,16 +46,9 @@ def highlight_window(clang_service):
     if vim.eval('g:ClighterCursorHL') == '1':
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
+        __vim_clear_match_pri(SYMBOL_REF_PRI)
 
-        if highlight_window.symbol and (symbol is None or symbol != highlight_window.symbol):
-            __vim_clear_match_pri(SYMBOL_REF_PRI)
-
-        if symbol and (highlight_window.symbol is None or symbol != highlight_window.symbol):
-            draw_symbol_ref = True
-
-        highlight_window.symbol = symbol
-
-    if not draw_syntax and not draw_symbol_ref:
+    if not draw_syntax and not symbol:
         return
 
     target_range = [top, bottom]
@@ -106,9 +97,9 @@ def highlight_window(clang_service):
 
         """ Do definition/reference highlighting'
         """
-        if draw_symbol_ref and t.location.line >= top and t.location.line <= bottom:
+        if symbol and t.location.line >= top and t.location.line <= bottom:
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
-            if t_symbol and t.spelling == t_symbol.spelling and t_symbol == highlight_window.symbol:
+            if t_symbol and t.spelling == t_symbol.spelling and t_symbol == symbol:
                 __vim_matchaddpos(
                     group='clighterCursorSymbolRef',
                     line=t.location.line,
@@ -118,7 +109,6 @@ def highlight_window(clang_service):
                 )
 
 highlight_window.syntactic_range = None
-highlight_window.symbol = None
 
 group_map = {
     cindex.CursorKind.MACRO_INSTANTIATION: 'clighterMacroInstantiation',
