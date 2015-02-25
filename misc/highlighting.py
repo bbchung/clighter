@@ -51,7 +51,6 @@ def highlight_window(clang_service, do_symbol_hl):
 
         if highlight_window.symbol and (not symbol or symbol != highlight_window.symbol):
             clear_symbol_hl()
-            highlight_window.symbol = None
 
         if do_symbol_hl:
             highlight_window.symbol = symbol
