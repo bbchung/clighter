@@ -1,6 +1,27 @@
 import threading
 from clang import cindex
 
+USEFUL_OPTS = ['-D', '-I']
+
+def get_useful_args(flags):
+    num = len(flags)
+    p = 0
+
+    useful_opts = []
+
+    while p < num:
+        prefix = flags[p][0:2]
+        if prefix in USEFUL_OPTS:
+            useful_opts.append(flags[p])
+            if len(flags[p]) == 2:
+                p += 1
+                if p < num:
+                    useful_opts.append(flags[p])
+
+        p += 1
+
+    return useful_opts
+
 
 class ClangContext(object):
 
@@ -77,7 +98,7 @@ class ClangService(object):
     def __del__(self):
         self.stop()
 
-    def __get_args(self, name):
+    def __get_useful_args(self, name):
         if not self.__cdb:
             return None
 
@@ -86,25 +107,10 @@ class ClangService(object):
         if not ccmds:
             return None
 
+        # if there is more than one commands, take the first one
         args = list(ccmds[0].arguments)
 
-        num = len(args)
-        p = 0
-
-        ret = []
-
-        while p < num:
-            prefix = args[p][0:2]
-            if prefix == "-D" or prefix == "-I":
-                ret.append(args[p])
-                if len(args[p]) == 2:
-                    p += 1
-                    if p < num:
-                        ret.append(args[p])
-
-            p += 1
-
-        return ret
+        return get_useful_args(args)
 
     def start(self, cdb_dir):
         if self.__cindex is None:
@@ -183,7 +189,7 @@ class ClangService(object):
         for cc in self.__cc_dict.values():
             cc.parse(
                 self.__cindex,
-                self.__get_args(cc.name),
+                self.__get_useful_args(cc.name),
                 unsaved,
                 tick[cc.name])
 
@@ -220,4 +226,4 @@ class ClangService(object):
             except:
                 pass
 
-            cc.parse(self.__cindex, self.__get_args(cc.name), unsaved, tick)
+            cc.parse(self.__cindex, self.__get_useful_args(cc.name), unsaved, tick)
