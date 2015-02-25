@@ -49,6 +49,8 @@ class ClangContext(object):
         self.__tu_tick = [None, -1]
         self.__buffer_tick = [None, 0]
 
+        self.compile_args = None
+
     def update_buffer(self, buffer, tick):
         self.__buffer_tick = [buffer, tick]
 
@@ -116,11 +118,14 @@ class ClangService(object):
     def __del__(self):
         self.stop()
 
-    def __get_useful_args(self, name):
+    def __get_useful_args(self, cc):
+        if cc.compile_args:
+            return cc.compile_args
+
         if not self.__cdb:
             return None
 
-        ccmds = self.__cdb.getCompileCommands(name)
+        ccmds = self.__cdb.getCompileCommands(cc.name)
 
         if not ccmds:
             return None
@@ -128,7 +133,8 @@ class ClangService(object):
         # if there is more than one commands, take the first one
         args = list(ccmds[0].arguments)
 
-        return get_useful_args(args)
+        cc.compile_args = get_useful_args(args)
+        return cc.compile_args
 
     def start(self, cdb_dir):
         if self.__cindex is None:
@@ -207,7 +213,7 @@ class ClangService(object):
         for cc in self.__cc_dict.values():
             cc.parse(
                 self.__cindex,
-                self.__get_useful_args(cc.name),
+                self.__get_useful_args(cc),
                 unsaved,
                 tick[cc.name])
 
@@ -246,6 +252,6 @@ class ClangService(object):
 
             cc.parse(
                 self.__cindex,
-                self.__get_useful_args(cc.name),
+                self.__get_useful_args(cc),
                 unsaved,
                 tick)
