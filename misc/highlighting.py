@@ -17,7 +17,7 @@ def clear_symbol_ref():
     __vim_clear_match_pri(SYMBOL_REF_PRI)
 
 
-def highlight_window(clang_service):
+def highlight_window(clang_service, do_symbol_hl):
     cc = clang_service.get_cc(vim.current.buffer.name)
     if cc is None:
         return
@@ -43,7 +43,7 @@ def highlight_window(clang_service):
         vim.current.window.vars['hl_tick'] = parse_tick
 
     file = tu.get_file(cc.name)
-    if vim.eval('g:ClighterCursorHL') == '1':
+    if vim.eval('g:ClighterCursorHL') == '1' and do_symbol_hl:
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
         __vim_clear_match_pri(SYMBOL_REF_PRI)
