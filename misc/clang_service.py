@@ -1,26 +1,44 @@
 import threading
 from clang import cindex
 
-USEFUL_OPTS = ['-D', '-I']
+USEFUL_OPTS = ['-D', '-I', '-include', '-x']
+USEFUL_FLAGS = ['-std']
 
-def get_useful_args(flags):
-    num = len(flags)
+
+def get_useful_args(args):
+    num = len(args)
     p = 0
 
     useful_opts = []
+    useful_flags = []
 
     while p < num:
-        prefix = flags[p][0:2]
-        if prefix in USEFUL_OPTS:
-            useful_opts.append(flags[p])
-            if len(flags[p]) == 2:
+        useful_opt = None
+        useful_flag = None
+
+        for opt in USEFUL_OPTS:
+            if args[p].startswith(opt):
+                useful_opt = opt
+                break
+
+        for flag in USEFUL_FLAGS:
+            if args[p].startswith(flag):
+                useful_flag = flag
+                break
+
+        if useful_opt:
+            useful_opts.append(args[p])
+            if args[p] == useful_opt:
                 p += 1
                 if p < num:
-                    useful_opts.append(flags[p])
+                    useful_opts.append(args[p])
+
+        if useful_flag:
+            useful_flags.append(args[p])
 
         p += 1
 
-    return useful_opts
+    return useful_flags + useful_opts
 
 
 class ClangContext(object):
@@ -226,4 +244,8 @@ class ClangService(object):
             except:
                 pass
 
-            cc.parse(self.__cindex, self.__get_useful_args(cc.name), unsaved, tick)
+            cc.parse(
+                self.__cindex,
+                self.__get_useful_args(cc.name),
+                unsaved,
+                tick)
