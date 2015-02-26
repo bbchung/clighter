@@ -62,19 +62,20 @@ def hl_window(clang_service, do_symbol_hl):
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
 
+    w_range = [top, bottom]
     syntax_range = [max(top - height, 1), min(
         bottom + height, len(vim.current.buffer))]
-    symbol_range = [top, bottom]
+    symbol_range = w_range
 
     if vim.current.window.vars['hl_tick'] < parse_tick:
         clear_highlight()
     else:
-        if not __is_contained_in([top, bottom], hl_window.syntax_range):
+        if not __is_contained_in(w_range, hl_window.syntax_range):
             __vim_clear_match_pri(SYNTAX_PRI)
         else:
             syntax_range = None
 
-        if not __is_contained_in([top, bottom], hl_window.symbol_range) or (hl_window.symbol and (not symbol or symbol != hl_window.symbol)):
+        if not __is_contained_in(w_range, hl_window.symbol_range) or (hl_window.symbol and (not symbol or symbol != hl_window.symbol)):
             clear_symbol_hl()
         else:
             symbol_range = None
