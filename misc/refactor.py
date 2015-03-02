@@ -8,7 +8,7 @@ def rename(clang_service):
     clang_service.update_buffers(__get_bufctx_list(), False)
     clang_service.parse_all()
 
-    cc = clang_service.get_cc(vim.current.buffer.name)
+    cc = clang_service.current_cc
     if cc is None:
         return
 
@@ -69,7 +69,7 @@ def __cross_buffer_rename(clang_service, symbol_usr, new_name, prompt):
 
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
-        cc = clang_service.get_cc(vim.current.buffer.name)
+        cc = clang_service.current_cc
         if cc:
             try:
                 __search_symbol_and_rename(

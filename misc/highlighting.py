@@ -40,7 +40,7 @@ def clear_symbol_hl():
 
 
 def hl_window(clang_service, do_symbol_hl):
-    cc = clang_service.get_cc(vim.current.buffer.name)
+    cc = clang_service.current_cc
     if cc is None:
         return
 

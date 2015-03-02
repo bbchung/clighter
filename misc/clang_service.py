@@ -217,9 +217,6 @@ class ClangService(object):
                 unsaved,
                 tick[cc.name])
 
-    def get_cc(self, name):
-        return self.__cc_dict.get(name)
-
     def __gen_unsaved(self):
         unsaved = []
         for cc in self.__cc_dict.values():
@@ -255,3 +252,7 @@ class ClangService(object):
                 self.__get_useful_args(cc),
                 unsaved,
                 tick)
+
+    @property
+    def current_cc(self):
+        return self.__current_cc
