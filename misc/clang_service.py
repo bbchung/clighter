@@ -194,12 +194,11 @@ class ClangService(object):
                 self.__cond.notify()
 
     def switch(self, name):
-        cc = self.__cc_dict.get(name)
-        if cc is None:
+        self.__current_cc = self.__cc_dict.get(name)
+        if self.__current_cc is None:
             return
 
-        cc.parse_tick = -1
-        self.__current_cc = cc
+        self.__current_cc.parse_tick = -1
         with self.__cond:
             self.__cond.notify()
 
