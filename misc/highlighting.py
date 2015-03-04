@@ -63,9 +63,8 @@ def hl_window(clang_service, do_symbol_hl):
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
 
     w_range = [top, bottom]
-    syntax_range = [max(top - height, 1), min(
+    symbol_range = syntax_range = [max(top - height, 1), min(
         bottom + height, len(vim.current.buffer))]
-    symbol_range = w_range
 
     if vim.current.window.vars['hl_tick'] < parse_tick:
         clear_highlight()
