@@ -134,7 +134,7 @@ def __do_highlight(tu, file, syntax_range, symbol, symbol_range):
                 type_kind=t_cursor.type.kind
             )
 
-        if __is_in_range(t.location.line, symbol_range):
+        if symbol and __is_in_range(t.location.line, symbol_range):
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
             if t_symbol and t.spelling == t_symbol.spelling and t_symbol == symbol:
                 __vim_matchaddpos(
