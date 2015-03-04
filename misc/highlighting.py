@@ -69,12 +69,12 @@ def hl_window(clang_service, do_symbol_hl):
     if vim.current.window.vars['hl_tick'] < parse_tick:
         clear_highlight()
     else:
-        if not __is_contained_in(w_range, hl_window.syntax_range):
+        if not __is_subrange(w_range, hl_window.syntax_range):
             __vim_clear_match_pri(SYNTAX_PRI)
         else:
             syntax_range = None
 
-        if not __is_contained_in(w_range, hl_window.symbol_range) or (hl_window.symbol and (not symbol or symbol != hl_window.symbol)):
+        if not __is_subrange(w_range, hl_window.symbol_range) or (hl_window.symbol and (not symbol or symbol != hl_window.symbol)):
             clear_symbol_hl()
         else:
             symbol_range = None
@@ -125,7 +125,7 @@ def __do_highlight(tu, file, syntax_range, symbol, symbol_range):
             )
         )
 
-        if syntax_range:
+        if __is_in_range(t.location.line, syntax_range):
             __draw_token(
                 line=t.location.line,
                 col=t.location.column,
@@ -134,7 +134,7 @@ def __do_highlight(tu, file, syntax_range, symbol, symbol_range):
                 type_kind=t_cursor.type.kind
             )
 
-        if symbol and symbol_range:
+        if __is_in_range(t.location.line, symbol_range):
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
             if t_symbol and t.spelling == t_symbol.spelling and t_symbol == symbol:
                 __vim_matchaddpos(
@@ -183,7 +183,17 @@ def __union(range1, range2):
         return None
 
 
-def __is_contained_in(range1, range2):
+def __is_in_range(value, range):
+    if range is None:
+        return False
+
+    if value >= range[0] and value <= range[1]:
+        return True
+
+    return False
+
+
+def __is_subrange(range1, range2):
     if not range1:
         return True
 
