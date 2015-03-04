@@ -28,14 +28,13 @@ group_map = {
 
 def clear_highlight():
     __vim_clear_match_pri(SYMBOL_REF_PRI, SYNTAX_PRI)
-    hl_window.syntax_range = None
-    hl_window.symbol_range = None
-    hl_window.symbol = None
+    vim.current.window.vars['clighter_hl'] = [
+        -1, [], []]  # [hl_tick, syntax_range, symbol_range]
 
 
 def clear_symbol_hl():
     __vim_clear_match_pri(SYMBOL_REF_PRI)
-    hl_window.symbol_range = None
+    vim.current.window.vars['clighter_hl'][2] = []
     hl_window.symbol = None
 
 
@@ -66,15 +65,15 @@ def hl_window(clang_service, do_symbol_hl):
     syntax_range = [max(top - height, 1), min(
         bottom + height, len(vim.current.buffer))]
 
-    if vim.current.window.vars['hl_tick'] < parse_tick:
+    if vim.current.window.vars['clighter_hl'][0] < parse_tick:
         clear_highlight()
     else:
-        if not __is_subrange(w_range, hl_window.syntax_range):
+        if not __is_subrange(w_range, list(vim.current.window.vars['clighter_hl'][1])):
             __vim_clear_match_pri(SYNTAX_PRI)
         else:
             syntax_range = None
 
-        if not __is_subrange(w_range, hl_window.symbol_range) or (hl_window.symbol and (not symbol or symbol != hl_window.symbol)):
+        if not __is_subrange(w_range, list(vim.current.window.vars['clighter_hl'][2])) or (hl_window.symbol and (not symbol or symbol != hl_window.symbol)):
             clear_symbol_hl()
         else:
             symbol_range = None
@@ -83,11 +82,7 @@ def hl_window(clang_service, do_symbol_hl):
         symbol_range = None
 
     __do_highlight(tu, file, syntax_range, symbol, symbol_range)
-    vim.current.window.vars['hl_tick'] = parse_tick
-
-hl_window.syntax_range = None
-hl_window.symbol_range = None
-hl_window.symbol = None
+    vim.current.window.vars['clighter_hl'][0] = parse_tick
 
 
 def __do_highlight(tu, file, syntax_range, symbol, symbol_range):
@@ -95,10 +90,10 @@ def __do_highlight(tu, file, syntax_range, symbol, symbol_range):
         return
 
     if syntax_range:
-        hl_window.syntax_range = syntax_range
+        vim.current.window.vars['clighter_hl'][1] = syntax_range
 
     if symbol_range and symbol:
-        hl_window.symbol_range = symbol_range
+        vim.current.window.vars['clighter_hl'][2] = symbol_range
         hl_window.symbol = symbol
 
     union_range = __union(syntax_range, symbol_range)
