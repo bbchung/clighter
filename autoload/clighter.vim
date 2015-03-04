@@ -74,7 +74,11 @@ fun! clighter#Enable()
 
     augroup ClighterEnable
         au!
-        au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), False)
+        if g:clighter_cursor_hl_mode == 0
+            au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), False)
+        else
+            au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), True)
+        endif
         au CursorHold,CursorHoldI * py highlighting.hl_window(clang_service.ClangService(), True)
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
         au WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_to_current()

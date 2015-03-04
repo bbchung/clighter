@@ -87,13 +87,25 @@ Default: `['clighterMacroInstantiation','clighterStructDecl','clighterClassDecl'
 let g:clighter_highlight_groups = ['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum']
 ```
 
-### g:clighter_cursor_hl_default
+### g:clighter_cursor_hl_mode
 
-Enable cursor highlight by default.
+If value is 0, the behavior of cursor highlight is visual studio liked(some
+delay before highlighting different cursors), or the cursors will always be
+highlighted immediately.
+
+Default: `0`
+```vim
+let g:clighter_cursor_hl_mode = 0
+```
+
+### g:ClighterCursorHL
+
+Enable cursor highlight. Cursor highlight is a clighter function that
+highlight all words with the same semantic symbol.
 
 Default: `1`
 ```vim
-let g:clighter_cursor_hl_default = 1
+let g:ClighterCursorHL = 1
 ```
 
 ## Commands and Functions
