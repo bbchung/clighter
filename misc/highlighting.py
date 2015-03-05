@@ -81,11 +81,10 @@ def hl_window(clang_service, do_symbol_hl):
     if not do_symbol_hl:
         symbol_range = None
 
-    __do_highlight(tu, file, syntax_range, symbol, symbol_range)
-    vim.current.window.vars['clighter_hl'][0] = parse_tick
+    __do_highlight(tu, file, syntax_range, symbol, symbol_range, parse_tick)
 
 
-def __do_highlight(tu, file, syntax_range, symbol, symbol_range):
+def __do_highlight(tu, file, syntax_range, symbol, symbol_range, tick):
     if not syntax_range and (not symbol or not symbol_range):
         return
 
@@ -139,6 +138,8 @@ def __do_highlight(tu, file, syntax_range, symbol, symbol_range):
                     len=len(t.spelling),
                     priority=SYMBOL_REF_PRI
                 )
+
+    vim.current.window.vars['clighter_hl'][0] = tick
 
 
 def __draw_token(line, col, len, cursor_kind, type_kind):
