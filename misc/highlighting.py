@@ -149,7 +149,7 @@ def __draw_syntax(line, col, len, cursor_kind, type_kind):
     if group is None:
         return
 
-    if isinstance(group, dict):
+    if group == cindex.CursorKind.DECL_REF_EXPR:
         group = group.get(type_kind)
         if group is None:
             return
