@@ -5,8 +5,9 @@
 Clighter(C lighter) makes vim a better c-family development environment as a
 plugin based on libclang. Clighter provides following features currently:
 
-* Context-sensitive syntax highlighting
-* Context-sensitive cursor word highlighting
+* Context-sentitive highlight
+	* Syntax highlight
+	* Occurrences highlight
 * Experimental rename-refactoring function
 
 ![Clighter GIF demo](http://goo.gl/C7FYg8)
@@ -80,7 +81,7 @@ let g:clighter_enable_cross_rename = 1
 
 ### g:clighter_highlight_groups
 
-Define the syntax to be highlighted.
+Define the group to be highlighted.
 
 Default: `['clighterMacroInstantiation','clighterStructDecl','clighterClassDecl','clighterEnumDecl','clighterEnumConstantDecl','clighterTypeRef','clighterDeclRefExprEnum']`
 ```vim
@@ -142,9 +143,9 @@ Clighter automatically load and parse the compilation database
 compile options will be passed to libclang. For more information about
 compilation database, please reference [Compilation Database][cdb] 
 
-## Syntax Group
+## Highlight Group
 
-Clighter defines these syntax groups corresponded to libclang.
+Clighter defines these highlight groups corresponded to libclang.
 
 ```vim
 hi link clighterMacroInstantiation Constant
