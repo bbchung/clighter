@@ -57,7 +57,7 @@ def hl_window(clang_service, do_occurrences):
 
     symbol = None
 
-    if vim.eval('g:ClighterCursorHL') == '1':
+    if vim.eval('g:ClighterOccurrences') == '1':
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
 

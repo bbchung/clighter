@@ -18,17 +18,17 @@ endpython
 endif
 
 
-fun! clighter#ToggleCursorHL()
-    if g:ClighterCursorHL==1
+fun! clighter#ToggleOccurrences()
+    if g:ClighterOccurrences==1
         let a:wnr = winnr()
         windo py highlighting.clear_occurrences()
         exe a:wnr."wincmd w"
     endif
 
-    let g:ClighterCursorHL = !g:ClighterCursorHL
+    let g:ClighterOccurrences = !g:ClighterOccurrences
 
     echohl WarningMsg |
-                \echom printf("Cursor Highlight: %s", g:ClighterCursorHL == 1 ? "Enabled" : "Disabled") |
+                \echom printf("Cursor Occurrences: %s", g:ClighterOccurrences == 1 ? "Enabled" : "Disabled") |
                 \echohl None
 endf
 
@@ -74,7 +74,7 @@ fun! clighter#Enable()
 
     augroup ClighterEnable
         au!
-        if g:clighter_cursor_hl_mode == 0
+        if g:clighter_occurrences_mode == 0
             au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), False)
         else
             au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), True)
