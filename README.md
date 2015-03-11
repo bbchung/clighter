@@ -88,25 +88,25 @@ Default: `['clighterMacroInstantiation','clighterStructDecl','clighterClassDecl'
 let g:clighter_highlight_groups = ['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum']
 ```
 
-### g:clighter_cursor_hl_mode
+### g:clighter_occurrences_mode
 
-If value is 0, the behavior of cursor highlight is visual studio liked(some
-delay before highlighting different cursors), or the cursors will always be
-highlighted immediately.
+If value is 0, the behavior of occurrences highlight is visual studio
+liked(some delay before highlighting different cursors), or the cursors will
+always be highlighted immediately.
 
 Default: `0`
 ```vim
-let g:clighter_cursor_hl_mode = 0
+let g:clighter_occurrences_mode = 0
 ```
 
-### g:ClighterCursorHL
+### g:ClighterOccurrences
 
-Enable cursor highlight. Cursor highlight is a clighter function that
-highlight all words with the same semantic symbol.
+Enable occurrences highlight. Occurrences highlight is a clighter function
+that highlight all words with the same semantic symbol.
 
 Default: `1`
 ```vim
-let g:ClighterCursorHL = 1
+let g:ClighterOccurrences = 1
 ```
 
 ## Commands and Functions
@@ -121,9 +121,9 @@ Enable clighter plugin.
 
 Disable clighter plugin.
 
-### ClighterToggleCursorHL
+### ClighterToggleOccurrences
 
-Toggle cursor highlighting.
+Toggle occurrences highlighting.
 
 ### clighter#Rename()
 

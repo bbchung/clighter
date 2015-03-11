@@ -61,8 +61,8 @@ Untar the clighter.tar.gz to your vim path.
 |g:clighter_rename_prompt_level|
 |g:clighter_enable_cross_rename|
 |g:clighter_highlight_groups|
-|g:clighter_cursor_hl_mode|
-|g:ClighterCursorHL|
+|g:clighter_occurrences_mode|
+|g:ClighterOccurrences|
 
 ------------------------------------------------------------------------------
 						*g:clighter_autostart*
@@ -122,27 +122,27 @@ Default: `['clighterMacroInstantiation','clighterStructDecl','clighterClassDecl'
 	let g:clighter_highlight_groups = ['clighterMacroInstantiation','clighterStructDecl','clighterClassDecl','clighterEnumDecl','clighterEnumConstantDecl','clighterTypeRef','clighterDeclRefExprEnum']
 <
 ------------------------------------------------------------------------------
-						*g:clighter_cursor_hl_mode*
-g:clighter_cursor_hl_mode~
+						*g:clighter_occurrences_mode*
+g:clighter_occurrences_mode~
 
-If value is 0, the behavior of cursor highlight is visual studio liked(some
-delay before highlighting different cursors), or the cursors will always be
-highlighted immediately.
+If value is 0, the behavior of occurrences highlight is visual studio
+liked(some delay before highlighting different cursors), or the tcursors will
+always be highlighted immediately.
 
 Default: `0`
 >
-	let g:clighter_cursor_hl_mode = 0
+	let g:clighter_occurrences_mode = 0
 <
 ------------------------------------------------------------------------------
-						*g:ClighterCursorHL*
-g:ClighterCursorHL~
+						*g:ClighterOccurrences*
+g:ClighterOccurrences~
 
-Enable cursor highlight. Cursor highlight is a clighter function that
-highlight all words with the same semantic symbol.
+Enable occurrences highlight. Occurrences highlight is a clighter function
+that highlight all words with the same semantic symbol.
 
 Default: `1`
 >
-	let g:ClighterCursorHL = 1
+	let g:ClighterOccurrences = 1
 <
 ==============================================================================
 						*clighter-commands-and-functions*
@@ -152,7 +152,7 @@ Clighter provides these commands and functions.
 
 |ClighterEnable|
 |ClighterDisable|
-|ClighterToggleCursorHL|
+|ClighterToggleOccurrences|
 |clighter#Rename()|
 
 ------------------------------------------------------------------------------
@@ -168,10 +168,10 @@ ClighterDisable~
 Disable clighter plugin.
 
 ------------------------------------------------------------------------------
-						*ClighterToggleCursorHL*
-ClighterToggleCursorHL~
+						*ClighterToggleOccurrences*
+ClighterToggleOccurrences~
 
-Toggle cursor highlighting.
+Toggle occurrences highlighting.
 
 ------------------------------------------------------------------------------
 						*clighter#Rename()*
