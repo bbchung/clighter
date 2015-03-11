@@ -79,13 +79,13 @@ Default: `1`
 let g:clighter_enable_cross_rename = 1
 ```
 
-### g:clighter_highlight_groups
+### g:clighter_syntax_groups
 
-Define the group to be highlighted.
+Define the group of syntax to be highlighted.
 
 Default: `['clighterMacroInstantiation','clighterStructDecl','clighterClassDecl','clighterEnumDecl','clighterEnumConstantDecl','clighterTypeRef','clighterDeclRefExprEnum']`
 ```vim
-let g:clighter_highlight_groups = ['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum']
+let g:clighter_syntax_groups = ['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum']
 ```
 
 ### g:clighter_occurrences_mode

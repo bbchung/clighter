@@ -7,7 +7,7 @@ import clang_service
 OCCURRENCES_PRI = -11
 SYNTAX_PRI = -12
 
-group_map = {
+syntax_group_map = {
     cindex.CursorKind.MACRO_INSTANTIATION: 'clighterMacroInstantiation',
         cindex.CursorKind.STRUCT_DECL: 'clighterStructDecl',
         cindex.CursorKind.CLASS_DECL: 'clighterClassDecl',
@@ -120,7 +120,7 @@ def __do_highlight(tu, file, syntax_range, symbol, occurrences_range, tick):
         )
 
         if __is_in_range(t.location.line, syntax_range):
-            __draw_token(
+            __draw_syntax(
                 line=t.location.line,
                 col=t.location.column,
                 len=len(t.spelling),
@@ -142,10 +142,10 @@ def __do_highlight(tu, file, syntax_range, symbol, occurrences_range, tick):
     vim.current.window.vars['clighter_hl'][0] = tick
 
 
-def __draw_token(line, col, len, cursor_kind, type_kind):
-    highlight_groups = vim.eval('g:clighter_highlight_groups')
+def __draw_syntax(line, col, len, cursor_kind, type_kind):
+    syntax_groups = vim.eval('g:clighter_syntax_groups')
 
-    group = group_map.get(cursor_kind)
+    group = syntax_group_map.get(cursor_kind)
     if group is None:
         return
 
@@ -154,7 +154,7 @@ def __draw_token(line, col, len, cursor_kind, type_kind):
         if group is None:
             return
 
-    if group in highlight_groups:
+    if group in syntax_groups:
         __vim_matchaddpos(group, line, col, len, SYNTAX_PRI)
 
 
