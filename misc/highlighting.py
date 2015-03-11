@@ -4,7 +4,7 @@ import clighter_helper
 from clang import cindex
 import clang_service
 
-SYMBOL_REF_PRI = -11
+OCCURRENCES_PRI = -11
 SYNTAX_PRI = -12
 
 group_map = {
@@ -26,19 +26,19 @@ group_map = {
 }
 
 
-def clear_highlight():
-    __vim_clear_match_pri(SYMBOL_REF_PRI, SYNTAX_PRI)
+def clear_all():
+    __vim_clear_match_pri(OCCURRENCES_PRI, SYNTAX_PRI)
     vim.current.window.vars['clighter_hl'] = [
-        -1, [], []]  # [hl_tick, syntax_range, symbol_range]
+        -1, [], []]  # [hl_tick, syntax_range, occurrences_range]
 
 
-def clear_symbol_hl():
-    __vim_clear_match_pri(SYMBOL_REF_PRI)
+def clear_occurrences():
+    __vim_clear_match_pri(OCCURRENCES_PRI)
     vim.current.window.vars['clighter_hl'][2] = []
     hl_window.symbol = None
 
 
-def hl_window(clang_service, do_symbol_hl):
+def hl_window(clang_service, do_occurrences):
     cc = clang_service.current_cc
     if cc is None:
         return
@@ -61,12 +61,12 @@ def hl_window(clang_service, do_symbol_hl):
         vim_cursor = clighter_helper.get_vim_cursor(tu, file)
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
 
-    symbol_range = w_range = [top, bottom]
+    occurrences_range = w_range = [top, bottom]
     syntax_range = [max(top - height, 1), min(
         bottom + height, len(vim.current.buffer))]
 
     if vim.current.window.vars['clighter_hl'][0] < parse_tick:
-        clear_highlight()
+        clear_all()
     else:
         if not __is_subrange(w_range, list(vim.current.window.vars['clighter_hl'][1])):
             __vim_clear_match_pri(SYNTAX_PRI)
@@ -74,28 +74,28 @@ def hl_window(clang_service, do_symbol_hl):
             syntax_range = None
 
         if not __is_subrange(w_range, list(vim.current.window.vars['clighter_hl'][2])) or (hl_window.symbol and (not symbol or symbol != hl_window.symbol)):
-            clear_symbol_hl()
+            clear_occurrences()
         else:
-            symbol_range = None
+            occurrences_range = None
 
-    if not do_symbol_hl:
-        symbol_range = None
+    if not do_occurrences:
+        occurrences_range = None
 
-    __do_highlight(tu, file, syntax_range, symbol, symbol_range, parse_tick)
+    __do_highlight(tu, file, syntax_range, symbol, occurrences_range, parse_tick)
 
 
-def __do_highlight(tu, file, syntax_range, symbol, symbol_range, tick):
-    if not syntax_range and (not symbol or not symbol_range):
+def __do_highlight(tu, file, syntax_range, symbol, occurrences_range, tick):
+    if not syntax_range and (not symbol or not occurrences_range):
         return
 
     if syntax_range:
         vim.current.window.vars['clighter_hl'][1] = syntax_range
 
-    if symbol_range and symbol:
-        vim.current.window.vars['clighter_hl'][2] = symbol_range
+    if occurrences_range and symbol:
+        vim.current.window.vars['clighter_hl'][2] = occurrences_range
         hl_window.symbol = symbol
 
-    union_range = __union(syntax_range, symbol_range)
+    union_range = __union(syntax_range, occurrences_range)
 
     location1 = cindex.SourceLocation.from_position(
         tu, file, line=union_range[0], column=1)
@@ -128,15 +128,15 @@ def __do_highlight(tu, file, syntax_range, symbol, symbol_range, tick):
                 type_kind=t_cursor.type.kind
             )
 
-        if symbol and __is_in_range(t.location.line, symbol_range):
+        if symbol and __is_in_range(t.location.line, occurrences_range):
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
             if t_symbol and t.spelling == t_symbol.spelling and t_symbol == symbol:
                 __vim_matchaddpos(
-                    group='clighterCursorSymbolRef',
+                    group='clighterOccurrences',
                     line=t.location.line,
                     col=t.location.column,
                     len=len(t.spelling),
-                    priority=SYMBOL_REF_PRI
+                    priority=OCCURRENCES_PRI
                 )
 
     vim.current.window.vars['clighter_hl'][0] = tick

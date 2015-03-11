@@ -21,7 +21,7 @@ endif
 fun! clighter#ToggleCursorHL()
     if g:ClighterCursorHL==1
         let a:wnr = winnr()
-        windo py highlighting.clear_symbol_hl()
+        windo py highlighting.clear_occurrences()
         exe a:wnr."wincmd w"
     endif
 
@@ -95,7 +95,7 @@ fun! clighter#Disable()
     py clang_service.ClangService().stop()
     silent! unlet s:clang_initialized
     let a:wnr = winnr()
-    windo py highlighting.clear_highlight()
+    windo py highlighting.clear_all()
     exe a:wnr."wincmd w"
 endf
 

@@ -154,7 +154,7 @@ hi link clighterClassDecl Type
 hi link clighterEnumDecl Type
 hi link clighterEnumConstantDecl Identifier
 hi link clighterDeclRefExprEnum Identifier
-hi link clighterCursorSymbolRef IncSearch
+hi link clighterOccurrences IncSearch
 hi link clighterFunctionDecl None
 hi link clighterDeclRefExprCall None
 hi link clighterMemberRefExpr None
