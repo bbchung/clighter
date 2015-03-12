@@ -12,7 +12,7 @@ def on_FileType():
         clang_service.ClangService().switch(vim.current.buffer.name)
     else:
         clang_service.ClangService().unregister([vim.current.buffer.name])
-        highlighting.clear_highlight()
+        highlighting.clear_all()
 
 
 def register_allowed_buffers():
