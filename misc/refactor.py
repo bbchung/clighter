@@ -1,7 +1,6 @@
 import vim
 import string
 import clighter_helper
-import clang_service
 
 
 def rename(clang_service):

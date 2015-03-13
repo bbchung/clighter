@@ -2,26 +2,26 @@ import vim
 import string
 import clighter_helper
 from clang import cindex
-import clang_service
+
 
 OCCURRENCES_PRI = -11
 SYNTAX_PRI = -12
 
 syntax_group_map = {
     cindex.CursorKind.MACRO_INSTANTIATION: 'clighterMacroInstantiation',
-        cindex.CursorKind.STRUCT_DECL: 'clighterStructDecl',
-        cindex.CursorKind.CLASS_DECL: 'clighterClassDecl',
-        cindex.CursorKind.ENUM_DECL: 'clighterEnumDecl',
-        cindex.CursorKind.ENUM_CONSTANT_DECL: 'clighterEnumConstantDecl',
-        cindex.CursorKind.TYPE_REF: 'clighterTypeRef',
-        cindex.CursorKind.FUNCTION_DECL: 'clighterFunctionDecl',
-        cindex.CursorKind.MEMBER_REF_EXPR: 'clighterMemberRefExpr',
-        cindex.CursorKind.NAMESPACE_REF: 'clighterNamespace',
-        cindex.CursorKind.NAMESPACE: 'clighterNamespace',
-        cindex.CursorKind.DECL_REF_EXPR:
-        {
-            cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum',
-            cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall'
+    cindex.CursorKind.STRUCT_DECL: 'clighterStructDecl',
+    cindex.CursorKind.CLASS_DECL: 'clighterClassDecl',
+    cindex.CursorKind.ENUM_DECL: 'clighterEnumDecl',
+    cindex.CursorKind.ENUM_CONSTANT_DECL: 'clighterEnumConstantDecl',
+    cindex.CursorKind.TYPE_REF: 'clighterTypeRef',
+    cindex.CursorKind.FUNCTION_DECL: 'clighterFunctionDecl',
+    cindex.CursorKind.MEMBER_REF_EXPR: 'clighterMemberRefExpr',
+    cindex.CursorKind.NAMESPACE_REF: 'clighterNamespace',
+    cindex.CursorKind.NAMESPACE: 'clighterNamespace',
+    cindex.CursorKind.DECL_REF_EXPR:
+    {
+        cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum',
+        cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall'
         }
 }
 
@@ -81,7 +81,13 @@ def hl_window(clang_service, do_occurrences):
     if not do_occurrences:
         occurrences_range = None
 
-    __do_highlight(tu, file, syntax_range, symbol, occurrences_range, parse_tick)
+    __do_highlight(
+        tu,
+        file,
+        syntax_range,
+        symbol,
+        occurrences_range,
+        parse_tick)
 
 
 def __do_highlight(tu, file, syntax_range, symbol, occurrences_range, tick):

@@ -1,5 +1,4 @@
 import vim
-from clang import cindex
 import string
 import clighter_helper
 import clang_service
