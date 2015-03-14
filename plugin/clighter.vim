@@ -1,13 +1,13 @@
-if v:version < 704 || !exists("*matchaddpos")
+if v:version < 704 || !exists('*matchaddpos')
     echohl WarningMsg |
-                \ echomsg "Clighter unavailable: requires Vim 7.4p330+" |
+                \ echomsg 'Clighter unavailable: requires Vim 7.4p330+' |
                 \ echohl None
     finish
 endif
 
 if !has('python')
     echohl WarningMsg |
-                \ echomsg "Clighter unavailable: requires python2 support" |
+                \ echomsg 'Clighter unavailable: requires python2 support' |
                 \ echohl None
     finish
 endif
@@ -23,7 +23,7 @@ endpython
 
 if !pyeval('has_python_clang()')
     echohl WarningMsg |
-                \ echomsg "Clighter unavailable: requires clang python binding package" |
+                \ echomsg 'Clighter unavailable: requires clang python binding package' |
                 \ echohl None
     finish
 endif

@@ -22,13 +22,13 @@ fun! clighter#ToggleOccurrences()
     if g:ClighterOccurrences==1
         let a:wnr = winnr()
         windo py highlighting.clear_occurrences()
-        exe a:wnr."wincmd w"
+        exe a:wnr.'wincmd w'
     endif
 
     let g:ClighterOccurrences = !g:ClighterOccurrences
 
     echohl WarningMsg |
-                \echom printf("Cursor Occurrences: %s", g:ClighterOccurrences == 1 ? "Enabled" : "Disabled") |
+                \echom printf('Cursor Occurrences: %s', g:ClighterOccurrences == 1 ? 'Enabled' : 'Disabled') |
                 \echohl None
 endf
 
@@ -51,7 +51,7 @@ endf
 fun! clighter#Enable()
     silent! au! ClighterAutoStart
 
-    if exists("s:clang_initialized")
+    if exists('s:clang_initialized')
         return
     endif
 
@@ -64,7 +64,7 @@ fun! clighter#Enable()
 
     if !pyeval(a:start_cmd)
         echohl WarningMsg |
-                    \ echomsg "Clighter unavailable: clang service failed, you must setup clang environment for clighter" |
+                    \ echomsg 'Clighter unavailable: clang service failed, you must setup clang environment for clighter' |
                     \ echohl None
         return
     endif
@@ -96,7 +96,7 @@ fun! clighter#Disable()
     silent! unlet s:clang_initialized
     let a:wnr = winnr()
     windo py highlighting.clear_all()
-    exe a:wnr."wincmd w"
+    exe a:wnr.'wincmd w'
 endf
 
 fun! clighter#Rename()
