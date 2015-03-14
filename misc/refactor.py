@@ -99,7 +99,7 @@ def __search_symbol_and_rename(tu, symbol_usr, new_name, prompt):
     if len(locs):
         if prompt >= 1:
             if vim.eval(
-                "confirm(\"found symbols in {0}, rename them?\", \"&Yes\n&No\", 1)".format(
+                'confirm("found symbols in {0}, rename them?", "&Yes\n&No", 1)'.format(
                     vim.current.buffer.name)) == "2":
                 return
 
@@ -121,24 +121,24 @@ def __vim_multi_replace(locs, old, new, prompt):
             continue
 
         if pattern:
-            pattern += "\|"
+            pattern += r'\|'
 
-        pattern += "\%" + str(line) + "l" + "\%>" + str(
-            column - 1) + "c\%<" + str(column + len(old)) + "c" + old
+        pattern += r'\%' + str(line) + 'l' + r'\%>' + str(
+            column - 1) + r'c\%<' + str(column + len(old)) + 'c' + old
 
     if not pattern:
         return
 
-    cmd = "%s/" + pattern + "/" + new + "/gI"
+    cmd = '%s/' + pattern + '/' + new + '/gI'
 
     if prompt >= 2:
-        cmd = cmd + "c"
+        cmd = cmd + 'c'
 
     vim.command(cmd)
 
 
 def __get_bufctx_list():
-    list = []
+    buf_list = []
 
     for buf in vim.buffers:
         if not clighter_helper.is_vim_buffer_allowed(buf):
@@ -147,9 +147,9 @@ def __get_bufctx_list():
         if len(buf) == 1 and not buf[0]:
             continue
 
-        list.append(
+        buf_list.append(
             (buf.name,
              '\n'.join(buf),
              string.atoi(vim.eval("b:changedtick"))))
 
-    return list
+    return buf_list

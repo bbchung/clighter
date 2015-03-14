@@ -7,7 +7,7 @@ from clang import cindex
 OCCURRENCES_PRI = -11
 SYNTAX_PRI = -12
 
-syntax_group_map = {
+SYNTAX_GROUP_MAP = {
     cindex.CursorKind.MACRO_INSTANTIATION: 'clighterMacroInstantiation',
     cindex.CursorKind.STRUCT_DECL: 'clighterStructDecl',
     cindex.CursorKind.CLASS_DECL: 'clighterClassDecl',
@@ -49,7 +49,7 @@ def hl_window(clang_service, do_occurrences):
     if tu is None:
         return
 
-    file = tu.get_file(cc.name)
+    current_file = tu.get_file(cc.name)
 
     top = string.atoi(vim.eval("line('w0')"))
     bottom = string.atoi(vim.eval("line('w$')"))
@@ -58,7 +58,7 @@ def hl_window(clang_service, do_occurrences):
     symbol = None
 
     if vim.eval('g:ClighterOccurrences') == '1':
-        vim_cursor = clighter_helper.get_vim_cursor(tu, file)
+        vim_cursor = clighter_helper.get_vim_cursor(tu, current_file)
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
 
     occurrences_range = w_range = [top, bottom]
@@ -89,14 +89,14 @@ def hl_window(clang_service, do_occurrences):
 
     __do_highlight(
         tu,
-        file,
+        current_file,
         syntax_range,
         symbol,
         occurrences_range,
         parse_tick)
 
 
-def __do_highlight(tu, file, syntax_range, symbol, occurrences_range, tick):
+def __do_highlight(tu, f, syntax_range, symbol, occurrences_range, tick):
     if not syntax_range and (not symbol or not occurrences_range):
         return
 
@@ -110,9 +110,9 @@ def __do_highlight(tu, file, syntax_range, symbol, occurrences_range, tick):
     union_range = __union(syntax_range, occurrences_range)
 
     location1 = cindex.SourceLocation.from_position(
-        tu, file, line=union_range[0], column=1)
+        tu, f, line=union_range[0], column=1)
     location2 = cindex.SourceLocation.from_position(
-        tu, file, line=union_range[1] + 1, column=1)
+        tu, f, line=union_range[1] + 1, column=1)
     tokens = tu.get_tokens(
         extent=cindex.SourceRange.from_locations(
             location1,
@@ -125,7 +125,7 @@ def __do_highlight(tu, file, syntax_range, symbol, occurrences_range, tick):
         t_cursor = cindex.Cursor.from_location(
             tu,
             cindex.SourceLocation.from_position(
-                tu, file,
+                tu, f,
                 t.location.line,
                 t.location.column
             )
@@ -135,7 +135,7 @@ def __do_highlight(tu, file, syntax_range, symbol, occurrences_range, tick):
             __draw_syntax(
                 line=t.location.line,
                 col=t.location.column,
-                len=len(t.spelling),
+                length=len(t.spelling),
                 cursor_kind=t_cursor.kind,
                 type_kind=t_cursor.type.kind
             )
@@ -147,17 +147,17 @@ def __do_highlight(tu, file, syntax_range, symbol, occurrences_range, tick):
                     group='clighterOccurrences',
                     line=t.location.line,
                     col=t.location.column,
-                    len=len(t.spelling),
+                    length=len(t.spelling),
                     priority=OCCURRENCES_PRI
                 )
 
     vim.current.window.vars['clighter_hl'][0] = tick
 
 
-def __draw_syntax(line, col, len, cursor_kind, type_kind):
+def __draw_syntax(line, col, length, cursor_kind, type_kind):
     syntax_groups = vim.eval('g:clighter_syntax_groups')
 
-    group = syntax_group_map.get(cursor_kind)
+    group = SYNTAX_GROUP_MAP.get(cursor_kind)
     if group is None:
         return
 
@@ -167,12 +167,12 @@ def __draw_syntax(line, col, len, cursor_kind, type_kind):
             return
 
     if group in syntax_groups:
-        __vim_matchaddpos(group, line, col, len, SYNTAX_PRI)
+        __vim_matchaddpos(group, line, col, length, SYNTAX_PRI)
 
 
-def __vim_matchaddpos(group, line, col, len, priority):
+def __vim_matchaddpos(group, line, col, length, priority):
     cmd = "call matchaddpos('{0}', [[{1}, {2}, {3}]], {4})"
-    vim.command(cmd.format(group, line, col, len, priority))
+    vim.command(cmd.format(group, line, col, length, priority))
 
 
 def __vim_clear_match_pri(*priorities):
@@ -191,11 +191,11 @@ def __union(range1, range2):
         return None
 
 
-def __is_in_range(value, range):
-    if range is None:
+def __is_in_range(value, r):
+    if r is None:
         return False
 
-    if value >= range[0] and value <= range[1]:
+    if value >= r[0] and value <= r[1]:
         return True
 
     return False

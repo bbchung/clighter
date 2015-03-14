@@ -14,7 +14,7 @@ def get_vim_symbol(cursor):
     return symbol
 
 
-def get_vim_cursor(tu, file):
+def get_vim_cursor(tu, f):
     row, col = vim.current.window.cursor
     if len(vim.current.line) <= col:
         return None
@@ -27,7 +27,7 @@ def get_vim_cursor(tu, file):
         tu,
         cindex.SourceLocation.from_position(
             tu,
-            file,
+            f,
             row,
             col + 1))
 

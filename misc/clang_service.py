@@ -51,8 +51,8 @@ class ClangContext(object):
 
         self.compile_args = None
 
-    def update_buffer(self, buffer, tick):
-        self.__buffer_tick = [buffer, tick]
+    def update_buffer(self, buf, tick):
+        self.__buffer_tick = [buf, tick]
 
     def parse(self, idx, args, unsaved, tick):
         try:
@@ -169,25 +169,25 @@ class ClangService(object):
         self.__cc_dict.clear()
         self.__cindex = None
 
-    def unregister(self, list):
-        for name in list:
+    def unregister(self, unreg_list):
+        for name in unreg_list:
             if name in self.__cc_dict.keys():
                 del self.__cc_dict[name]
 
-    def register(self, list):
-        for name in list:
+    def register(self, reg_list):
+        for name in reg_list:
             if name in self.__cc_dict.keys():
                 continue
 
             self.__cc_dict[name] = ClangContext(name)
 
     def update_buffers(self, update_list, notify=True):
-        for name, buffer, tick in update_list:
+        for name, buf, tick in update_list:
             cc = self.__cc_dict.get(name)
             if cc is None:
                 continue
 
-            cc.update_buffer(buffer, tick)
+            cc.update_buffer(buf, tick)
 
         if notify:
             with self.__cond:
@@ -219,10 +219,10 @@ class ClangService(object):
     def __gen_unsaved(self):
         unsaved = []
         for cc in self.__cc_dict.values():
-            buffer = cc.buffer
+            buf = cc.buffer
 
-            if buffer:
-                unsaved.append((cc.name, buffer))
+            if buf:
+                unsaved.append((cc.name, buf))
 
         return unsaved
 
