@@ -82,7 +82,7 @@ fun! clighter#Enable()
         au CursorHold,CursorHoldI * py highlighting.hl_window(clang_service.ClangService(), True)
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
         au WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_to_current()
-        au FileType * py clighter.on_FileType()
+        au FileType * py clighter.on_filetype()
         au BufDelete,BufWipeout * py clang_service.ClangService().unregister([vim.eval('fnamemodify(expand("<afile>"), ":p")')])
         au VimLeavePre * py clang_service.ClangService().stop()
     augroup END

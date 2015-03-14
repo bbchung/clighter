@@ -22,7 +22,7 @@ syntax_group_map = {
     {
         cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum',
         cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall'
-        }
+    }
 }
 
 
@@ -68,12 +68,18 @@ def hl_window(clang_service, do_occurrences):
     if vim.current.window.vars['clighter_hl'][0] < parse_tick:
         clear_all()
     else:
-        if not __is_subrange(w_range, list(vim.current.window.vars['clighter_hl'][1])):
+        if not __is_subrange(
+            w_range, list(
+                vim.current.window.vars['clighter_hl'][1])):
             __vim_clear_match_pri(SYNTAX_PRI)
         else:
             syntax_range = None
 
-        if not __is_subrange(w_range, list(vim.current.window.vars['clighter_hl'][2])) or (hl_window.symbol and (not symbol or symbol != hl_window.symbol)):
+        if not __is_subrange(
+            w_range, list(
+                vim.current.window.vars['clighter_hl'][2])) or (
+            hl_window.symbol and (
+                not symbol or symbol != hl_window.symbol)):
             clear_occurrences()
         else:
             occurrences_range = None

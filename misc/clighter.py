@@ -5,7 +5,7 @@ import clang_service
 import highlighting
 
 
-def on_FileType():
+def on_filetype():
     if clighter_helper.is_vim_buffer_allowed(vim.current.buffer):
         clang_service.ClangService().register([vim.current.buffer.name])
         clang_service.ClangService().switch(vim.current.buffer.name)
@@ -15,12 +15,12 @@ def on_FileType():
 
 
 def register_allowed_buffers():
-    list = []
+    buf_list = []
     for buf in vim.buffers:
         if clighter_helper.is_vim_buffer_allowed(buf):
-            list.append(buf.name)
+            buf_list.append(buf.name)
 
-    clang_service.ClangService().register(list)
+    clang_service.ClangService().register(buf_list)
 
 
 def clang_switch_to_current():
