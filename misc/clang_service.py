@@ -7,36 +7,36 @@ USEFUL_FLAGS = ['-std']
 
 def get_useful_args(args):
     num = len(args)
-    p = 0
+    pos = 0
 
     useful_opts = []
     useful_flags = []
 
-    while p < num:
+    while pos < num:
         useful_opt = None
         useful_flag = None
 
         for opt in USEFUL_OPTS:
-            if args[p].startswith(opt):
+            if args[pos].startswith(opt):
                 useful_opt = opt
                 break
 
         for flag in USEFUL_FLAGS:
-            if args[p].startswith(flag):
+            if args[pos].startswith(flag):
                 useful_flag = flag
                 break
 
         if useful_opt:
-            useful_opts.append(args[p])
-            if args[p] == useful_opt:
-                p += 1
-                if p < num:
-                    useful_opts.append(args[p])
+            useful_opts.append(args[pos])
+            if args[pos] == useful_opt:
+                pos += 1
+                if pos < num:
+                    useful_opts.append(args[pos])
 
         if useful_flag:
-            useful_flags.append(args[p])
+            useful_flags.append(args[pos])
 
-        p += 1
+        pos += 1
 
     return useful_flags + useful_opts
 

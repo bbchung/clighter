@@ -118,36 +118,36 @@ def __do_highlight(tu, f, syntax_range, symbol, occurrences_range, tick):
             location1,
             location2))
 
-    for t in tokens:
-        if t.kind.value != 2:
+    for token in tokens:
+        if token.kind.value != 2:
             continue
 
         t_cursor = cindex.Cursor.from_location(
             tu,
             cindex.SourceLocation.from_position(
                 tu, f,
-                t.location.line,
-                t.location.column
+                token.location.line,
+                token.location.column
             )
         )
 
-        if __is_in_range(t.location.line, syntax_range):
+        if __is_in_range(token.location.line, syntax_range):
             __draw_syntax(
-                line=t.location.line,
-                col=t.location.column,
-                length=len(t.spelling),
+                line=token.location.line,
+                col=token.location.column,
+                length=len(token.spelling),
                 cursor_kind=t_cursor.kind,
                 type_kind=t_cursor.type.kind
             )
 
-        if symbol and __is_in_range(t.location.line, occurrences_range):
+        if symbol and __is_in_range(token.location.line, occurrences_range):
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
-            if t_symbol and t.spelling == t_symbol.spelling and t_symbol == symbol:
+            if t_symbol and token.spelling == t_symbol.spelling and t_symbol == symbol:
                 __vim_matchaddpos(
                     group='clighterOccurrences',
-                    line=t.location.line,
-                    col=t.location.column,
-                    length=len(t.spelling),
+                    line=token.location.line,
+                    col=token.location.column,
+                    length=len(token.spelling),
                     priority=OCCURRENCES_PRI
                 )
 
@@ -191,11 +191,11 @@ def __union(range1, range2):
         return None
 
 
-def __is_in_range(value, r):
-    if r is None:
+def __is_in_range(inner, outer):
+    if outer is None:
         return False
 
-    if value >= r[0] and value <= r[1]:
+    if inner >= outer[0] and inner <= outer[1]:
         return True
 
     return False
