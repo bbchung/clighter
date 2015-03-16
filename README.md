@@ -99,6 +99,19 @@ Default: `0`
 let g:clighter_occurrences_mode = 0
 ```
 
+### g:clighter_heuristic_compile_args
+
+Clighter will search the compilation database to compile, however the
+compilation database the CMake generated doesn't include the header files(make
+sense, but clighter needs it). Clighter can heuristic search the compilation
+database to guess the most possible compile args if set this option, and it's
+useful for header files.
+
+Default: `0`
+```vim
+let g:clighter_heuristic_compile_args = 1
+```
+
 ### g:ClighterOccurrences
 
 Enable occurrences highlight. Occurrences highlight is a clighter function
@@ -179,6 +192,13 @@ Even though libclang provides many useful informations, it's not enough to do
 cross file rename-refactoring. Clighter needs to use its own way way to
 'guess' what should be renamed. Clighter can't gurantee the result of
 rename-factoring result is perfect.
+
+### Libclang crash?
+When incorrect compile args meet incorrect source code, libclang possibly
+crashes, and it may happend in vim thread or background thread of clighter.
+Currently clighter can't catch such crash, so vim will become unstable if it
+happends.
+
 
 ## LICENSE
 
