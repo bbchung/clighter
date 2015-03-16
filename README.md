@@ -107,7 +107,7 @@ sense, but clighter needs it). Clighter can heuristic search the compilation
 database to guess the most possible compile args if set this option, and it's
 useful for header files.
 
-Default: `0`
+Default: `1`
 ```vim
 let g:clighter_heuristic_compile_args = 1
 ```
