@@ -255,10 +255,10 @@ do cross file rename-refactoring. Clighter needs to use its own way way to
 rename-factoring result is perfect.
 
 Q. Libclang crash?
-A. When incorrect compile args meet incorrect source code, libclang possibly
-crashes, and it may happend in vim thread or background thread of clighter.
-Currently clighter can't catch such crash, so vim will become unstable if it
-happends.
+When incorrect compile args meet incorrect source code, libclang possibly
+crashes(for example: empty compile arg meet .hxx), and it may happend in vim
+thread or background thread of clighter.  Currently clighter can't catch such
+crash, so vim will become unstable if it happends.
 
 ==============================================================================
                                                         *clighter-license*

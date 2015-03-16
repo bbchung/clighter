@@ -199,9 +199,9 @@ rename-factoring result is perfect.
 
 ### Libclang crash?
 When incorrect compile args meet incorrect source code, libclang possibly
-crashes, and it may happend in vim thread or background thread of clighter.
-Currently clighter can't catch such crash, so vim will become unstable if it
-happends.
+crashes(for example: empty compile arg meet .hxx), and it may happend in vim
+thread or background thread of clighter.  Currently clighter can't catch such
+crash, so vim will become unstable if it happends.
 
 
 ## LICENSE
