@@ -5,7 +5,9 @@ import clighter_helper
 
 def rename(clang_service):
     clang_service.update_buffers(__get_bufctx_list(), False)
-    clang_service.parse_all()
+    clang_service.parse_all(
+        string.atoi(
+            vim.eval('g:clighter_heuristic_compile_args')))
 
     cc = clang_service.current_cc
     if cc is None:
