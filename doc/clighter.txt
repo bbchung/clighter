@@ -168,6 +168,7 @@ Clighter provides these commands and functions.
 |ClighterEnable|
 |ClighterDisable|
 |ClighterToggleOccurrences|
+|ClighterShowInfo|
 |clighter#Rename()|
 
 ------------------------------------------------------------------------------
@@ -187,6 +188,12 @@ Disable clighter plugin.
 ClighterToggleOccurrences~
 
 Toggle occurrences highlighting.
+
+------------------------------------------------------------------------------
+						*ClighterShowInfo*
+ClighterShowInfo~
+
+Show clighter runtime informations.
 
 ------------------------------------------------------------------------------
 						*clighter#Rename()*

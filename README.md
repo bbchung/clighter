@@ -138,6 +138,10 @@ Disable clighter plugin.
 
 Toggle occurrences highlighting.
 
+### ClighterShowInfo
+
+Show clighter runtime informations.
+
 ### clighter#Rename()
 
 * An experimental function to do rename refactoring.
