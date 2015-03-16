@@ -38,12 +38,14 @@ let g:clighter_rename_prompt_level = get(g:, 'clighter_rename_prompt_level', 1)
 let g:clighter_enable_cross_rename = get(g:, 'clighter_enable_cross_rename', 1)
 let g:clighter_syntax_groups = get(g:, 'clighter_syntax_groups', ['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum'])
 let g:clighter_occurrences_mode = get(g:, 'clighter_occurrences_mode', 0)
+let g:clighter_heuristic_compile_args = get(g:, 'clighter_heuristic_compile_args', 1)
 
 let g:ClighterOccurrences = get(g:, 'ClighterOccurrences', 1)
 
 command! ClighterEnable call clighter#Enable()
 command! ClighterDisable call clighter#Disable()
 command! ClighterToggleOccurrences call clighter#ToggleOccurrences()
+command! ClighterShowInfo call clighter#ShowInfo()
 
 hi default link clighterMacroInstantiation Constant
 hi default link clighterTypeRef Identifier

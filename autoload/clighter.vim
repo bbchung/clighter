@@ -17,6 +17,7 @@ endpython
 
 endif
 
+let s:clang_initialized=0
 
 fun! clighter#ToggleOccurrences()
     if g:ClighterOccurrences==1
@@ -51,7 +52,7 @@ endf
 fun! clighter#Enable()
     silent! au! ClighterAutoStart
 
-    if exists('s:clang_initialized')
+    if s:clang_initialized == 1
         return
     endif
 
@@ -60,7 +61,7 @@ fun! clighter#Enable()
         let a:cwd = ''
     endif
 
-    let a:start_cmd = printf("clang_service.ClangService().start('%s')", a:cwd)
+    let a:start_cmd = printf("clang_service.ClangService().start('%s', %d)", a:cwd, g:clighter_heuristic_compile_args)
 
     if !pyeval(a:start_cmd)
         echohl WarningMsg |
@@ -93,7 +94,7 @@ endf
 fun! clighter#Disable()
     silent! au! ClighterEnable
     py clang_service.ClangService().stop()
-    silent! unlet s:clang_initialized
+    let s:clang_initialized=0
     let a:wnr = winnr()
     windo py highlighting.clear_all()
     exe a:wnr.'wincmd w'
@@ -101,4 +102,8 @@ endf
 
 fun! clighter#Rename()
     py refactor.rename(clang_service.ClangService())
+endf
+
+fun! clighter#ShowInfo()
+    py clighter.show_information()
 endf

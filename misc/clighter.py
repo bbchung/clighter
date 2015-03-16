@@ -39,3 +39,11 @@ def update_buffer_if_allow():
             [(vim.current.buffer.name,
               '\n'.join(vim.current.buffer),
               string.atoi(vim.eval('b:changedtick')))])
+
+
+def show_information():
+    print "Enable clighter: %s" % ('Enable' if vim.eval('s:clang_initialized') == '1' else 'Disable')
+    print "Current context: %s" % (clang_service.ClangService().current_cc.name if clang_service.ClangService().current_cc else '')
+    print "Highlight occurrences: %s" % ('On' if vim.eval('g:ClighterOccurrences') == '1' else 'Off')
+    print "Compilation database: %s" % (clang_service.ClangService().compilation_database.file_path)
+    print "Compile args: %s" % (' '.join(clang_service.ClangService().current_cc.compile_args) if clang_service.ClangService().current_cc and clang_service.ClangService().current_cc.compile_args else '')

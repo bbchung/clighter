@@ -1,44 +1,6 @@
 import threading
 from clang import cindex
-
-USEFUL_OPTS = ['-D', '-I', '-include', '-x']
-USEFUL_FLAGS = ['-std']
-
-
-def get_useful_args(args):
-    num = len(args)
-    pos = 0
-
-    useful_opts = []
-    useful_flags = []
-
-    while pos < num:
-        useful_opt = None
-        useful_flag = None
-
-        for opt in USEFUL_OPTS:
-            if args[pos].startswith(opt):
-                useful_opt = opt
-                break
-
-        for flag in USEFUL_FLAGS:
-            if args[pos].startswith(flag):
-                useful_flag = flag
-                break
-
-        if useful_opt:
-            useful_opts.append(args[pos])
-            if args[pos] == useful_opt:
-                pos += 1
-                if pos < num:
-                    useful_opts.append(args[pos])
-
-        if useful_flag:
-            useful_flags.append(args[pos])
-
-        pos += 1
-
-    return useful_flags + useful_opts
+import compilation_database
 
 
 class ClangContext(object):
@@ -118,25 +80,27 @@ class ClangService(object):
     def __del__(self):
         self.stop()
 
-    def __get_useful_args(self, cc):
-        if cc.compile_args:
+    def __get_useful_args(self, cc, heuristic):
+        if cc.compile_args is not None:
             return cc.compile_args
+
+        cc.compile_args = []
 
         if not self.__cdb:
             return None
 
-        ccmds = self.__cdb.getCompileCommands(cc.name)
+        ccmds = self.__cdb.get_commands(cc.name, False)
 
-        if not ccmds:
-            return None
+        if not ccmds and heuristic:
+            ccmds = self.__cdb.get_commands(cc.name, True)
 
-        # if there is more than one commands, take the first one
-        args = list(ccmds[0].arguments)
+        if ccmds:
+            # if there is more than one commands, take the first one
+            cc.compile_args = ccmds[0].useful_args
 
-        cc.compile_args = get_useful_args(args)
         return cc.compile_args
 
-    def start(self, cdb_dir):
+    def start(self, cdb_dir, heuristic):
         if self.__cindex is None:
             try:
                 self.__cindex = cindex.Index.create()
@@ -148,12 +112,17 @@ class ClangService(object):
 
         if cdb_dir:
             try:
-                self.__cdb = cindex.CompilationDatabase.fromDirectory(cdb_dir)
+                self.__cdb = compilation_database.CompilationDatabase.from_dir(
+                    cdb_dir)
             except:
                 pass
 
         self.__is_running = True
-        self.__parsing_thread = threading.Thread(target=self.__parsing_worker)
+        self.__parsing_thread = threading.Thread(
+            target=self.__parsing_worker,
+            args=(
+                heuristic,
+            ))
         self.__parsing_thread.start()
 
         return True
@@ -202,7 +171,7 @@ class ClangService(object):
         with self.__cond:
             self.__cond.notify()
 
-    def parse_all(self):
+    def parse_all(self, heuristic):
         tick = {}
         for cc in self.__cc_dict.values():
             tick[cc.name] = cc.change_tick
@@ -212,7 +181,7 @@ class ClangService(object):
         for cc in self.__cc_dict.values():
             cc.parse(
                 self.__cindex,
-                self.__get_useful_args(cc),
+                self.__get_useful_args(cc, heuristic),
                 unsaved,
                 tick[cc.name])
 
@@ -226,7 +195,7 @@ class ClangService(object):
 
         return unsaved
 
-    def __parsing_worker(self):
+    def __parsing_worker(self, heuristic):
         while self.__is_running:
             cc = self.__current_cc
 
@@ -248,10 +217,14 @@ class ClangService(object):
 
             cc.parse(
                 self.__cindex,
-                self.__get_useful_args(cc),
+                self.__get_useful_args(cc, heuristic),
                 unsaved,
                 tick)
 
     @property
     def current_cc(self):
         return self.__current_cc
+
+    @property
+    def compilation_database(self):
+        return self.__cdb
