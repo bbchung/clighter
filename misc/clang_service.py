@@ -171,6 +171,9 @@ class ClangService(object):
         with self.__cond:
             self.__cond.notify()
 
+    def get_cc(self, name):
+        return self.__cc_dict.get(name)
+
     def parse_all(self, heuristic):
         tick = {}
         for cc in self.__cc_dict.values():

@@ -39,7 +39,7 @@ def clear_occurrences():
 
 
 def hl_window(clang_service, do_occurrences):
-    cc = clang_service.current_cc
+    cc = clang_service.get_cc(vim.current.buffer.name)
     if cc is None:
         return
 

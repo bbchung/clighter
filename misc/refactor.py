@@ -9,7 +9,7 @@ def rename(clang_service):
         string.atoi(
             vim.eval('g:clighter_heuristic_compile_args')))
 
-    cc = clang_service.current_cc
+    cc = clang_service.get_cc(vim.current.buffer.name)
     if cc is None:
         return
 
@@ -70,7 +70,7 @@ def __cross_buffer_rename(clang_service, symbol_usr, new_name, prompt):
 
     vim.command("bn!")
     while vim.current.buffer.number != call_bufnr:
-        cc = clang_service.current_cc
+        cc = clang_service.get_cc(vim.current.buffer.name)
         if cc:
             try:
                 __search_symbol_and_rename(

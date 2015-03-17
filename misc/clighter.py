@@ -8,11 +8,11 @@ import highlighting
 def on_filetype():
     if clighter_helper.is_vim_buffer_allowed(vim.current.buffer):
         clang_service.ClangService().register([vim.current.buffer.name])
-        clang_service.ClangService().switch(vim.current.buffer.name)
     else:
         clang_service.ClangService().unregister([vim.current.buffer.name])
-        clang_service.ClangService().switch(None)
-        highlighting.clear_all()
+        
+    clang_service.ClangService().switch(vim.current.buffer.name)
+    highlighting.clear_all()
 
 
 def register_allowed_buffers():
