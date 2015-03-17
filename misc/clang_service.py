@@ -143,8 +143,8 @@ class ClangService(object):
             if name in self.__cc_dict.keys():
                 del self.__cc_dict[name]
 
-    def register(self, reg_list):
-        for name in reg_list:
+    def register(self, tobe_reg):
+        for name in tobe_reg:
             if name in self.__cc_dict.keys():
                 continue
 

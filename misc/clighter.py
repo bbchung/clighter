@@ -11,16 +11,17 @@ def on_filetype():
         clang_service.ClangService().switch(vim.current.buffer.name)
     else:
         clang_service.ClangService().unregister([vim.current.buffer.name])
+        clang_service.ClangService().switch(None)
         highlighting.clear_all()
 
 
 def register_allowed_buffers():
-    buf_list = []
+    tobe_reg = set()
     for buf in vim.buffers:
         if clighter_helper.is_vim_buffer_allowed(buf):
-            buf_list.append(buf.name)
+            tobe_reg.add(buf.name)
 
-    clang_service.ClangService().register(buf_list)
+    clang_service.ClangService().register(tobe_reg)
 
 
 def clang_switch_to_current():
