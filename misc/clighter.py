@@ -27,7 +27,7 @@ def register_allowed_buffers():
 def clang_switch_to_current():
     clang_service.ClangService().switch(vim.current.buffer.name)
 
-    if vim.current.window.vars.get('clighter_hl') is None:
+    if not vim.current.window.vars.get('clighter_hl'):
         vim.current.window.vars['clighter_hl'] = [
             -1, [], []]  # [hl_tick, syntax_range, symbol_range]
     else:

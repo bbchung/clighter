@@ -5,7 +5,7 @@ from clang import cindex
 def get_vim_symbol(cursor):
     symbol = get_semantic_symbol(cursor)
 
-    if symbol is None:
+    if not symbol:
         return None
 
     if vim.eval('expand("<cword>")') != symbol.spelling:
@@ -50,17 +50,17 @@ def search_cursors_by_usr(cursor, usr, result):
 
 
 def get_semantic_symbol(cursor):
-    if cursor is None:
+    if not cursor:
         return None
 
     if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
         return cursor
 
     def_cur = cursor.get_definition()
-    if def_cur is None:
+    if not def_cur:
         def_cur = cursor.referenced
 
-    if def_cur is None:
+    if not def_cur:
         return None
 
     if def_cur.kind == cindex.CursorKind.CONSTRUCTOR or def_cur.kind == cindex.CursorKind.DESTRUCTOR:

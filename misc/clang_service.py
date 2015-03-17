@@ -101,7 +101,7 @@ class ClangService(object):
         return cc.compile_args
 
     def start(self, cdb_dir, heuristic):
-        if self.__cindex is None:
+        if not self.__cindex:
             try:
                 self.__cindex = cindex.Index.create()
             except:
@@ -153,7 +153,7 @@ class ClangService(object):
     def update_buffers(self, update_list, notify=True):
         for name, buf, tick in update_list:
             cc = self.__cc_dict.get(name)
-            if cc is None:
+            if not cc:
                 continue
 
             cc.update_buffer(buf, tick)
@@ -164,7 +164,7 @@ class ClangService(object):
 
     def switch(self, name):
         self.__current_cc = self.__cc_dict.get(name)
-        if self.__current_cc is None:
+        if not self.__current_cc:
             return
 
         self.__current_cc.parse_tick = -1
@@ -202,7 +202,7 @@ class ClangService(object):
         while self.__is_running:
             cc = self.__current_cc
 
-            if cc is None:
+            if not cc:
                 continue
 
             if cc.parse_tick == cc.change_tick:

@@ -40,13 +40,13 @@ def clear_occurrences():
 
 def hl_window(clang_service, do_occurrences):
     cc = clang_service.get_cc(vim.current.buffer.name)
-    if cc is None:
+    if not cc:
         return
 
     parse_tick = cc.parse_tick
 
     tu = cc.current_tu
-    if tu is None:
+    if not tu:
         return
 
     current_file = tu.get_file(cc.name)
@@ -158,12 +158,12 @@ def __draw_syntax(line, col, length, cursor_kind, type_kind):
     syntax_groups = vim.eval('g:clighter_syntax_groups')
 
     group = SYNTAX_GROUP_MAP.get(cursor_kind)
-    if group is None:
+    if not group:
         return
 
     if group == cindex.CursorKind.DECL_REF_EXPR:
         group = group.get(type_kind)
-        if group is None:
+        if not group:
             return
 
     if group in syntax_groups:
@@ -191,27 +191,27 @@ def __union(range1, range2):
         return None
 
 
-def __is_in_range(inner, outer):
-    if outer is None:
+def __is_in_range(value, range):
+    if not range:
         return False
 
-    if inner >= outer[0] and inner <= outer[1]:
+    if value >= range[0] and value <= range[1]:
         return True
 
     return False
 
 
-def __is_subrange(range1, range2):
-    if not range1:
+def __is_subrange(inner, outer):
+    if not inner:
         return True
 
-    if not range2:
+    if not outer:
         return False
 
-    if range1[0] < range2[0]:
+    if inner[0] < outer[0]:
         return False
 
-    if range1[1] > range2[1]:
+    if inner[1] > outer[1]:
         return False
 
     return True

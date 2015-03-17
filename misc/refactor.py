@@ -10,17 +10,17 @@ def rename(clang_service):
             vim.eval('g:clighter_heuristic_compile_args')))
 
     cc = clang_service.get_cc(vim.current.buffer.name)
-    if cc is None:
+    if not cc:
         return
 
     tu = cc.current_tu
-    if tu is None:
+    if not tu:
         return
 
     symbol = clighter_helper.get_vim_symbol(
         clighter_helper.get_vim_cursor(tu, tu.get_file(cc.name)))
 
-    if symbol is None:
+    if not symbol:
         return
 
     old_name = clighter_helper.get_spelling_or_displayname(symbol)
@@ -82,7 +82,7 @@ def __cross_buffer_rename(clang_service, symbol_usr, new_name, prompt):
 
 
 def __search_symbol_and_rename(tu, symbol_usr, new_name, prompt):
-    if tu is None:
+    if not tu:
         return
 
     symbols = []
@@ -113,13 +113,13 @@ def __search_symbol_and_rename(tu, symbol_usr, new_name, prompt):
 
 
 def __vim_multi_replace(locs, old, new, prompt):
-    if locs is None:
+    if not locs:
         return
 
     pattern = ""
 
     for line, column, bufname in locs:
-        if bufname is None or bufname != vim.current.buffer.name:
+        if not bufname or bufname != vim.current.buffer.name:
             continue
 
         if pattern:
