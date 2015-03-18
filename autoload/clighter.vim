@@ -29,7 +29,7 @@ fun! clighter#ToggleOccurrences()
     let g:ClighterOccurrences = !g:ClighterOccurrences
 
     echohl WarningMsg |
-                \echom printf('Cursor Occurrences: %s', g:ClighterOccurrences == 1 ? 'Enabled' : 'Disabled') |
+                \echom printf('Cursor Occurrences: %s', g:ClighterOccurrences ? 'Enabled' : 'Disabled') |
                 \echohl None
 endf
 
@@ -52,7 +52,7 @@ endf
 fun! clighter#Enable()
     silent! au! ClighterAutoStart
 
-    if s:clang_initialized == 1
+    if s:clang_initialized
         return
     endif
 
@@ -75,7 +75,7 @@ fun! clighter#Enable()
 
     augroup ClighterEnable
         au!
-        if g:clighter_occurrences_mode == 0
+        if !g:clighter_occurrences_mode
             au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), False)
         else
             au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), True)

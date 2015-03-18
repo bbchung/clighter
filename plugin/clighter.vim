@@ -60,7 +60,7 @@ hi default link clighterDeclRefExprCall None
 hi default link clighterMemberRefExpr None
 hi default link clighterNamespace None
 
-if g:clighter_autostart == 1
+if g:clighter_autostart
     augroup ClighterAutoStart
         au FileType c,cpp,objc,objcpp call clighter#Enable()
     augroup END
