@@ -118,6 +118,8 @@ def __do_highlight(tu, f, syntax_range, symbol, occurrences_range, tick):
             location1,
             location2))
 
+    draw_map = {}  # {priority:{group:[[[line, column, len]]]}}
+
     for token in tokens:
         if token.kind.value != 2:
             continue
@@ -132,52 +134,77 @@ def __do_highlight(tu, f, syntax_range, symbol, occurrences_range, tick):
         )
 
         if __is_in_range(token.location.line, syntax_range):
-            __draw_syntax(
-                line=token.location.line,
-                col=token.location.column,
-                length=len(token.spelling),
-                cursor_kind=t_cursor.kind,
-                type_kind=t_cursor.type.kind
-            )
+            group = __get_syntax_group(t_cursor.kind, t_cursor.type.kind)
+            __add_to_draw_map(
+                draw_map, SYNTAX_PRI, group, [
+                    token.location.line, token.location.column, len(
+                        token.spelling)])
 
         if symbol and __is_in_range(token.location.line, occurrences_range):
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
             if t_symbol and token.spelling == t_symbol.spelling and t_symbol == symbol:
+                __add_to_draw_map(
+                    draw_map, OCCURRENCES_PRI, 'clighterOccurrences', [
+                        token.location.line, token.location.column, len(
+                            token.spelling)])
+
+    __draw(draw_map, tick)
+
+
+def __draw(draw_map, tick):
+    for priority, group_map in draw_map.items():
+        for group, draw_pos in group_map.items():
+            for pos in draw_pos:
                 __vim_matchaddpos(
-                    group='clighterOccurrences',
-                    line=token.location.line,
-                    col=token.location.column,
-                    length=len(token.spelling),
-                    priority=OCCURRENCES_PRI
+                    group=group,
+                    pos=pos,
+                    priority=priority
                 )
 
     vim.current.window.vars['clighter_hl'][0] = tick
 
 
-def __draw_syntax(line, col, length, cursor_kind, type_kind):
-    syntax_groups = vim.eval('g:clighter_syntax_groups')
+def __add_to_draw_map(draw_map, priority, group, pos):
+    if not group or not pos:
+        return
 
+    if not draw_map.get(priority):
+        draw_map[priority] = {}
+
+    if not draw_map[priority].get(group):
+        draw_map[priority][group] = [[pos]]
+        return
+
+    if len(draw_map[priority][group][-1]) < 8:
+        draw_map[priority][group][-1].append(pos)
+    else:
+        draw_map[priority][group].append([pos])
+
+
+def __get_syntax_group(cursor_kind, type_kind):
     group = SYNTAX_GROUP_MAP.get(cursor_kind)
     if not group:
-        return
+        return None
 
     if group == cindex.CursorKind.DECL_REF_EXPR:
         group = group.get(type_kind)
         if not group:
-            return
+            return None
 
-    if group in syntax_groups:
-        __vim_matchaddpos(group, line, col, length, SYNTAX_PRI)
+    if group not in vim.eval('g:clighter_syntax_groups'):
+        return None
+
+    return group
 
 
-def __vim_matchaddpos(group, line, col, length, priority):
-    cmd = "call matchaddpos('{0}', [[{1}, {2}, {3}]], {4})"
-    vim.command(cmd.format(group, line, col, length, priority))
+def __vim_matchaddpos(group, pos, priority):
+    cmd = "call matchaddpos('{0}', {1}, {2})".format(group, pos, priority)
+    vim.command(cmd)
 
 
 def __vim_clear_match_pri(*priorities):
-    cmd = "call s:clear_match_pri({0})"
-    vim.command(cmd.format(list(priorities)))
+    cmd = "call s:clear_match_pri({0})".format(list(priorities))
+    vim.command(cmd)
 
 
 def __union(range1, range2):
