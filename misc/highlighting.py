@@ -118,7 +118,7 @@ def __do_highlight(tu, f, syntax_range, symbol, occurrences_range, tick):
             location1,
             location2))
 
-    draw_map = {}  # {priority:{group:[[[line, column, len]]]}}
+    # draw_map = {}  # {priority:{group:[[[line, column, len]]]}}
 
     for token in tokens:
         if token.kind.value != 2:
@@ -133,52 +133,59 @@ def __do_highlight(tu, f, syntax_range, symbol, occurrences_range, tick):
             )
         )
 
+        pos = [
+            [token.location.line, token.location.column, len(
+                token.spelling)]]
+
         if __is_in_range(token.location.line, syntax_range):
             group = __get_syntax_group(t_cursor.kind, t_cursor.type.kind)
-            __add_to_draw_map(
-                draw_map, SYNTAX_PRI, group, [
-                    token.location.line, token.location.column, len(
-                        token.spelling)])
+            if group:
+                __vim_matchaddpos(group, pos, SYNTAX_PRI)
+
+            #__add_to_draw_map(
+               # draw_map, SYNTAX_PRI, group, [token.location.line,
+               # token.location.column, len( token.spelling)])
 
         if symbol and __is_in_range(token.location.line, occurrences_range):
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
             if t_symbol and token.spelling == t_symbol.spelling and t_symbol == symbol:
-                __add_to_draw_map(
-                    draw_map, OCCURRENCES_PRI, 'clighterOccurrences', [
-                        token.location.line, token.location.column, len(
-                            token.spelling)])
+                __vim_matchaddpos('clighterOccurrences', pos, OCCURRENCES_PRI)
 
-    __draw(draw_map, tick)
+               #__add_to_draw_map(
+                # draw_map, OCCURRENCES_PRI, 'clighterOccurrences', [
+                # token.location.line, token.location.column, len(
+                # token.spelling)])
 
-
-def __draw(draw_map, tick):
-    for priority, group_map in draw_map.items():
-        for group, draw_pos in group_map.items():
-            for pos in draw_pos:
-                __vim_matchaddpos(
-                    group=group,
-                    pos=pos,
-                    priority=priority
-                )
-
+    #__draw(draw_map, tick)
     vim.current.window.vars['clighter_hl'][0] = tick
 
 
-def __add_to_draw_map(draw_map, priority, group, pos):
-    if not group or not pos:
-        return
+# def __draw(draw_map, tick):
+    # for priority, group_map in draw_map.items():
+    # for group, draw_pos in group_map.items():
+    # for pos in draw_pos:
+    #__vim_matchaddpos(
+    # group=group,
+    # pos=pos,
+    # priority=priority
+    #)
 
-    if not draw_map.get(priority):
-        draw_map[priority] = {}
 
-    if not draw_map[priority].get(group):
-        draw_map[priority][group] = [[pos]]
-        return
+# def __add_to_draw_map(draw_map, priority, group, pos):
+    # if not group or not pos:
+    # return
 
-    if len(draw_map[priority][group][-1]) < 8:
-        draw_map[priority][group][-1].append(pos)
-    else:
-        draw_map[priority][group].append([pos])
+    # if not draw_map.get(priority):
+    #draw_map[priority] = {}
+
+    # if not draw_map[priority].get(group):
+    #draw_map[priority][group] = [[pos]]
+    # return
+
+    # if len(draw_map[priority][group][-1]) < 8:
+    # draw_map[priority][group][-1].append(pos)
+    # else:
+    # draw_map[priority][group].append([pos])
 
 
 def __get_syntax_group(cursor_kind, type_kind):
