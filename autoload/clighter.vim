@@ -17,7 +17,7 @@ endpython
 
 endif
 
-let s:clang_initialized=0
+let s:clighter_enabled=0
 
 fun! clighter#ToggleOccurrences()
     if g:ClighterOccurrences==1
@@ -52,7 +52,7 @@ endf
 fun! clighter#Enable()
     silent! au! ClighterAutoStart
 
-    if s:clang_initialized
+    if s:clighter_enabled
         return
     endif
 
@@ -88,13 +88,13 @@ fun! clighter#Enable()
         au VimLeavePre * py clang_service.ClangService().stop()
     augroup END
 
-    let s:clang_initialized=1
+    let s:clighter_enabled=1
 endf
 
 fun! clighter#Disable()
     silent! au! ClighterEnable
     py clang_service.ClangService().stop()
-    let s:clang_initialized=0
+    let s:clighter_enabled=0
     let a:wnr = winnr()
     windo py highlighting.clear_all()
     exe a:wnr.'wincmd w'
