@@ -164,10 +164,10 @@ class ClangService(object):
 
     def switch(self, name):
         self.__current_cc = self.__cc_dict.get(name)
-        if not self.__current_cc:
-            return
 
-        self.__current_cc.parse_tick = -1
+        if self.__current_cc:
+            self.__current_cc.parse_tick = -1
+
         with self.__cond:
             self.__cond.notify()
 
@@ -203,6 +203,9 @@ class ClangService(object):
             cc = self.__current_cc
 
             if not cc:
+                with self.__cond:
+                    self.__cond.wait()
+
                 continue
 
             if cc.parse_tick == cc.change_tick:
