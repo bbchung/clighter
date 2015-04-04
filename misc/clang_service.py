@@ -163,12 +163,12 @@ class ClangService(object):
                 self.__cond.notify()
 
     def switch(self, name):
-        self.__current_cc = self.__cc_dict.get(name)
-
-        if self.__current_cc:
-            self.__current_cc.parse_tick = -1
-
         with self.__cond:
+            self.__current_cc = self.__cc_dict.get(name)
+
+            if self.__current_cc:
+                self.__current_cc.parse_tick = -1
+
             self.__cond.notify()
 
     def get_cc(self, name):
@@ -200,20 +200,18 @@ class ClangService(object):
 
     def __parsing_worker(self, heuristic):
         while self.__is_running:
-            cc = self.__current_cc
+            with self.__cond:
+                cc = self.__current_cc
 
-            if not cc:
-                with self.__cond:
+                if not cc:
                     self.__cond.wait()
-
-                continue
-
-            if cc.parse_tick == cc.change_tick:
-                with self.__cond:
-                    self.__cond.wait()
+                    continue
 
                 if cc.parse_tick == cc.change_tick:
-                    continue
+                    self.__cond.wait()
+
+                    if cc.parse_tick == cc.change_tick:
+                        continue
 
             try:
                 tick = cc.change_tick
