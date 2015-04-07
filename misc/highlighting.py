@@ -21,6 +21,8 @@ SYNTAX_GROUP_MAP = {
     cindex.CursorKind.NAMESPACE_REF: 'clighterNamespace',
     cindex.CursorKind.NAMESPACE: 'clighterNamespace',
     cindex.CursorKind.CLASS_TEMPLATE: 'clighterClassDecl',
+    cindex.CursorKind.TEMPLATE_TYPE_PARAMETER: 'clighterClassDecl',
+    cindex.CursorKind.TEMPLATE_REF: 'clighterTypeRef',
     cindex.CursorKind.DECL_REF_EXPR:
     {
         cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall',
