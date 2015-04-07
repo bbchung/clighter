@@ -47,19 +47,6 @@ command! ClighterDisable call clighter#Disable()
 command! ClighterToggleOccurrences call clighter#ToggleOccurrences()
 command! ClighterShowInfo call clighter#ShowInfo()
 
-hi default link clighterMacroInstantiation Constant
-hi default link clighterTypeRef Identifier
-hi default link clighterStructDecl Type
-hi default link clighterClassDecl Type
-hi default link clighterEnumDecl Type
-hi default link clighterEnumConstantDecl Identifier
-hi default link clighterDeclRefExprEnum Identifier
-hi default link clighterOccurrences IncSearch
-hi default link clighterFunctionDecl None
-hi default link clighterDeclRefExprCall None
-hi default link clighterMemberRefExpr None
-hi default link clighterNamespace None
-
 if g:clighter_autostart
     augroup ClighterAutoStart
         au FileType c,cpp,objc,objcpp call clighter#Enable()

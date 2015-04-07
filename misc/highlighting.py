@@ -10,18 +10,21 @@ SYNTAX_PRI = -12
 SYNTAX_GROUP_MAP = {
     cindex.CursorKind.MACRO_INSTANTIATION: 'clighterMacroInstantiation',
     cindex.CursorKind.STRUCT_DECL: 'clighterStructDecl',
+    cindex.CursorKind.UNION_DECL: 'clighterUnionDecl',
     cindex.CursorKind.CLASS_DECL: 'clighterClassDecl',
     cindex.CursorKind.ENUM_DECL: 'clighterEnumDecl',
+    cindex.CursorKind.FIELD_DECL: 'clighterFieldDecl',
     cindex.CursorKind.ENUM_CONSTANT_DECL: 'clighterEnumConstantDecl',
     cindex.CursorKind.TYPE_REF: 'clighterTypeRef',
     cindex.CursorKind.FUNCTION_DECL: 'clighterFunctionDecl',
     cindex.CursorKind.MEMBER_REF_EXPR: 'clighterMemberRefExpr',
     cindex.CursorKind.NAMESPACE_REF: 'clighterNamespace',
     cindex.CursorKind.NAMESPACE: 'clighterNamespace',
+    cindex.CursorKind.CLASS_TEMPLATE: 'clighterClassDecl',
     cindex.CursorKind.DECL_REF_EXPR:
     {
+        cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall',
         cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum',
-        cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall'
     }
 }
 
@@ -193,7 +196,7 @@ def __get_syntax_group(cursor_kind, type_kind):
     if not group:
         return None
 
-    if group == cindex.CursorKind.DECL_REF_EXPR:
+    if cursor_kind == cindex.CursorKind.DECL_REF_EXPR:
         group = group.get(type_kind)
         if not group:
             return None
