@@ -18,6 +18,7 @@ endpython
 endif
 
 let s:clighter_enabled=0
+execute('source '. s:script_folder_path . '/../after/syntax/clighter.vim')
 
 fun! clighter#ToggleOccurrences()
     if g:ClighterOccurrences==1
@@ -75,7 +76,6 @@ fun! clighter#Enable()
 
     augroup ClighterEnable
         au!
-        au VimEnter * execute('source '. s:script_folder_path . '/../after/syntax/clighter.vim')
         if !g:clighter_occurrences_mode
             au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), False)
         else
