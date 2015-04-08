@@ -15,6 +15,7 @@ SYNTAX_GROUP_MAP = {
     cindex.CursorKind.ENUM_DECL: 'clighterEnumDecl',
     cindex.CursorKind.FIELD_DECL: 'clighterFieldDecl',
     cindex.CursorKind.FUNCTION_DECL: 'clighterFunctionDecl',
+    cindex.CursorKind.CXX_METHOD: 'clighterFunctionDecl',
     cindex.CursorKind.ENUM_CONSTANT_DECL: 'clighterEnumConstantDecl',
     cindex.CursorKind.NAMESPACE: 'clighterNamespace',
     cindex.CursorKind.CLASS_TEMPLATE: 'clighterClassDecl',
