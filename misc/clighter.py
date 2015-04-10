@@ -10,7 +10,7 @@ def on_filetype():
         clang_service.ClangService().register([vim.current.buffer.name])
     else:
         clang_service.ClangService().unregister([vim.current.buffer.name])
-        
+
     clang_service.ClangService().switch(vim.current.buffer.name)
     highlighting.clear_all()
 

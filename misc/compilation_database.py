@@ -120,7 +120,8 @@ class CompilationDatabase(object):
         for key, commands in self.__command_cache.items():
             next_basename = os.path.basename(key)
 
-            if os.path.splitext(next_basename)[0] == os.path.splitext(basename)[0]:
+            if os.path.splitext(
+                    next_basename)[0] == os.path.splitext(basename)[0]:
                 if os.path.dirname(key) == os.path.dirname(full_path):
                     all_commands = commands
                     break
