@@ -20,15 +20,19 @@ SYNTAX_GROUP_MAP = {
     cindex.CursorKind.NAMESPACE: 'clighterNamespace',
     cindex.CursorKind.CLASS_TEMPLATE: 'clighterClassDecl',
     cindex.CursorKind.TEMPLATE_TYPE_PARAMETER: 'clighterTemplateTypeParameter',
-    cindex.CursorKind.TYPE_REF: 'clighterTypeRef',
-    cindex.CursorKind.MEMBER_REF_EXPR: 'clighterMemberRefExpr',
-    cindex.CursorKind.NAMESPACE_REF: 'clighterNamespace',
-    cindex.CursorKind.TEMPLATE_REF: 'clighterTemplateRef',
+    cindex.CursorKind.TYPE_REF: 'clighterTypeRef', # class ref
+    cindex.CursorKind.NAMESPACE_REF: 'clighterNamespace', # namespace ref
+    cindex.CursorKind.TEMPLATE_REF: 'clighterTemplateRef', # template class ref
     cindex.CursorKind.DECL_REF_EXPR:
     {
-        cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall',
-        cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum',
-    }
+        cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall', # function call
+        cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum', # enum ref
+        cindex.TypeKind.TYPEDEF: 'clighterTypeRef', # ex: cout
+    },
+    cindex.CursorKind.MEMBER_REF_EXPR:
+    {
+        cindex.TypeKind.UNEXPOSED: 'clighterDeclRefExprCall', # member function call
+    },
 }
 
 
@@ -199,7 +203,7 @@ def __get_syntax_group(cursor_kind, type_kind):
     if not group:
         return None
 
-    if cursor_kind == cindex.CursorKind.DECL_REF_EXPR:
+    if cursor_kind == cindex.CursorKind.DECL_REF_EXPR or cursor_kind == cindex.CursorKind.MEMBER_REF_EXPR:
         group = group.get(type_kind)
         if not group:
             return None
