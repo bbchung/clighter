@@ -39,6 +39,7 @@ let g:clighter_enable_cross_rename = get(g:, 'clighter_enable_cross_rename', 1)
 let g:clighter_syntax_groups = get(g:, 'clighter_syntax_groups', ['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum', 'clighterTemplateTypeParameter', 'clighterTemplateRef'])
 let g:clighter_occurrences_mode = get(g:, 'clighter_occurrences_mode', 0)
 let g:clighter_heuristic_compile_args = get(g:, 'clighter_heuristic_compile_args', 1)
+let g:clighter_compile_args = get(g:, 'clighter_compile_args', [])
 
 let g:ClighterOccurrences = get(g:, 'ClighterOccurrences', 1)
 
