@@ -31,6 +31,7 @@ SYNTAX_GROUP_MAP = {
         cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum',  # enum ref
         cindex.TypeKind.TYPEDEF: 'clighterTypeRef',  # ex: cout
     },
+    cindex.CursorKind.MEMBER_REF: 'clighterDeclRefExprCall', # ex: designated initializer
     cindex.CursorKind.MEMBER_REF_EXPR:
     {
         # member function call
