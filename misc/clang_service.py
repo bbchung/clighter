@@ -80,11 +80,11 @@ class ClangService(object):
     def __del__(self):
         self.stop()
 
-    def __get_useful_args(self, cc, heuristic, g_compile_args):
+    def __get_useful_args(self, cc, heuristic, global_args):
         if cc.compile_args is not None:
             return cc.compile_args
 
-        cc.compile_args = g_compile_args
+        cc.compile_args = global_args
 
         if not self.__cdb:
             return None
@@ -100,7 +100,7 @@ class ClangService(object):
 
         return cc.compile_args
 
-    def start(self, cdb_dir, heuristic, g_compile_args):
+    def start(self, cdb_dir, heuristic, global_args):
         if not self.__cindex:
             try:
                 self.__cindex = cindex.Index.create()
@@ -122,7 +122,7 @@ class ClangService(object):
             target=self.__parsing_worker,
             args=(
                 heuristic,
-                g_compile_args,
+                global_args,
             ))
         self.__parsing_thread.start()
 
@@ -175,7 +175,7 @@ class ClangService(object):
     def get_cc(self, name):
         return self.__cc_dict.get(name)
 
-    def parse_all(self, heuristic, g_compile_args):
+    def parse_all(self, heuristic, global_args):
         tick = {}
         for cc in self.__cc_dict.values():
             tick[cc.name] = cc.change_tick
@@ -185,7 +185,7 @@ class ClangService(object):
         for cc in self.__cc_dict.values():
             cc.parse(
                 self.__cindex,
-                self.__get_useful_args(cc, heuristic, g_compile_args),
+                self.__get_useful_args(cc, heuristic, global_args),
                 unsaved,
                 tick[cc.name])
 
@@ -199,7 +199,7 @@ class ClangService(object):
 
         return unsaved
 
-    def __parsing_worker(self, heuristic, g_compile_args):
+    def __parsing_worker(self, heuristic, global_args):
         while self.__is_running:
             with self.__cond:
                 cc = self.__current_cc
@@ -222,7 +222,7 @@ class ClangService(object):
 
             cc.parse(
                 self.__cindex,
-                self.__get_useful_args(cc, heuristic, g_compile_args),
+                self.__get_useful_args(cc, heuristic, global_args),
                 unsaved,
                 tick)
 
