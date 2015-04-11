@@ -62,7 +62,7 @@ fun! clighter#Enable()
         let a:cwd = ''
     endif
 
-    let a:start_cmd = printf("clang_service.ClangService().start('%s', %d, vim.eval('g:clighter_compile_args'))", a:cwd, g:clighter_heuristic_compile_args)
+    let a:start_cmd = printf("clang_service.ClangService().start('%s', %d, %s)", a:cwd, g:clighter_heuristic_compile_args, string(g:clighter_compile_args))
 
     if !pyeval(a:start_cmd)
         echohl WarningMsg |
