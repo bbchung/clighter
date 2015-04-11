@@ -7,23 +7,27 @@ from clang import cindex
 OCCURRENCES_PRI = -11
 SYNTAX_PRI = -12
 
-SYNTAX_GROUP_MAP = {
+CUSTOM_SYNTAX_GROUP = {
+    cindex.CursorKind.INCLUSION_DIRECTIVE: 'cligherInclusionDirective',
     cindex.CursorKind.MACRO_INSTANTIATION: 'clighterMacroInstantiation',
+    cindex.CursorKind.VAR_DECL: 'clighterVarDecl',
     cindex.CursorKind.STRUCT_DECL: 'clighterStructDecl',
     cindex.CursorKind.UNION_DECL: 'clighterUnionDecl',
     cindex.CursorKind.CLASS_DECL: 'clighterClassDecl',
     cindex.CursorKind.ENUM_DECL: 'clighterEnumDecl',
-    cindex.CursorKind.FIELD_DECL: 'clighterFieldDecl',
+    cindex.CursorKind.PARM_DECL: 'clighterParmDecl',
     cindex.CursorKind.FUNCTION_DECL: 'clighterFunctionDecl',
+    cindex.CursorKind.FUNCTION_TEMPLATE: 'clighterFunctionDecl',
     cindex.CursorKind.CXX_METHOD: 'clighterFunctionDecl',
     cindex.CursorKind.CONSTRUCTOR: 'clighterFunctionDecl',
     cindex.CursorKind.DESTRUCTOR: 'clighterFunctionDecl',
+    cindex.CursorKind.FIELD_DECL: 'clighterFieldDecl',
     cindex.CursorKind.ENUM_CONSTANT_DECL: 'clighterEnumConstantDecl',
     cindex.CursorKind.NAMESPACE: 'clighterNamespace',
     cindex.CursorKind.CLASS_TEMPLATE: 'clighterClassDecl',
     cindex.CursorKind.TEMPLATE_TYPE_PARAMETER: 'clighterTemplateTypeParameter',
     cindex.CursorKind.TYPE_REF: 'clighterTypeRef',  # class ref
-    cindex.CursorKind.NAMESPACE_REF: 'clighterNamespace',  # namespace ref
+    cindex.CursorKind.NAMESPACE_REF: 'clighterNamespaceRef',  # namespace ref
     # template class ref
     cindex.CursorKind.TEMPLATE_REF: 'clighterTemplateRef',
     cindex.CursorKind.DECL_REF_EXPR:
@@ -33,11 +37,12 @@ SYNTAX_GROUP_MAP = {
         cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum',  # enum ref
         cindex.TypeKind.TYPEDEF: 'clighterTypeRef',  # ex: cout
     },
-    cindex.CursorKind.MEMBER_REF: 'clighterDeclRefExprCall', # ex: designated initializer
+    # ex: designated initializer
+    cindex.CursorKind.MEMBER_REF: 'clighterDeclRefExprCall',
     cindex.CursorKind.MEMBER_REF_EXPR:
     {
         # member function call
-        cindex.TypeKind.UNEXPOSED: 'clighterDeclRefExprCall',
+        cindex.TypeKind.UNEXPOSED: 'clighterMemberRefExprCall',
     },
 }
 
@@ -203,18 +208,36 @@ def __do_highlight(tu, f, syntax_range, symbol, occurrences_range, tick):
     # else:
     # draw_map[priority][group].append([pos])
 
-
-def __get_syntax_group(cursor_kind, type_kind):
-    group = SYNTAX_GROUP_MAP.get(cursor_kind)
-    if not group:
+def __get_default_syn(cursor_kind):
+    if cursor_kind.is_preprocessing():
+        return 'clighterPrepro'
+    elif cursor_kind.is_declaration():
+        return 'clighterDecl'
+    elif cursor_kind.is_reference():
+        return 'clighterRef'
+    else:
         return None
 
-    if cursor_kind == cindex.CursorKind.DECL_REF_EXPR or cursor_kind == cindex.CursorKind.MEMBER_REF_EXPR:
-        group = group.get(type_kind)
-        if not group:
-            return None
 
-    if group not in vim.eval('g:clighter_syntax_groups'):
+def __get_syntax_group(cursor_kind, type_kind):
+    group = __get_default_syn(cursor_kind)
+
+    custom = CUSTOM_SYNTAX_GROUP.get(cursor_kind)
+    if custom:
+        if cursor_kind == cindex.CursorKind.DECL_REF_EXPR:
+            custom = custom.get(type_kind)
+            if custom:
+                group = custom
+        elif cursor_kind == cursor_kind == cindex.CursorKind.MEMBER_REF_EXPR:
+            custom = custom.get(type_kind)
+            if custom:
+                group = custom
+            else:
+                group = 'clighterMemberRefExprVar'
+        else:
+            group = custom
+
+    if group in vim.eval('g:clighter_highlight_blacklist'):
         return None
 
     return group
