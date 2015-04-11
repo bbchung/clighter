@@ -277,16 +277,21 @@ recommended) is installed correctly and set |g:clighter_libclang_file| if
 need.
 
 Q. Why rename-refactoring function is an experimental function?
-A. Even though libclang provides many useful informations, it's not enough to
-do cross file rename-refactoring. Clighter needs to use its own way way to
-'guess' what should be renamed. Clighter can't gurantee the result of
-rename-factoring result is perfect.
-
+A. Due to the character of c-family language, even libclang provides a
+powerful c-family parser, it still hard to do rename refactoring. Clighter can
+only search the current opened buffer to do rename refactoring and it can't
+guarantee the result correct.
+ 
 Q. Libclang crash?
-When incorrect compile args meet incorrect source code, libclang possibly
+A. When incorrect compile args meet incorrect source code, libclang possibly
 crashes(for example: empty compile arg meet .hxx), and it may happend in vim
-thread or background thread of clighter.  Currently clighter can't catch such
-crash, so vim will become unstable if it happends.
+thread or background thread of clighter. Currently clighter can't catch such
+crash, so vim will become unstable if it happens.
+
+Q. Highlighting always are messed up as typing, can fix?
+A. No, Clighter uses position based matching by vim. When typing, it can't
+automatically move the typing offset for highlighted word. Once vim provides
+such api, it will be fixed.
 
 ==============================================================================
                                                         *clighter-license*

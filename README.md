@@ -212,22 +212,28 @@ hi clighterClassDecl term=NONE cterm=NONE ctermbg=255 ctermfg=232 gui=NONE
 
 ## FAQ
 
-### The clighter plugin doesn't work.
-Vim version 7.4 with python2.x is required, and make sure libclang(3.5 is
-recommended) is installed correctly and set g:clighter_libclang_file if need.
+### The clighter plugin doesn't work?
+Vim version 7.4 with python2.x is required, and make sure libclang(3.5 and 3.6
+is recommended) is installed correctly and set g:clighter_libclang_file if
+need.
 
 ### Why rename-refactoring function is an experimental function?
-Even though libclang provides many useful informations, it's not enough to do
-cross file rename-refactoring. Clighter needs to use its own way way to
-'guess' what should be renamed. Clighter can't gurantee the result of
-rename-factoring result is perfect.
+Due to the character of c-family language, even libclang provides a powerful
+c-family parser, it still hard to do rename refactoring. Clighter can only
+search the current opened buffer to do rename refactoring and it can't
+guarantee the result correct.
 
 ### Libclang crash?
 When incorrect compile args meet incorrect source code, libclang possibly
 crashes(for example: empty compile arg meet .hxx), and it may happend in vim
-thread or background thread of clighter.  Currently clighter can't catch such
-crash, so vim will become unstable if it happends.
+thread or background thread of clighter. Currently clighter can't catch such
+crash, so vim will become unstable if it happens.
 
+### Highlighting always are messed up as typing, can fix?
+No, Clighter use position based matching by vim. When typing, it can't
+automatically move the typing offset for highlighted word. Once vim provides
+such api, it will be fixed.
+ 
 
 ## LICENSE
 
