@@ -112,6 +112,16 @@ Default: `1`
 let g:clighter_heuristic_compile_args = 1
 ```
 
+### g:clighter_compile_args
+
+The global compile args of clighter. It will be appended in each file's
+compile args.
+
+Default: `[]`
+```vim
+let g:clighter_compile_args = []
+```
+
 ### g:ClighterOccurrences
 
 Enable occurrences highlight. Occurrences highlight is a clighter function
@@ -121,6 +131,7 @@ Default: `1`
 ```vim
 let g:ClighterOccurrences = 1
 ```
+
 
 ## Commands and Functions
 

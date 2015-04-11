@@ -63,6 +63,7 @@ Untar the clighter.tar.gz to your vim path.
 |g:clighter_syntax_groups|
 |g:clighter_occurrences_mode|
 |g:clighter_heuristic_compile_args|
+|g:clighter_compile_args|
 |g:ClighterOccurrences|
 
 ------------------------------------------------------------------------------
@@ -148,7 +149,20 @@ Default: `1`
 >
 	let g:clighter_heuristic_compile_args = 1
 <
+-------------------------------------------------------------------------------
+						*g:clighter_compile_args*
+g:clighter_compile_args~
+
+The global compile args of clighter. It will be appended in each file's
+compile args.
+
+Default: `[]`
+>
+	let g:clighter_compile_args = []
+
+<
 ------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
 						*g:ClighterOccurrences*
 g:ClighterOccurrences~
 
