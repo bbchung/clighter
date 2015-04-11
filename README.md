@@ -79,13 +79,15 @@ Default: `1`
 let g:clighter_enable_cross_rename = 1
 ```
 
-### g:clighter_syntax_groups
+### g:clighter_highlight_blacklist
 
-Define the group of syntax to be highlighted.
+Define the group of syntax NOT to be highlighted. 
 
-Default: `['clighterMacroInstantiation','clighterStructDecl','clighterClassDecl','clighterEnumDecl','clighterEnumConstantDecl','clighterTypeRef','clighterDeclRefExprEnum']`
+Default: `['cligherInclusionDirective']`
+
+The recommend setting to not be dazzled:
 ```vim
-let g:clighter_syntax_groups = ['clighterMacroInstantiation', 'clighterStructDecl', 'clighterClassDecl', 'clighterEnumDecl', 'clighterEnumConstantDecl', 'clighterTypeRef', 'clighterDeclRefExprEnum']
+let g:clighter_highlight_blacklist = ['clighterNamespaceRef', 'clighterFunctionDecl', 'clighterFieldDecl', 'clighterDeclRefExprCall', 'clighterMemberRefExprCall', 'clighterMemberRefExprVar', 'clighterNamespace', 'clighterNamespaceRef', 'cligherInclusionDirective', 'clighterVarDecl']
 ```
 
 ### g:clighter_occurrences_mode
@@ -176,18 +178,30 @@ compilation database, please reference [Compilation Database][cdb]
 Clighter defines these highlight groups corresponded to libclang.
 
 ```vim
-hi link clighterMacroInstantiation Constant
-hi link clighterTypeRef Identifier
-hi link clighterStructDecl Type
-hi link clighterClassDecl Type
-hi link clighterEnumDecl Type
-hi link clighterEnumConstantDecl Identifier
-hi link clighterDeclRefExprEnum Identifier
-hi link clighterOccurrences IncSearch
-hi link clighterFunctionDecl None
-hi link clighterDeclRefExprCall None
-hi link clighterMemberRefExpr None
-hi link clighterNamespace None
+hi default link clighterPrepro PreProc
+hi default link clighterDecl Identifier
+hi default link clighterRef Type
+hi default link cligherInclusionDirective cIncluded
+hi default link clighterMacroInstantiation Constant
+hi default link clighterVarDecl Identifier
+hi default link clighterStructDecl Identifier
+hi default link clighterUnionDecl Identifier
+hi default link clighterClassDecl Identifier
+hi default link clighterEnumDecl Identifier
+hi default link clighterParmDecl Identifier
+hi default link clighterFunctionDecl Identifier
+hi default link clighterFieldDecl Identifier
+hi default link clighterEnumConstantDecl Constant
+hi default link clighterDeclRefExprEnum Constant
+hi default link clighterDeclRefExprCall Type
+hi default link clighterMemberRefExprCall Type
+hi default link clighterMemberRefExprVar Type
+hi default link clighterTypeRef Type
+hi default link clighterNamespace Identifier
+hi default link clighterNamespaceRef Type
+hi default link clighterTemplateTypeParameter Identifier
+hi default link clighterTemplateRef Type
+hi default link clighterOccurrences IncSearch
 ```
 
 You can customize these colors in your colorscheme, for example:
