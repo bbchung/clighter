@@ -234,6 +234,10 @@ No, Clighter use position based matching by vim. When typing, it can't
 automatically move the typing offset for highlighted word. Once vim provides
 such api, it will be fixed.
 
+### How to set compile args?
+Clighter set the compile args for each file with (g:clighter_compile_args +
+"compilation database"), and both are optional. Compile args will affect the
+correctness of highlight and refactoring function.
 
 ## LICENSE
 
