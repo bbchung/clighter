@@ -81,7 +81,7 @@ let g:clighter_enable_cross_rename = 1
 
 ### g:clighter_highlight_blacklist
 
-Define the group of syntax NOT to be highlighted. 
+Define the group of syntax NOT to be highlighted.
 
 Default: `['cligherInclusionDirective']`
 
@@ -171,7 +171,7 @@ nmap <silent> <Leader>r :call clighter#Rename()<CR>
 Clighter automatically load and parse the compilation database
 "compile_commands.json" if it exists in current working directory, then the
 compile options will be passed to libclang. For more information about
-compilation database, please reference [Compilation Database][cdb] 
+compilation database, please reference [Compilation Database][cdb].
 
 ## Highlight Group
 
@@ -233,7 +233,7 @@ crash, so vim will become unstable if it happens.
 No, Clighter use position based matching by vim. When typing, it can't
 automatically move the typing offset for highlighted word. Once vim provides
 such api, it will be fixed.
- 
+
 
 ## LICENSE
 

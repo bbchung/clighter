@@ -117,7 +117,7 @@ Default: `1`
 						*g:clighter_highlight_blacklist*
 g:clighter_highlight_blacklist~
 
-Define the group of syntax NOT to be highlighted. 
+Define the group of syntax NOT to be highlighted.
 
 Default: `['cligherInclusionDirective']`
 
@@ -229,7 +229,7 @@ clighter#Rename()~
 
 Clighter automatically load and parse the compilation database
 "compile_commands.json" if it exists in current working directory, then the
-compile options will be passed to libclang.  
+compile options will be passed to libclang.
 
 ==============================================================================
 						*clighter-highlight-group*
@@ -281,7 +281,7 @@ A. Due to the character of c-family language, even libclang provides a
 powerful c-family parser, it still hard to do rename refactoring. Clighter can
 only search the current opened buffer to do rename refactoring and it can't
 guarantee the result correct.
- 
+
 Q. Libclang crash?
 A. When incorrect compile args meet incorrect source code, libclang possibly
 crashes(for example: empty compile arg meet .hxx), and it may happend in vim
