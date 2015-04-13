@@ -28,21 +28,17 @@ CUSTOM_SYNTAX_GROUP = {
     cindex.CursorKind.TEMPLATE_TYPE_PARAMETER: 'clighterTemplateTypeParameter',
     cindex.CursorKind.TYPE_REF: 'clighterTypeRef',  # class ref
     cindex.CursorKind.NAMESPACE_REF: 'clighterNamespaceRef',  # namespace ref
-    # template class ref
-    cindex.CursorKind.TEMPLATE_REF: 'clighterTemplateRef',
+    cindex.CursorKind.TEMPLATE_REF: 'clighterTemplateRef', # template class ref
     cindex.CursorKind.DECL_REF_EXPR:
     {
-        # function call
-        cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall',
+        cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall', # function call
         cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum',  # enum ref
         cindex.TypeKind.TYPEDEF: 'clighterTypeRef',  # ex: cout
     },
-    # ex: designated initializer
-    cindex.CursorKind.MEMBER_REF: 'clighterDeclRefExprCall',
+    cindex.CursorKind.MEMBER_REF: 'clighterDeclRefExprCall', # ex: designated initializer
     cindex.CursorKind.MEMBER_REF_EXPR:
     {
-        # member function call
-        cindex.TypeKind.UNEXPOSED: 'clighterMemberRefExprCall',
+        cindex.TypeKind.UNEXPOSED: 'clighterMemberRefExprCall', # member function call
     },
 }
 
@@ -142,7 +138,7 @@ def __do_highlight(tu, f, syntax_range, symbol, occurrences_range, tick):
     # draw_map = {}  # {priority:{group:[[[line, column, len]]]}}
 
     for token in tokens:
-        if token.kind.value != 2:
+        if token.kind.value != 2: # no keyword, comment
             continue
 
         t_cursor = cindex.Cursor.from_location(
