@@ -1,20 +1,13 @@
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 py import sys
 exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
-py import vim
 py import clighter
 py import highlighting
 py import clang_service
 py import refactor
 
 if !empty(g:clighter_libclang_file)
-
-python << endpython
-import vim
-from clang import cindex
-cindex.Config.set_library_file(vim.eval('g:clighter_libclang_file'))
-endpython
-
+    exe 'python clang_service.ClangService.set_library_file("'.g:clighter_libclang_file.'")'
 endif
 
 let s:clighter_enabled=0
@@ -85,7 +78,7 @@ fun! clighter#Enable()
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
         au WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_to_current()
         au FileType * py clighter.on_filetype()
-        au BufDelete,BufWipeout * py clang_service.ClangService().unregister([vim.eval('fnamemodify(expand("<afile>"), ":p")')])
+        au BufDelete,BufWipeout * exe 'py clang_service.ClangService().unregister("'.fnamemodify(expand("<afile>"), ":p").'")'
         au VimLeavePre * py clang_service.ClangService().stop()
     augroup END
 

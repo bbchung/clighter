@@ -68,6 +68,11 @@ class Singleton(type):
 class ClangService(object):
     __metaclass__ = Singleton
 
+    @staticmethod
+    def set_library_file(path):
+        cindex.Config.set_library_file(path)
+
+
     def __init__(self):
         self.__current_cc = None
         self.__cc_dict = {}
