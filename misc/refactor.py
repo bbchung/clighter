@@ -8,7 +8,7 @@ def rename(clang_service):
     clang_service.parse_all(
         string.atoi(
             vim.eval('g:clighter_heuristic_compile_args')),
-        vim.bindeval('g:clighter_compile_args'))
+        vim.eval('g:clighter_compile_args'))
 
     cc = clang_service.get_cc(vim.current.buffer.name)
     if not cc:
