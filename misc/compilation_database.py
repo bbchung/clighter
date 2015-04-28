@@ -106,9 +106,9 @@ class CompilationDatabase(object):
 
             self.__command_cache[full_path].append(
                 CompilationCommand(
-                    entry['directory'],
-                    entry['command'],
-                    entry['file']))
+                    entry['directory'].encode('utf-8'),
+                    entry['command'].encode('utf-8'),
+                    entry['file'].encode('utf-8')))
 
     def get_commands(self, full_path, heuristic):
         if not heuristic:

@@ -61,8 +61,8 @@ def get_vim_cursor_info():
 
 def show_information():
     print "Enable clighter: %s" % ('Enable' if vim.eval('s:clighter_enabled') == '1' else 'Disable')
-    print "Current context: %s" % (clang_service.ClangService().current_cc.name if clang_service.ClangService().current_cc else '')
+    print "Current context: %s" % (clang_service.ClangService().current_cc.name if clang_service.ClangService().current_cc else None)
     print "Highlight occurrences: %s" % ('On' if vim.eval('g:ClighterOccurrences') == '1' else 'Off')
     print "Compilation database: %s" % ((clang_service.ClangService().compilation_database.file_path) if clang_service.ClangService().compilation_database else None)
-    print "Compile args: %s" % (' '.join(clang_service.ClangService().current_cc.compile_args) if clang_service.ClangService().current_cc and clang_service.ClangService().current_cc.compile_args else '')
+    print "Compile args: ", clang_service.ClangService().current_cc.compile_args if clang_service.ClangService().current_cc else None
     print 'Cursor info:', get_vim_cursor_info()
