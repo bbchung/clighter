@@ -91,14 +91,9 @@ class CompilationDatabase(object):
         self.__command_cache = {}
 
         for entry in self.__data:
-            if not entry.get('directory'):
-                raise Exception()
-
-            if not entry.get('command'):
-                raise Exception()
-
-            if not entry.get('file'):
-                raise Exception()
+            if not entry.get('directory') or not entry.get(
+                    'command') or not entry.get('file'):
+                continue
 
             full_path = os.path.join(entry['directory'], entry['file'])
             if not self.__command_cache.get(full_path):
