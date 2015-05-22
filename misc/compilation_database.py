@@ -5,32 +5,43 @@ USEFUL_OPTS = ['-D', '-I', '-include', '-x']
 USEFUL_FLAGS = ['-std']
 
 
-class CompilationCommand(object):
+class CompilationDatabase(object):
 
-    def __init__(self, dir, command, file):
-        self.__directory = dir
-        self.__command = command
-        self.__file = file
+    def __init__(self, file_path, jdata, heuristic):
+        self.__heuristic = heuristic
+        self.__file_path = file_path
+        self.__jdata = jdata
+        self.__cdb_cache = {}
 
-    @property
-    def directory(self):
-        return self.__directory
+    @staticmethod
+    def from_dir(dir, heuristic):
+        file_path = dir + '/compile_commands.json'
+        json_file = open(file_path)
+        jdata = json.load(json_file)
+        json_file.close()
 
-    @property
-    def basename(self):
-        return self.__file
+        if not isinstance(jdata, list):
+            raise Exception()
 
-    @property
-    def full_path(self):
-        os.path.join(self.__directory, self.__file)
+        cdb = CompilationDatabase(file_path, jdata, heuristic)
+        # cdb.build_cdb_cache()
+        return cdb
 
-    @property
-    def command(self):
-        return self.__command
+    def get_useful_args(self, abs_path):
+        if not self.__cdb_cache:
+            self.build_cdb_cache()
 
-    @property
-    def useful_args(self):
-        args = self.__command.split()
+        if not self.__cdb_cache.get(abs_path):
+            self.__cdb_cache[abs_path] = {'abs_path': abs_path}
+
+        if self.__cdb_cache[abs_path].get('arg_list'):
+            return self.__cdb_cache[abs_path]['arg_list']
+
+        command = self.get_commands(abs_path)
+        if not command:
+            return []
+
+        args = command.split()
         num = len(args)
         pos = 0
 
@@ -41,97 +52,74 @@ class CompilationCommand(object):
             useful_opt = None
             useful_flag = None
 
+            arg = args[pos].replace('\"', '').replace('\'', '')
+
             for opt in USEFUL_OPTS:
-                if args[pos].startswith(opt):
+                if arg.startswith(opt):
                     useful_opt = opt
                     break
 
             for flag in USEFUL_FLAGS:
-                if args[pos].startswith(flag):
+                if arg.startswith(flag):
                     useful_flag = flag
                     break
 
             if useful_opt:
-                useful_opts.append(args[pos])
-                if args[pos] == useful_opt:
+                useful_opts.append(arg)
+                if arg == useful_opt:
                     pos += 1
                     if pos < num:
-                        useful_opts.append(args[pos])
+                        useful_opts.append(arg)
 
             if useful_flag:
-                useful_flags.append(args[pos])
+                useful_flags.append(arg)
 
             pos += 1
 
-        return useful_flags + useful_opts
+        self.__cdb_cache[abs_path]['arg_list'] = useful_flags + useful_opts
+        return self.__cdb_cache[abs_path]['arg_list']
 
+    def get_commands(self, abs_path):
+        if not self.__cdb_cache:
+            self.build_cdb_cache()
 
-class CompilationDatabase(object):
+        context = self.__cdb_cache.get(abs_path)
 
-    def __init__(self, file_path, data):
-        self.__file_path = file_path
-        self.__data = data
-        self.__command_cache = {}
+        if not context:
+            return None
 
-    @staticmethod
-    def from_dir(dir):
-        file_path = dir + '/compile_commands.json'
-        json_file = open(file_path)
-        data = json.load(json_file)
-        json_file.close()
+        if context.get('command'):
+            return context['command']
 
-        if not isinstance(data, list):
-            raise Exception()
+        if not self.__heuristic:
+            return None
 
-        cdb = CompilationDatabase(file_path, data)
-        cdb.build_command_cache()
-        return cdb
+        command = ""
+        for key, value in self.__cdb_cache.iteritems():
+            if os.path.splitext(
+                    os.path.basename(abs_path))[0] == os.path.splitext(
+                    os.path.basename(key))[0] and value.get('command'):
+                if value.get('command'):
+                    command += value['command']
 
-    def build_command_cache(self):
-        self.__command_cache = {}
+        return command
 
-        for entry in self.__data:
+    def clean_cdb_cache(self):
+        self.__cdb_cache.clear()
+
+    def build_cdb_cache(self):
+        for entry in self.__jdata:
             if not entry.get('directory') or not entry.get(
                     'command') or not entry.get('file'):
                 continue
 
-            full_path = os.path.join(entry['directory'], entry['file'])
-            if not self.__command_cache.get(full_path):
-                self.__command_cache[full_path] = []
+            abs_path = os.path.join(
+                entry['directory'].encode('utf-8'),
+                entry['file'].encode('utf-8'))
 
-            self.__command_cache[full_path].append(
-                CompilationCommand(
-                    entry['directory'].encode('utf-8'),
-                    entry['command'].encode('utf-8'),
-                    entry['file'].encode('utf-8')))
-
-    def get_commands(self, full_path, heuristic):
-        if not heuristic:
-            return self.__command_cache.get(full_path)
-
-        basename = os.path.basename(full_path)
-
-        all_commands = []
-        for key, commands in self.__command_cache.items():
-            next_basename = os.path.basename(key)
-
-            if os.path.splitext(
-                    next_basename)[0] == os.path.splitext(basename)[0]:
-                if os.path.dirname(key) == os.path.dirname(full_path):
-                    all_commands = commands
-                    break
-                else:
-                    all_commands += commands
-
-        return all_commands
-
-    """
-    to be done
-    """
-
-    def write_back(self):
-        with open(self.__file_path, 'w') as json_file:
-            json_file.write(json.dumps(self.__data))
+            self.__cdb_cache[abs_path] = {
+                'abs_path': abs_path,
+                'command': entry['command'].encode('utf-8')}
 
     @property
     def file_path(self):

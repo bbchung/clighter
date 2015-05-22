@@ -72,7 +72,6 @@ class ClangService(object):
     def set_library_file(path):
         cindex.Config.set_library_file(path)
 
-
     def __init__(self):
         self.__current_cc = None
         self.__cc_dict = {}
@@ -85,23 +84,14 @@ class ClangService(object):
     def __del__(self):
         self.stop()
 
-    def __get_useful_args(self, cc, heuristic, global_args):
+    def __get_compile_args(self, cc, global_args):
         if cc.compile_args is not None:
             return cc.compile_args
 
         cc.compile_args = global_args
 
-        if not self.__cdb:
-            return None
-
-        ccmds = self.__cdb.get_commands(cc.name, False)
-
-        if not ccmds and heuristic:
-            ccmds = self.__cdb.get_commands(cc.name, True)
-
-        if ccmds:
-            # if there is more than one commands, take the first one
-            cc.compile_args += ccmds[0].useful_args
+        if self.__cdb:
+            cc.compile_args += self.__cdb.get_useful_args(cc.name)
 
         return cc.compile_args
 
@@ -118,7 +108,7 @@ class ClangService(object):
         if cdb_dir:
             try:
                 self.__cdb = compilation_database.CompilationDatabase.from_dir(
-                    cdb_dir)
+                    cdb_dir, heuristic)
             except:
                 pass
 
@@ -126,7 +116,6 @@ class ClangService(object):
         self.__parsing_thread = threading.Thread(
             target=self.__parsing_worker,
             args=(
-                heuristic,
                 global_args,
             ))
         self.__parsing_thread.start()
@@ -180,7 +169,7 @@ class ClangService(object):
     def get_cc(self, name):
         return self.__cc_dict.get(name)
 
-    def parse_all(self, heuristic, global_args):
+    def parse_all(self, global_args):
         tick = {}
         for cc in self.__cc_dict.values():
             tick[cc.name] = cc.change_tick
@@ -190,7 +179,7 @@ class ClangService(object):
         for cc in self.__cc_dict.values():
             cc.parse(
                 self.__cindex,
-                self.__get_useful_args(cc, heuristic, global_args),
+                self.__get_compile_args(cc, global_args),
                 unsaved,
                 tick[cc.name])
 
@@ -204,7 +193,7 @@ class ClangService(object):
 
         return unsaved
 
-    def __parsing_worker(self, heuristic, global_args):
+    def __parsing_worker(self, global_args):
         while self.__is_running:
             with self.__cond:
                 cc = self.__current_cc
@@ -227,7 +216,7 @@ class ClangService(object):
 
             cc.parse(
                 self.__cindex,
-                self.__get_useful_args(cc, heuristic, global_args),
+                self.__get_compile_args(cc, global_args),
                 unsaved,
                 tick)
 
