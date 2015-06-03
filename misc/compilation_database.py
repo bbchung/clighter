@@ -5,6 +5,14 @@ USEFUL_OPTS = ['-D', '-I', '-isystem' '-include', '-x']
 USEFUL_FLAGS = ['-std']
 
 
+def startswith_list(str, prefix_list):
+    for prefix in prefix_list:
+        if str.startswith(prefix):
+            return True
+
+    return False
+
+
 class CompilationDatabase(object):
 
     def __init__(self, file_path, jdata, heuristic):
@@ -49,21 +57,20 @@ class CompilationDatabase(object):
         while (args):
             arg = args.pop(0)
 
-            for flag in USEFUL_FLAGS:
-                if arg.startswith(flag):
-                    useful_flags.append(arg)
-                    continue
+            if startswith_list(arg, USEFUL_FLAGS):
+                useful_flags.append(arg)
+                continue
 
-            if arg in USEFUL_OPTS and args:
-                if not args[0].startswith('-'):
+            if arg in USEFUL_OPTS:
+                if args and args[0] and not args[0].startswith('-'):
                     useful_opts.append(arg)
                     useful_opts.append(args.pop(0))
-                    continue
 
-            for opt in USEFUL_OPTS:
-                if arg.startswith(opt):
-                    useful_opts.append(arg)
-                    continue
+                continue
+
+            if startswith_list(arg, USEFUL_OPTS):
+                useful_opts.append(arg)
+                continue
 
         self.__cdb_cache[abs_path]['arg_list'] = useful_flags + useful_opts
         return self.__cdb_cache[abs_path]['arg_list']
