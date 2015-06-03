@@ -1,7 +1,7 @@
 import os
 import json
 
-USEFUL_OPTS = ['-D', '-I', '-include', '-x']
+USEFUL_OPTS = ['-D', '-I', '-isystem' '-include', '-x']
 USEFUL_FLAGS = ['-std']
 
 
@@ -41,40 +41,29 @@ class CompilationDatabase(object):
         if not command:
             return []
 
-        args = command.split()
-        num = len(args)
-        pos = 0
+        args = command.replace('\"', '').replace('\'', '').split()
 
         useful_opts = []
         useful_flags = []
 
-        while pos < num:
-            useful_opt = None
-            useful_flag = None
-
-            arg = args[pos].replace('\"', '').replace('\'', '')
-
-            for opt in USEFUL_OPTS:
-                if arg.startswith(opt):
-                    useful_opt = opt
-                    break
+        while (args):
+            arg = args.pop(0)
 
             for flag in USEFUL_FLAGS:
                 if arg.startswith(flag):
-                    useful_flag = flag
-                    break
+                    useful_flags.append(arg)
+                    continue
 
-            if useful_opt:
-                useful_opts.append(arg)
-                if arg == useful_opt:
-                    pos += 1
-                    if pos < num:
-                        useful_opts.append(arg)
+            if arg in USEFUL_OPTS and args:
+                if not args[0].startswith('-'):
+                    useful_opts.append(arg)
+                    useful_opts.append(args.pop(0))
+                    continue
 
-            if useful_flag:
-                useful_flags.append(arg)
-
-            pos += 1
+            for opt in USEFUL_OPTS:
+                if arg.startswith(opt):
+                    useful_opts.append(arg)
+                    continue
 
         self.__cdb_cache[abs_path]['arg_list'] = useful_flags + useful_opts
         return self.__cdb_cache[abs_path]['arg_list']
