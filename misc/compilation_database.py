@@ -1,7 +1,7 @@
 import os
 import json
 
-USEFUL_OPTS = ['-D', '-I', '-isystem' '-include', '-x']
+USEFUL_OPTS = ['-D', '-I', '-isystem', '-include', '-x']
 USEFUL_FLAGS = ['-std']
 
 
