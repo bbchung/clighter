@@ -76,7 +76,7 @@ fun! clighter#Enable()
         endif
         au CursorHold,CursorHoldI * py highlighting.hl_window(clang_service.ClangService(), True)
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
-        au TabEnter,WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_to_current()
+        au WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_to_current()
         au FileType * py clighter.on_filetype()
         au BufDelete,BufWipeout * exe 'py clang_service.ClangService().unregister("'.fnamemodify(expand("<afile>"), ":p").'")'
         au VimLeavePre * py clang_service.ClangService().stop()
