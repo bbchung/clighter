@@ -24,22 +24,22 @@ def register_allowed_buffers():
     clang_service.ClangService().register(tobe_reg)
 
 
-def clang_switch_to_current():
-    clang_service.ClangService().switch(vim.current.buffer.name)
-
-    if not vim.current.window.vars.get('clighter_hl'):
-        vim.current.window.vars['clighter_hl'] = [
-            -1, [], []]  # [hl_tick, syntax_range, symbol_range]
-    else:
-        vim.current.window.vars['clighter_hl'][0] = -1
+def config_win_context():
+    highlighting.clear_all()
+    vim.current.window.vars['clighter_hl'] = [
+        -1, [], []]  # [hl_tick, syntax_range, symbol_range]
 
 
 def update_buffer_if_allow():
-    if clighter_helper.is_vim_buffer_allowed(vim.current.buffer):
-        clang_service.ClangService().update_buffers(
-            [(vim.current.buffer.name,
-              '\n'.join(vim.current.buffer),
-              string.atoi(vim.eval('b:changedtick')))])
+    if not clighter_helper.is_vim_buffer_allowed(vim.current.buffer):
+        return
+
+    clang_service.ClangService().update_buffers(
+        [(vim.current.buffer.name,
+          '\n'.join(vim.current.buffer),
+          string.atoi(vim.eval('b:changedtick')))])
+
+    clang_service.ClangService().switch(vim.current.buffer.name)
 
 
 def get_vim_cursor_info():

@@ -145,7 +145,7 @@ class ClangService(object):
 
             self.__cc_dict[name] = ClangContext(name)
 
-    def update_buffers(self, update_list, notify=True):
+    def update_buffers(self, update_list):
         for name, buf, tick in update_list:
             cc = self.__cc_dict.get(name)
             if not cc:
@@ -153,17 +153,9 @@ class ClangService(object):
 
             cc.update_buffer(buf, tick)
 
-        if notify:
-            with self.__cond:
-                self.__cond.notify()
-
     def switch(self, name):
         with self.__cond:
             self.__current_cc = self.__cc_dict.get(name)
-
-            if self.__current_cc:
-                self.__current_cc.parse_tick = -1
-
             self.__cond.notify()
 
     def get_cc(self, name):

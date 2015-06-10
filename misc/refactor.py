@@ -4,7 +4,7 @@ import clighter_helper
 
 
 def rename(clang_service):
-    clang_service.update_buffers(__get_bufctx_list(), False)
+    clang_service.update_buffers(__get_bufctx_list())
     clang_service.parse_all(vim.eval('g:clighter_compile_args'))
 
     cc = clang_service.get_cc(vim.current.buffer.name)
@@ -60,7 +60,9 @@ def rename(clang_service):
 
     vim.current.window.cursor = pos
 
-    clang_service.update_buffers(__get_bufctx_list(), True)
+    clang_service.update_buffers(__get_bufctx_list())
+    clang_service.switch(vim.current.buffer.name)           
+    
 
 
 def __cross_buffer_rename(clang_service, symbol_usr, new_name, prompt):

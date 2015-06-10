@@ -65,7 +65,7 @@ fun! clighter#Enable()
     endif
 
     py clighter.register_allowed_buffers()
-    py clighter.clang_switch_to_current()
+    py clang_service.ClangService().switch(vim.current.buffer.name)
 
     augroup ClighterEnable
         au!
@@ -74,9 +74,10 @@ fun! clighter#Enable()
         else
             au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), True)
         endif
+        au BufWinEnter,SessionLoadPost * py clighter.config_win_context()
         au CursorHold,CursorHoldI * py highlighting.hl_window(clang_service.ClangService(), True)
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
-        au WinEnter,BufEnter,SessionLoadPost * py clighter.clang_switch_to_current()
+        au WinEnter,BufEnter * py clighter.clang_service.ClangService().switch(vim.current.buffer.name)
         au FileType * py clighter.on_filetype()
         au BufDelete,BufWipeout * exe 'py clang_service.ClangService().unregister("'.fnamemodify(expand("<afile>"), ":p").'")'
         au VimLeavePre * py clang_service.ClangService().stop()
