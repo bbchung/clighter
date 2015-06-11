@@ -74,10 +74,10 @@ fun! clighter#Enable()
         else
             au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), True)
         endif
-        au BufWinEnter,SessionLoadPost * py clighter.config_win_context()
+        au WinEnter,BufWinEnter,SessionLoadPost * py clighter.config_win_context()
         au CursorHold,CursorHoldI * py highlighting.hl_window(clang_service.ClangService(), True)
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
-        au WinEnter,BufEnter * py clighter.clang_service.ClangService().switch(vim.current.buffer.name)
+        au BufEnter * py clighter.clang_service.ClangService().switch(vim.current.buffer.name)
         au FileType * py clighter.on_filetype()
         au BufDelete,BufWipeout * exe 'py clang_service.ClangService().unregister("'.fnamemodify(expand("<afile>"), ":p").'")'
         au VimLeavePre * py clang_service.ClangService().stop()

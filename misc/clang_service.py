@@ -213,9 +213,5 @@ class ClangService(object):
                 tick)
 
     @property
-    def current_cc(self):
-        return self.__current_cc
-
-    @property
     def compilation_database(self):
         return self.__cdb
