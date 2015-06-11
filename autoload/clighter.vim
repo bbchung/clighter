@@ -69,12 +69,13 @@ fun! clighter#Enable()
 
     augroup ClighterEnable
         au!
+        au WinEnter * py clighter.config_win_context(False)
+        au BufWinEnter,SessionLoadPost * py clighter.config_win_context(True)
         if !g:clighter_occurrences_mode
             au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), False)
         else
             au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), True)
         endif
-        au WinEnter,BufWinEnter,SessionLoadPost * py clighter.config_win_context()
         au CursorHold,CursorHoldI * py highlighting.hl_window(clang_service.ClangService(), True)
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
         au BufEnter * py clighter.clang_service.ClangService().switch(vim.current.buffer.name)

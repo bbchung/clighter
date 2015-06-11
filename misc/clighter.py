@@ -24,10 +24,11 @@ def register_allowed_buffers():
     clang_service.ClangService().register(tobe_reg)
 
 
-def config_win_context():
-    highlighting.clear_all()
-    vim.current.window.vars['clighter_hl'] = [
-        -1, [], []]  # [hl_tick, syntax_range, symbol_range]
+def config_win_context(init):
+    if init or 'clighter_hl' not in vim.current.window.vars:
+        highlighting.clear_all()
+        vim.current.window.vars['clighter_hl'] = [
+            -1, [], []]  # [hl_tick, syntax_range, symbol_range]
 
 
 def update_buffer_if_allow():
