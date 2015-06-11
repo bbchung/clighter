@@ -45,6 +45,7 @@ CUSTOM_SYNTAX_GROUP = {
 
 def clear_all():
     __vim_clear_match_pri(OCCURRENCES_PRI, SYNTAX_PRI)
+    hl_window.symbol = None
     vim.current.window.vars['clighter_hl'] = [
         -1, [], []]  # [hl_tick, syntax_range, occurrences_range]
 
