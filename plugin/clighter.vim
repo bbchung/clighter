@@ -34,7 +34,7 @@ command! ClighterShowInfo call clighter#ShowInfo()
 
 if g:clighter_autostart
     augroup ClighterAutoStart
-        au FileType c,cpp,objc,objcpp call clighter#Enable()
+        au VimEnter * call clighter#Enable()
     augroup END
 endif
 

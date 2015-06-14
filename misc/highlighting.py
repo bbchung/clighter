@@ -56,6 +56,15 @@ def clear_occurrences():
     hl_window.symbol = None
 
 
+def config_win_context(init):
+    if not init or 'clighter_hl' in vim.current.window.vars:
+        return
+
+    clear_all()
+    vim.current.window.vars['clighter_hl'] = [
+        -1, [], []]  # [hl_tick, syntax_range, symbol_range]
+
+
 def hl_window(clang_service, do_occurrences):
     cc = clang_service.get_cc(vim.current.buffer.name)
     if not cc:
@@ -82,6 +91,8 @@ def hl_window(clang_service, do_occurrences):
     occurrences_range = w_range = [top, bottom]
     syntax_range = [max(top - height, 1), min(
         bottom + height, len(vim.current.buffer))]
+
+    config_win_context(False)
 
     if vim.current.window.vars['clighter_hl'][0] < parse_tick:
         clear_all()

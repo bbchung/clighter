@@ -69,8 +69,7 @@ fun! clighter#Enable()
 
     augroup ClighterEnable
         au!
-        au WinEnter * py clighter.config_win_context(False)
-        au BufWinEnter,SessionLoadPost * py clighter.config_win_context(True)
+        au BufWinEnter * py highlighting.config_win_context(True)
         if !g:clighter_occurrences_mode
             au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), False)
         else
