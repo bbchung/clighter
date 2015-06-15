@@ -57,7 +57,7 @@ def clear_occurrences():
 
 
 def config_win_context(init):
-    if not init or 'clighter_hl' in vim.current.window.vars:
+    if not init and 'clighter_hl' in vim.current.window.vars:
         return
 
     clear_all()
