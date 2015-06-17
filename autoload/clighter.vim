@@ -1,3 +1,4 @@
+py import vim
 let s:script_folder_path = escape( expand( '<sfile>:p:h' ), '\' )
 py import sys
 exe 'python sys.path = sys.path + ["' . s:script_folder_path . '/../misc"]'
