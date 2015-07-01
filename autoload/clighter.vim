@@ -80,7 +80,7 @@ fun! clighter#Enable()
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()
         au BufEnter * py clighter.clang_service.ClangService().switch(vim.current.buffer.name)
         au FileType * py clighter.on_filetype()
-        au BufDelete,BufWipeout * exe 'py clang_service.ClangService().unregister("'.fnamemodify(expand("<afile>"), ":p").'")'
+        au BufDelete,BufWipeout * exe 'py clang_service.ClangService().unregister("'. substitute(fnamemodify(expand("<afile>"), ":p"), '\', '/', 'g') . '")'
         au VimLeavePre * py clang_service.ClangService().stop()
     augroup END
 
