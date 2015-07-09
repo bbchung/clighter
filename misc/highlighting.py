@@ -116,25 +116,26 @@ def hl_window(clang_service, do_occurrences):
     if not do_occurrences:
         occurrences_range = None
 
+    hl_window.symbol = symbol
+
     __do_highlight(
         tu,
         current_file,
         syntax_range,
-        symbol,
         occurrences_range,
         parse_tick)
 
 
-def __do_highlight(tu, f, syntax_range, symbol, occurrences_range, tick):
-    if not syntax_range and (not symbol or not occurrences_range):
+
+def __do_highlight(tu, f, syntax_range, occurrences_range, tick):
+    if not syntax_range and (not hl_window.symbol or not occurrences_range):
         return
 
     if syntax_range:
         vim.current.window.vars['clighter_hl'][1] = syntax_range
 
-    if occurrences_range and symbol:
+    if occurrences_range and hl_window.symbol:
         vim.current.window.vars['clighter_hl'][2] = occurrences_range
-        hl_window.symbol = symbol
 
     union_range = __union(syntax_range, occurrences_range)
 
@@ -175,9 +176,9 @@ def __do_highlight(tu, f, syntax_range, symbol, occurrences_range, tick):
                # draw_map, SYNTAX_PRI, group, [token.location.line,
                # token.location.column, len( token.spelling)])
 
-        if symbol and __is_in_range(token.location.line, occurrences_range):
+        if hl_window.symbol and __is_in_range(token.location.line, occurrences_range):
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
-            if t_symbol and token.spelling == t_symbol.spelling and t_symbol == symbol:
+            if t_symbol and token.spelling == t_symbol.spelling and t_symbol == hl_window.symbol:
                 __vim_matchaddpos('clighterOccurrences', pos, OCCURRENCES_PRI)
 
                #__add_to_draw_map(
