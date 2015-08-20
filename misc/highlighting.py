@@ -26,6 +26,7 @@ CUSTOM_SYNTAX_GROUP = {
     cindex.CursorKind.NAMESPACE: 'clighterNamespace',
     cindex.CursorKind.CLASS_TEMPLATE: 'clighterClassDecl',
     cindex.CursorKind.TEMPLATE_TYPE_PARAMETER: 'clighterTemplateTypeParameter',
+    cindex.CursorKind.TEMPLATE_NON_TYPE_PARAMETER: 'clighterTemplateNoneTypeParameter',
     cindex.CursorKind.TYPE_REF: 'clighterTypeRef',  # class ref
     cindex.CursorKind.NAMESPACE_REF: 'clighterNamespaceRef',  # namespace ref
     cindex.CursorKind.TEMPLATE_REF: 'clighterTemplateRef', # template class ref
@@ -148,8 +149,6 @@ def __do_highlight(tu, f, syntax_range, occurrences_range, tick):
             location1,
             location2))
 
-    # draw_map = {}  # {priority:{group:[[[line, column, len]]]}}
-
     for token in tokens:
         if token.kind.value != 2: # no keyword, comment
             continue
@@ -172,50 +171,13 @@ def __do_highlight(tu, f, syntax_range, occurrences_range, tick):
             if group:
                 __vim_matchaddpos(group, pos, SYNTAX_PRI)
 
-            #__add_to_draw_map(
-               # draw_map, SYNTAX_PRI, group, [token.location.line,
-               # token.location.column, len( token.spelling)])
-
         if hl_window.symbol and __is_in_range(token.location.line, occurrences_range):
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
             if t_symbol and token.spelling == t_symbol.spelling and t_symbol == hl_window.symbol:
                 __vim_matchaddpos('clighterOccurrences', pos, OCCURRENCES_PRI)
 
-               #__add_to_draw_map(
-                # draw_map, OCCURRENCES_PRI, 'clighterOccurrences', [
-                # token.location.line, token.location.column, len(
-                # token.spelling)])
-
-    #__draw(draw_map, tick)
     vim.current.window.vars['clighter_hl'][0] = tick
 
-
-# def __draw(draw_map, tick):
-    # for priority, group_map in draw_map.items():
-    # for group, draw_pos in group_map.items():
-    # for pos in draw_pos:
-    #__vim_matchaddpos(
-    # group=group,
-    # pos=pos,
-    # priority=priority
-    #)
-
-
-# def __add_to_draw_map(draw_map, priority, group, pos):
-    # if not group or not pos:
-    # return
-
-    # if not draw_map.get(priority):
-    #draw_map[priority] = {}
-
-    # if not draw_map[priority].get(group):
-    #draw_map[priority][group] = [[pos]]
-    # return
-
-    # if len(draw_map[priority][group][-1]) < 8:
-    # draw_map[priority][group][-1].append(pos)
-    # else:
-    # draw_map[priority][group].append([pos])
 
 def __get_default_syn(cursor_kind):
     if cursor_kind.is_preprocessing():

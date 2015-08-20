@@ -21,6 +21,7 @@ hi default link clighterTypeRef Type
 hi default link clighterNamespace Identifier
 hi default link clighterNamespaceRef Type
 hi default link clighterTemplateTypeParameter Identifier
+hi default link clighterTemplateNoneTypeParameter Identifier
 hi default link clighterTemplateRef Type
 
 hi default link clighterOccurrences IncSearch
