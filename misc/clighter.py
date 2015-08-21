@@ -45,7 +45,7 @@ def get_vim_cursor_info():
     if not tu:
         return None
 
-    vim_cursor = clighter_helper.get_vim_cursor(tu, tu.get_file(cc.name))
+    vim_cursor = clighter_helper.get_vim_cursor(tu)
 
     if vim_cursor:
         return vim_cursor.kind, vim_cursor.type.kind, vim_cursor.spelling

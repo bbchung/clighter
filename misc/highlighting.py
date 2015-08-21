@@ -77,8 +77,6 @@ def hl_window(clang_service, do_occurrences):
     if not tu:
         return
 
-    current_file = tu.get_file(cc.name)
-
     top = string.atoi(vim.eval("line('w0')"))
     bottom = string.atoi(vim.eval("line('w$')"))
     height = bottom - top + 1
@@ -86,7 +84,7 @@ def hl_window(clang_service, do_occurrences):
     symbol = None
 
     if vim.eval('g:ClighterOccurrences') == '1':
-        vim_cursor = clighter_helper.get_vim_cursor(tu, current_file)
+        vim_cursor = clighter_helper.get_vim_cursor(tu)
         symbol = clighter_helper.get_vim_symbol(vim_cursor)
 
     occurrences_range = w_range = [top, bottom]
@@ -121,14 +119,16 @@ def hl_window(clang_service, do_occurrences):
 
     __do_highlight(
         tu,
-        current_file,
+        vim.current.buffer.name,
         syntax_range,
         occurrences_range,
         parse_tick)
 
 
 
-def __do_highlight(tu, f, syntax_range, occurrences_range, tick):
+def __do_highlight(tu, file_name, syntax_range, occurrences_range, tick):
+    file = tu.get_file(file_name)
+
     if not syntax_range and (not hl_window.symbol or not occurrences_range):
         return
 
@@ -141,9 +141,9 @@ def __do_highlight(tu, f, syntax_range, occurrences_range, tick):
     union_range = __union(syntax_range, occurrences_range)
 
     location1 = cindex.SourceLocation.from_position(
-        tu, f, line=union_range[0], column=1)
+        tu, file, line=union_range[0], column=1)
     location2 = cindex.SourceLocation.from_position(
-        tu, f, line=union_range[1] + 1, column=1)
+        tu, file, line=union_range[1] + 1, column=1)
     tokens = tu.get_tokens(
         extent=cindex.SourceRange.from_locations(
             location1,
@@ -156,7 +156,7 @@ def __do_highlight(tu, f, syntax_range, occurrences_range, tick):
         t_cursor = cindex.Cursor.from_location(
             tu,
             cindex.SourceLocation.from_position(
-                tu, f,
+                tu, file,
                 token.location.line,
                 token.location.column
             )
