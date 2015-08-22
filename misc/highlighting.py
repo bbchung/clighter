@@ -166,7 +166,7 @@ def __do_highlight(tu, file_name, syntax_range, occurrences_range, tick):
             [token.location.line, token.location.column, len(
                 token.spelling)]]
 
-        if __is_in_range(token.location.line, syntax_range):
+        if t_cursor.spelling == token.spelling and __is_in_range(token.location.line, syntax_range):
             group = __get_syntax_group(t_cursor.kind, t_cursor.type.kind)
             if group:
                 __vim_matchaddpos(group, pos, SYNTAX_PRI)
