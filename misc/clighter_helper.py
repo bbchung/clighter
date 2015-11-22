@@ -56,24 +56,24 @@ def get_semantic_symbol(cursor):
     if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
         return cursor
 
-    def_cur = cursor.get_definition()
-    if not def_cur:
-        def_cur = cursor.referenced
+    symbol = cursor.get_definition()
+    if not symbol:
+        symbol = cursor.referenced
 
-    if not def_cur:
+    if not symbol:
         return None
 
-    if def_cur.kind == cindex.CursorKind.CONSTRUCTOR or def_cur.kind == cindex.CursorKind.DESTRUCTOR:
-        def_cur = def_cur.semantic_parent
+    if symbol.kind == cindex.CursorKind.CONSTRUCTOR or symbol.kind == cindex.CursorKind.DESTRUCTOR:
+        symbol = symbol.semantic_parent
 
-    return def_cur
+    return symbol
 
 
 def get_spelling_or_displayname(cursor):
     return cursor.spelling if cursor.spelling else cursor.displayname
 
 
-def search_referenced_tokens(tu, symbol, locs):
+def search_referenced_tokens(tu, symbol, result):
     tokens = tu.cursor.get_tokens()
 
     for t in tokens:
@@ -91,5 +91,5 @@ def search_referenced_tokens(tu, symbol, locs):
         t_symbol = get_semantic_symbol(t_cursor)
 
         if t_symbol and t_symbol == symbol:
-            locs.add(
+            result.add(
                 (t.location.line, t.location.column, t.location.file.name))

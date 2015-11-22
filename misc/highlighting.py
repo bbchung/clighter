@@ -29,17 +29,17 @@ CUSTOM_SYNTAX_GROUP = {
     cindex.CursorKind.TEMPLATE_NON_TYPE_PARAMETER: 'clighterTemplateNoneTypeParameter',
     cindex.CursorKind.TYPE_REF: 'clighterTypeRef',  # class ref
     cindex.CursorKind.NAMESPACE_REF: 'clighterNamespaceRef',  # namespace ref
-    cindex.CursorKind.TEMPLATE_REF: 'clighterTemplateRef', # template class ref
+    cindex.CursorKind.TEMPLATE_REF: 'clighterTemplateRef',  # template class ref
     cindex.CursorKind.DECL_REF_EXPR:
     {
-        cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall', # function call
+        cindex.TypeKind.FUNCTIONPROTO: 'clighterDeclRefExprCall',  # function call
         cindex.TypeKind.ENUM: 'clighterDeclRefExprEnum',  # enum ref
         cindex.TypeKind.TYPEDEF: 'clighterTypeRef',  # ex: cout
     },
-    cindex.CursorKind.MEMBER_REF: 'clighterDeclRefExprCall', # ex: designated initializer
+    cindex.CursorKind.MEMBER_REF: 'clighterDeclRefExprCall',  # ex: designated initializer
     cindex.CursorKind.MEMBER_REF_EXPR:
     {
-        cindex.TypeKind.UNEXPOSED: 'clighterMemberRefExprCall', # member function call
+        cindex.TypeKind.UNEXPOSED: 'clighterMemberRefExprCall',  # member function call
     },
 }
 
@@ -125,7 +125,6 @@ def hl_window(clang_service, do_occurrences):
         parse_tick)
 
 
-
 def __do_highlight(tu, file_name, syntax_range, occurrences_range, tick):
     file = tu.get_file(file_name)
 
@@ -150,7 +149,7 @@ def __do_highlight(tu, file_name, syntax_range, occurrences_range, tick):
             location2))
 
     for token in tokens:
-        if token.kind.value != 2: # no keyword, comment
+        if token.kind.value != 2:  # no keyword, comment
             continue
 
         t_cursor = cindex.Cursor.from_location(

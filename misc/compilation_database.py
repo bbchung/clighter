@@ -5,7 +5,7 @@ USEFUL_OPTS = ['-D', '-I', '-isystem', '-include', '-x']
 USEFUL_FLAGS = ['-std']
 
 
-def startswith_list(str, prefix_list):
+def check_prefix(str, prefix_list):
     for prefix in prefix_list:
         if str.startswith(prefix):
             return True
@@ -57,7 +57,7 @@ class CompilationDatabase(object):
         while (args):
             arg = args.pop(0)
 
-            if startswith_list(arg, USEFUL_FLAGS):
+            if check_prefix(arg, USEFUL_FLAGS):
                 useful_flags.append(arg)
                 continue
 
