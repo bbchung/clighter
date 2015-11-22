@@ -68,7 +68,7 @@ class CompilationDatabase(object):
 
                 continue
 
-            if startswith_list(arg, USEFUL_OPTS):
+            if check_prefix(arg, USEFUL_OPTS):
                 useful_opts.append(arg)
                 continue
 
