@@ -152,14 +152,17 @@ def __do_highlight(tu, file_name, syntax_range, occurrences_range, tick):
         if token.kind.value != 2:  # no keyword, comment
             continue
 
-        t_cursor = cindex.Cursor.from_location(
-            tu,
-            cindex.SourceLocation.from_position(
-                tu, file,
-                token.location.line,
-                token.location.column
-            )
-        )
+        t_cursor = token.cursor
+        t_cursor._tu = tu
+
+        # t_cursor = cindex.Cursor.from_location(
+            # tu,
+            # cindex.SourceLocation.from_position(
+                # tu, file,
+                # token.location.line,
+                # token.location.column
+            # )
+        # )
 
         pos = [
             [token.location.line, token.location.column, len(
