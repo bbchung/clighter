@@ -71,10 +71,12 @@ fun! clighter#Enable()
     augroup ClighterEnable
         au!
         au BufWinEnter * py highlighting.config_win_context(True)
-        if !g:clighter_occurrences_mode
-            au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), False)
-        else
-            au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), True)
+        if g:clighter_highlight_mode == 1
+            if !g:clighter_occurrences_mode
+                au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), False)
+            else
+                au CursorMoved,CursorMovedI * py highlighting.hl_window(clang_service.ClangService(), True)
+            endif
         endif
         au CursorHold,CursorHoldI * py highlighting.hl_window(clang_service.ClangService(), True)
         au TextChanged,TextChangedI * py clighter.update_buffer_if_allow()

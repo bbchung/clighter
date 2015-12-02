@@ -74,7 +74,7 @@ def get_spelling_or_displayname(cursor):
 
 
 def search_referenced_tokens(tu, symbol, result):
-    tokens = tu.cursor.get_tokens()
+    tokens = tu.get_tokens()
 
     for t in tokens:
         if t.kind.value != 2:

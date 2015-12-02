@@ -24,6 +24,7 @@ let g:clighter_highlight_blacklist = get(g:, 'clighter_highlight_blacklist', ['c
 let g:clighter_occurrences_mode = get(g:, 'clighter_occurrences_mode', 0)
 let g:clighter_heuristic_compile_args = get(g:, 'clighter_heuristic_compile_args', 1)
 let g:clighter_compile_args = get(g:, 'clighter_compile_args', [])
+let g:clighter_highlight_mode = get(g:, 'clighter_highlight_mode', 1)
 
 let g:ClighterOccurrences = get(g:, 'ClighterOccurrences', 1)
 
