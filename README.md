@@ -12,6 +12,10 @@ plugin based on libclang. Clighter provides following features currently:
 
 ![Clighter GIF demo](http://goo.gl/C7FYg8)
 
+Try Clamp if you use NeoVim, it use NeoVim's new plugin api with lighting highlight speed
+
+https://github.com/bbchung/Clamp
+
 ## Requirements
 
 Clighter requires the following:
