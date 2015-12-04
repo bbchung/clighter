@@ -1,5 +1,10 @@
 # Clighter: VIM plugin to improve c-family development environment based on Clang
 
+## Try Clamp If You Use NeoVim
+Try Clamp if you use NeoVim, it use NeoVim's new plugin api with lighting highlight speed
+
+https://github.com/bbchung/Clamp
+
 ## Intro
 
 Clighter(C lighter) makes vim a better c-family development environment as a
@@ -12,9 +17,7 @@ plugin based on libclang. Clighter provides following features currently:
 
 ![Clighter GIF demo](http://goo.gl/C7FYg8)
 
-Try Clamp if you use NeoVim, it use NeoVim's new plugin api with lighting highlight speed
 
-https://github.com/bbchung/Clamp
 
 ## Requirements
 
