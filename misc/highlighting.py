@@ -148,6 +148,8 @@ def __do_highlight(tu, file_name, syntax_range, occurrences_range, tick):
             location1,
             location2))
 
+    syntax = {}
+    occurrence = {'clighterOccurrences':[]}
     for token in tokens:
         if token.kind.value != 2:  # no keyword, comment
             continue
@@ -164,19 +166,26 @@ def __do_highlight(tu, file_name, syntax_range, occurrences_range, tick):
             # )
         # )
 
-        pos = [
-            [token.location.line, token.location.column, len(
-                token.spelling)]]
+        pos = [token.location.line, token.location.column, len( token.spelling)]
 
         if t_cursor.spelling == token.spelling and __is_in_range(token.location.line, syntax_range):
             group = __get_syntax_group(t_cursor.kind, t_cursor.type.kind)
             if group:
-                __vim_matchaddpos(group, pos, SYNTAX_PRI)
+                if not syntax.has_key(group):
+                    syntax[group] = []
+
+                syntax[group].append(pos)
 
         if hl_window.symbol and __is_in_range(token.location.line, occurrences_range):
             t_symbol = clighter_helper.get_semantic_symbol(t_cursor)
             if t_symbol and token.spelling == t_symbol.spelling and t_symbol == hl_window.symbol:
-                __vim_matchaddpos('clighterOccurrences', pos, OCCURRENCES_PRI)
+                occurrence['clighterOccurrences'].append(pos)
+
+    cmd = "call MatchIt({0}, {1})".format(syntax, SYNTAX_PRI)
+    vim.command(cmd)
+
+    cmd = "call MatchIt({0}, {1})".format(occurrence , OCCURRENCES_PRI)
+    vim.command(cmd)
 
     vim.current.window.vars['clighter_hl'][0] = tick
 
@@ -214,11 +223,6 @@ def __get_syntax_group(cursor_kind, type_kind):
         return None
 
     return group
-
-
-def __vim_matchaddpos(group, pos, priority):
-    cmd = "call matchaddpos('{0}', {1}, {2})".format(group, pos, priority)
-    vim.command(cmd)
 
 
 def __vim_clear_match_pri(*priorities):
