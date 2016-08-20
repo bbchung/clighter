@@ -1,5 +1,10 @@
 # Clighter: VIM plugin to improve c-family development environment based on Clang
 
+## Try Clighter8 If You Use VIM8
+Try Clighter8 if you use VIM8, it runs 10x faster than Clighter
+
+https://github.com/bbchung/clighter8
+
 ## Try Clamp If You Use NeoVim
 Try Clamp if you use NeoVim, it use NeoVim's new plugin api with lighting highlight speed
 
