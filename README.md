@@ -1,5 +1,5 @@
 # Clighter: VIM plugin to improve c-family development environment based on Clang
-
+# Clighter is not maintained anymore, instead, you can:
 ## Try Clighter8 If You Use VIM8
 Try Clighter8 if you use VIM8, it runs 10x faster than Clighter
 
